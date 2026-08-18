@@ -1,0 +1,4246 @@
+==> ./tsconfig.json <==
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
+    "**/*.mts"
+  ],
+  "exclude": ["node_modules"]
+}
+
+==> ./components/GenreRow.tsx <==
+// components/GenreRow.tsx
+
+import Link from 'next/link';
+import MovieCard from './MovieCard';
+import { Movie, Category } from '@/types';
+
+export default function GenreRow({ category, movies }: { category: Category, movies: Movie[] }) {
+  // Si no hay películas en este género, no mostramos la fila
+  if (!movies || movies.length === 0) return null;
+
+  return (
+    <section className="mb-12 px-4 md:px-8">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl md:text-2xl font-bold text-white capitalize">
+          {category.name} <span className="text-gray-500 text-base font-normal">/ Top Viewed</span>
+        </h2>
+        <Link 
+          href={`/movies?genres=${category.slug}`} 
+          className="text-red-500 hover:text-red-400 text-sm font-medium transition-colors"
+        >
+          See more →
+        </Link>
+      </div>
+
+      {/* Contenedor de Scroll Horizontal */}
+      <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
+        {movies.map((movie) => (
+          /* w-44 md:w-48 le da un ancho fijo a las tarjetas para que se alineen horizontalmente */
+          <div key={movie.id} className="flex-shrink-0 w-40 md:w-48">
+            <MovieCard movie={movie} />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+==> ./components/Header.tsx <==
+"use client";
+
+import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
+import { useState, useRef, useEffect } from 'react';
+import { IconHome, IconFilm, IconPlay, IconSearch } from '@/components/icons';
+
+export default function Header() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Atajo de teclado: presionar "/" enfoca la búsqueda
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '/' && document.activeElement?.tagName !== 'INPUT') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = searchQuery.trim();
+    if (trimmed) {
+      const params = new URLSearchParams({ q: trimmed });
+      router.push(`/search?${params.toString()}`);
+      setSearchQuery('');
+    }
+  };
+
+  const navLinks = [
+    {
+      label: 'Inicio',
+      href: '/',
+      title: 'Ir a la página principal',
+      icon: <IconHome />,
+    },
+    {
+      label: 'Películas',
+      href: '/movies',
+      title: 'Explorar catálogo de películas',
+      icon: <IconFilm />,
+    },
+  ];
+
+  const isActive = (href: string) =>
+    (href === '/' && pathname === '/') ||
+    (href !== '/' && pathname.startsWith(href));
+
+  return (
+    <header className="bg-gray-950/80 backdrop-blur-xl fixed top-0 left-0 right-0 z-50 h-16 border-b border-white/5">
+      <div className="container mx-auto px-4 md:px-8 h-full flex items-center justify-between gap-4">
+
+        {/* ─── LOGO ─── */}
+        <Link
+          href="/"
+          className="flex items-center gap-2.5 group flex-shrink-0"
+          title="CineStream - Página principal"
+          aria-label="CineStream, ir a la página principal"
+        >
+          {/* Icono de play en un contenedor redondeado */}
+          <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center group-hover:bg-red-500 transition-colors shadow-lg shadow-red-600/25">
+            <IconPlay className="w-4 h-4 text-white ml-0.5" />
+          </div>
+          {/* Texto del logo - oculto en pantallas muy pequeñas */}
+          <span className="text-lg font-bold tracking-wide text-white hidden sm:block">
+            CINE<span className="text-red-500">STREAM</span>
+          </span>
+        </Link>
+
+        {/* ─── NAVEGACIÓN CENTRAL ─── */}
+        <nav
+          className="hidden md:flex items-center gap-1"
+          aria-label="Navegación principal"
+        >
+          {navLinks.map((link) => {
+            const active = isActive(link.href);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                title={link.title}
+                aria-label={link.title}
+                aria-current={active ? 'page' : undefined}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${active
+                  ? 'bg-white/10 text-white'
+                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  }`}
+              >
+                {link.icon}
+                <span>{link.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* ─── NAVEGACIÓN MOBILE (solo iconos) ─── */}
+        <nav
+          className="flex md:hidden items-center gap-1"
+          aria-label="Navegación principal"
+        >
+          {navLinks.map((link) => {
+            const active = isActive(link.href);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                title={link.title}
+                aria-label={link.title}
+                aria-current={active ? 'page' : undefined}
+                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 ${active
+                  ? 'bg-white/10 text-white'
+                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  }`}
+              >
+                {link.icon}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* ─── BARRA DE BÚSQUEDA ─── */}
+        <form
+          onSubmit={handleSearch}
+          role="search"
+          className="relative flex-shrink-0"
+        >
+          <label htmlFor="search-input" className="sr-only">
+            Buscar películas
+          </label>
+
+          {/* Icono de lupa dentro del input */}
+          <div className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
+            <IconSearch className={`w-4 h-4 transition-colors duration-200 ${isSearchFocused ? 'text-red-500' : 'text-gray-500'
+              }`} />
+          </div>
+
+          <input
+            ref={searchInputRef}
+            id="search-input"
+            type="search"
+            placeholder="Buscar..."
+            title="Buscar películas (presiona / para enfocar)"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => setIsSearchFocused(true)}
+            onBlur={() => setIsSearchFocused(false)}
+            className={`w-36 sm:w-44 md:w-56 lg:w-64 bg-white/5 border rounded-full py-2 pl-10 pr-4 text-sm text-white placeholder-gray-500 outline-none transition-all duration-300 ${isSearchFocused
+              ? 'border-red-500/50 ring-2 ring-red-500/20 bg-white/10 w-44 sm:w-56 md:w-64 lg:w-72'
+              : 'border-white/10 hover:border-white/20'
+              }`}
+          />
+
+          {/* Indicador de atajo de teclado (solo desktop) */}
+          <div className="absolute inset-y-0 right-0 hidden lg:flex items-center pr-3 pointer-events-none">
+            <kbd className={`text-[10px] font-mono px-1.5 py-0.5 rounded border transition-colors duration-200 ${isSearchFocused
+              ? 'border-red-500/30 text-red-400'
+              : 'border-white/10 text-gray-600'
+              }`}>
+              /
+            </kbd>
+          </div>
+        </form>
+      </div>
+    </header>
+  );
+}
+==> ./components/AdBanner.tsx <==
+import { IconAd } from '@/components/icons';
+
+export default function AdBanner({ format = 'horizontal' }: { format?: 'horizontal' | 'square' | 'skyscraper' }) {
+  if (format === 'skyscraper') {
+    return (
+      <div className="w-full h-full bg-white/[0.02] border border-white/5 rounded-2xl flex flex-col items-center justify-center gap-3 p-6">
+        <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+          <IconAd />
+        </div>
+        <p className="text-xs text-gray-500 text-center leading-relaxed">
+          Espacio<br />Publicitario
+        </p>
+        <p className="text-[10px] text-gray-600 font-mono">160 × 600</p>
+      </div>
+    );
+  }
+
+  const heightClass = format === 'horizontal' ? 'h-24' : 'h-64';
+
+  return (
+    <div className={`w-full ${heightClass} bg-white/[0.02] border border-white/5 rounded-2xl flex items-center justify-center gap-4 my-4`}>
+      <div className="flex flex-col items-center gap-2">
+        <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+          <IconAd className="w-4 h-4 text-gray-500" />
+        </div>
+        <p className="text-xs text-gray-500">Espacio Publicitario</p>
+      </div>
+    </div>
+  );
+}
+==> ./components/ScrollToTop.tsx <==
+"use client";
+
+import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
+
+export default function ScrollToTop() {
+  const pathname = usePathname();
+
+  useEffect(() => {
+    // Si vamos a /movies con un scroll pendiente de restaurar,
+    // dejamos que MovieGrid se encargue (no forzamos scroll-to-top)
+    const hasPendingGridScroll = sessionStorage.getItem('grid-scroll');
+    if (pathname === '/movies' && hasPendingGridScroll) {
+      return;
+    }
+
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+==> ./components/VideoPlayer.tsx <==
+'use client';
+
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import { Server } from '@/types';
+import { IconPlay, IconRefresh } from '@/components/icons';
+
+// ─── Tipos internos del reproductor ───
+type EmbedProvider = {
+  name: string;
+  baseUrl: string;
+  sandbox?: string | false;
+};
+
+type PlayerServer = Server & {
+  sandbox?: string | false;
+};
+
+// ─── Sandbox por defecto ───
+// Este es el sandbox estándar para servidores seguros.
+const DEFAULT_SANDBOX_PERMISSIONS = [
+  'allow-scripts',
+  'allow-same-origin',
+  'allow-popups',
+  'allow-presentation',
+  'allow-forms',
+].join(' ');
+
+// ─── Sandbox menos restrictivo para VidLink ───
+// Si VidLink sigue pidiendo deshabilitar sandbox, más abajo puedes cambiar
+// sandbox: VIDLINK_SANDBOX_PERMISSIONS por sandbox: false.
+const VIDLINK_SANDBOX_PERMISSIONS = [
+  'allow-scripts',
+  'allow-same-origin',
+  'allow-popups',
+  'allow-popups-to-escape-sandbox',
+  'allow-forms',
+  'allow-modals',
+  'allow-presentation',
+].join(' ');
+
+// ─── Configuración de proveedores ───
+const EMBED_PROVIDERS: EmbedProvider[] = [
+  {
+    name: 'VidSrc',
+    baseUrl: 'https://vidsrc.to/embed/movie/',
+    sandbox: DEFAULT_SANDBOX_PERMISSIONS,
+  },
+  {
+    name: 'VidLink',
+    baseUrl: 'https://vidlink.pro/movie/',
+    sandbox: false,
+
+    // Si VidLink no funciona con el sandbox menos restrictivo,
+    // comenta la línea anterior y descomenta esta:
+    // sandbox: false,
+  },
+  {
+    name: 'VidEasy',
+    baseUrl: 'https://player.videasy.to/movie/',
+    sandbox: false,
+  },
+/*  {
+    name: 'WatchOut',
+    baseUrl: 'https://watchout-player.netlify.app/movie/',
+    sandbox: false,
+  },
+*/  
+  {
+    name: 'MoviesApi',
+    baseUrl: 'https://moviesapi.to/movie/',
+    sandbox: false,
+  },
+  {
+    name: 'Mapple',
+    baseUrl: 'https://mapple.uk/watch/movie/',
+    sandbox: false,
+  },
+  {
+    name: 'VidZee',
+    baseUrl: 'https://player.vidzee.wtf/embed/movie/',
+    sandbox: false,
+  },
+];
+
+// Tiempo máximo (ms) que esperamos a que un servidor responda antes de considerar que falló
+const LOAD_TIMEOUT_MS = 15_000;
+
+type LoadStatus = 'idle' | 'loading' | 'loaded' | 'timeout';
+
+interface VideoPlayerProps {
+  servers: Server[];
+  tmdbId: number;
+  movieSlug: string;
+}
+
+// ─── Utilidad: encontrar el siguiente servidor disponible ───
+function findNextAvailableServer(
+  servers: Server[],
+  currentIndex: number,
+  failedSet: Set<number>
+): number {
+  const total = servers.length;
+
+  for (let i = 1; i < total; i++) {
+    const candidateIndex = (currentIndex + i) % total;
+    if (!failedSet.has(candidateIndex)) {
+      return candidateIndex;
+    }
+  }
+
+  return -1; // Todos fallaron
+}
+
+export default function VideoPlayer({
+  servers,
+  tmdbId,
+  movieSlug,
+}: VideoPlayerProps) {
+  // ─── Lista combinada de servidores (dinámicos + manuales) ───
+  const allServers = useMemo<PlayerServer[]>(() => {
+    if (!tmdbId) return (servers || []) as PlayerServer[];
+
+    const dynamicServers: PlayerServer[] = EMBED_PROVIDERS.map((provider) => ({
+      id: `dynamic-${provider.name}`,
+      name: provider.name,
+      url: `${provider.baseUrl}${tmdbId}`,
+      sandbox: provider.sandbox,
+    }));
+
+    return [...dynamicServers, ...(servers || []) as PlayerServer[]];
+  }, [tmdbId, servers]);
+
+  // ─── Estado del reproductor ───
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [loadStatus, setLoadStatus] = useState<LoadStatus>('idle');
+  const [autoSwitched, setAutoSwitched] = useState(false);
+  const [retryCounter, setRetryCounter] = useState(0);
+
+  // Estado real para UI
+  const [failedServers, setFailedServers] = useState<Set<number>>(
+    () => new Set<number>()
+  );
+
+  // Ref auxiliar para lógica interna sin problemas de stale state
+  const failedServersRef = useRef<Set<number>>(failedServers);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const activeServer = allServers[activeIndex] ?? null;
+
+  // Mantener el ref sincronizado con el estado
+  useEffect(() => {
+    failedServersRef.current = failedServers;
+  }, [failedServers]);
+
+  // ─── Limpiar timeout ───
+  const clearLoadTimeout = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  }, []);
+
+  // ─── Helpers para mutar failedServers de forma segura ───
+  const markServerFailed = useCallback((index: number) => {
+    const next = new Set(failedServersRef.current);
+    next.add(index);
+    failedServersRef.current = next;
+    setFailedServers(next);
+  }, []);
+
+  const clearServerFailed = useCallback((index: number) => {
+    const next = new Set(failedServersRef.current);
+    next.delete(index);
+    failedServersRef.current = next;
+    setFailedServers(next);
+  }, []);
+
+  const resetFailedServers = useCallback(() => {
+    const next = new Set<number>();
+    failedServersRef.current = next;
+    setFailedServers(next);
+  }, []);
+
+  // ─── Protección por si la lista de servidores cambia y el índice queda fuera de rango ───
+  useEffect(() => {
+    if (allServers.length === 0) return;
+
+    if (activeIndex >= allServers.length) {
+      setActiveIndex(0);
+    }
+  }, [allServers.length, activeIndex]);
+
+  // ─── Iniciar timer de carga cuando cambia el servidor activo ───
+  useEffect(() => {
+    clearLoadTimeout();
+
+    if (!activeServer) {
+      setLoadStatus('idle');
+      return;
+    }
+
+    setLoadStatus('loading');
+
+    timeoutRef.current = setTimeout(() => {
+      markServerFailed(activeIndex);
+
+      const nextIndex = findNextAvailableServer(
+        allServers,
+        activeIndex,
+        failedServersRef.current
+      );
+
+      if (nextIndex !== -1) {
+        setAutoSwitched(true);
+        setActiveIndex(nextIndex);
+      } else {
+        setLoadStatus('timeout');
+      }
+    }, LOAD_TIMEOUT_MS);
+
+    return clearLoadTimeout;
+  }, [
+    activeIndex,
+    activeServer,
+    allServers,
+    clearLoadTimeout,
+    markServerFailed,
+    retryCounter,
+  ]);
+
+  // ─── Resetear estado cuando cambia la película ───
+  useEffect(() => {
+    setActiveIndex(0);
+    setLoadStatus('idle');
+    setAutoSwitched(false);
+    setRetryCounter(0);
+    resetFailedServers();
+    clearLoadTimeout();
+  }, [movieSlug, clearLoadTimeout, resetFailedServers]);
+
+  // ─── El iframe terminó de cargar ───
+  const handleIframeLoad = useCallback(() => {
+    clearLoadTimeout();
+    setLoadStatus('loaded');
+  }, [clearLoadTimeout]);
+
+  // ─── Reintentar el servidor actual ───
+  const handleRetry = useCallback(() => {
+    clearServerFailed(activeIndex);
+    setAutoSwitched(false);
+    setLoadStatus('loading');
+    setRetryCounter((prev) => prev + 1);
+  }, [activeIndex, clearServerFailed]);
+
+  // ─── Cambiar manualmente de servidor ───
+  const handleSelectServer = useCallback(
+    (index: number) => {
+      clearServerFailed(index);
+      setAutoSwitched(false);
+
+      if (index === activeIndex) {
+        // Si el usuario hace clic en el mismo servidor, forzamos remount/reintento
+        setLoadStatus('loading');
+        setRetryCounter((prev) => prev + 1);
+      } else {
+        setActiveIndex(index);
+      }
+    },
+    [activeIndex, clearServerFailed]
+  );
+
+  // ─── Si no hay servidores ───
+  if (!allServers || allServers.length === 0) {
+    return (
+      <div className="aspect-video bg-white/[0.02] border border-white/5 rounded-2xl flex items-center justify-center text-gray-500">
+        No hay servidores disponibles para esta película.
+      </div>
+    );
+  }
+
+  const allFailed = failedServers.size >= allServers.length;
+
+  // ─── Sandbox final del iframe ───
+  // Si activeServer.sandbox === false, se omite el atributo sandbox.
+  // Si no tiene sandbox definido, se usa DEFAULT_SANDBOX_PERMISSIONS.
+  const iframeSandbox =
+    activeServer?.sandbox === false
+      ? undefined
+      : (activeServer?.sandbox ?? DEFAULT_SANDBOX_PERMISSIONS);
+
+  return (
+    <div className="w-full">
+      {/* ═══ Selector de servidores ═══ */}
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        {allServers.map((server, index) => {
+          const isActive = index === activeIndex;
+          const isFailed = failedServers.has(index);
+
+          return (
+            <button
+              key={
+                typeof server.id === 'string'
+                  ? server.id
+                  : `${server.id}-${index}`
+              }
+              onClick={() => handleSelectServer(index)}
+              aria-pressed={isActive}
+              title={
+                isFailed
+                  ? 'Este servidor no respondió. Clic para reintentar.'
+                  : server.name
+              }
+              className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border ${
+                isActive
+                  ? 'bg-red-600/80 border-red-500/30 text-white shadow-lg shadow-red-900/20'
+                  : isFailed
+                    ? 'bg-white/[0.03] border-white/5 text-gray-600 hover:bg-white/5 hover:text-gray-400'
+                    : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:border-white/20 hover:text-white'
+              }`}
+            >
+              {isActive && <IconPlay className="w-3 h-3" />}
+              {server.name}
+              {isFailed && !isActive && (
+                <span className="text-[9px] uppercase tracking-wide opacity-60">
+                  caído
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ═══ Notificación de cambio automático ═══ */}
+      {autoSwitched && loadStatus === 'loading' && (
+        <div className="mb-3 flex items-center gap-2 text-xs text-amber-400/80 bg-amber-500/5 border border-amber-500/10 rounded-lg px-3 py-2">
+          <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse flex-shrink-0" />
+          El servidor anterior no respondió. Cambiando automáticamente a{' '}
+          <strong>{activeServer?.name}</strong>...
+        </div>
+      )}
+
+      {/* ═══ Contenedor del video ═══ */}
+      <div className="relative aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl shadow-black/30 border border-white/5">
+        {/* ─── Overlay de carga ─── */}
+        {loadStatus === 'loading' && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-black/80">
+            <div className="w-10 h-10 border-4 border-red-600/60 border-t-transparent rounded-full animate-spin" />
+            <p className="text-sm text-gray-400">
+              Conectando con{' '}
+              <span className="text-white font-medium">
+                {activeServer?.name}
+              </span>
+              ...
+            </p>
+            <p className="text-[11px] text-gray-600">
+              Si no carga en {LOAD_TIMEOUT_MS / 1000}s, se intentará otro
+              servidor automáticamente
+            </p>
+          </div>
+        )}
+
+        {/* ─── Overlay de timeout / todos fallaron ─── */}
+        {(loadStatus === 'timeout' || allFailed) && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-black/90 px-6 text-center">
+            <div className="w-14 h-14 rounded-full bg-red-600/10 border border-red-600/20 flex items-center justify-center">
+              <svg
+                className="w-7 h-7 text-red-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+                />
+              </svg>
+            </div>
+
+            <div>
+              <h3 className="text-white font-semibold mb-1">
+                {allFailed
+                  ? 'Ningún servidor respondió'
+                  : 'El servidor no respondió'}
+              </h3>
+              <p className="text-sm text-gray-400 max-w-sm">
+                {allFailed
+                  ? 'Todos los servidores están caídos en este momento. Intenta nuevamente en unos minutos.'
+                  : 'El servidor tardó demasiado en responder. Puedes reintentar o seleccionar otro servidor manualmente.'}
+              </p>
+            </div>
+
+            <button
+              onClick={handleRetry}
+              className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-5 py-2.5 rounded-full transition-colors"
+            >
+              <IconRefresh className="w-4 h-4" />
+              Reintentar
+            </button>
+          </div>
+        )}
+
+        {/* ─── Iframe del reproductor ─── */}
+        {activeServer && loadStatus !== 'timeout' && !allFailed && (
+          <iframe
+            key={`${activeServer.url}-${retryCounter}`}
+            src={activeServer.url}
+            width="100%"
+            height="100%"
+            allowFullScreen
+            frameBorder="0"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+            sandbox={iframeSandbox}
+            className="w-full h-full"
+            title={`Reproductor de video - ${activeServer.name}`}
+            onLoad={handleIframeLoad}
+          />
+        )}
+      </div>
+
+      {/* ═══ Nota de seguridad ═══ */}
+      <p className="mt-2 text-[10px] text-gray-600 text-center">
+        El contenido se reproduce en un entorno aislado por seguridad. Si un
+        servidor muestra publicidad emergente, ciérrala directamente en el
+        reproductor.
+      </p>
+    </div>
+  );
+}
+==> ./components/MovieGrid.tsx <==
+"use client";
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { Movie } from '@/types';
+import MovieCard from './MovieCard';
+import AdBanner from './AdBanner';
+import { fetchMoviesFromApi } from '@/lib/client/movies';
+
+export default function MovieGrid({
+  initialMovies,
+  initialHasMore,
+  filters,
+}: {
+  initialMovies: Movie[];
+  initialHasMore: boolean;
+  filters: Record<string, string | string[] | undefined>;
+}) {
+  const filterKey = JSON.stringify(filters);
+  const [movies, setMovies] = useState<Movie[]>(initialMovies);
+  const [hasMore, setHasMore] = useState<boolean>(initialHasMore);
+  const [page, setPage] = useState<number>(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const observerRef = useRef<HTMLDivElement>(null);
+  const prevFilterKey = useRef(filterKey);
+  const loadingRef = useRef(false);
+
+  // Memoizar filters para evitar re-renders innecesarios
+  const stableFilters = useMemo(() => filters, [filterKey]);
+
+  // Hidratación segura desde sessionStorage
+  useEffect(() => {
+    const savedScroll = sessionStorage.getItem('grid-scroll');
+    if (savedScroll) {
+      const savedStateString = sessionStorage.getItem(`grid-state-${filterKey}`);
+      if (savedStateString) {
+        try {
+          const savedState = JSON.parse(savedStateString);
+          if (savedState.movies && savedState.movies.length > 0) {
+            setMovies(savedState.movies);
+            setHasMore(savedState.hasMore);
+            setPage(savedState.page);
+            setTimeout(() => window.scrollTo(0, parseInt(savedScroll, 10)), 150);
+          }
+        } catch (e) {
+          sessionStorage.removeItem(`grid-state-${filterKey}`);
+        }
+      }
+      sessionStorage.removeItem('grid-scroll');
+    }
+  }, [filterKey]);
+
+  // Guardar estado
+  useEffect(() => {
+    if (movies.length > initialMovies.length) {
+      try {
+        sessionStorage.setItem(`grid-state-${filterKey}`, JSON.stringify({ movies, hasMore, page }));
+      } catch (e) {
+        // Silenciar errores de quota
+      }
+    }
+  }, [movies, hasMore, page, filterKey, initialMovies.length]);
+
+  // Resetear si cambian los filtros
+  useEffect(() => {
+    if (prevFilterKey.current !== filterKey) {
+      setMovies(initialMovies);
+      setHasMore(initialHasMore);
+      setPage(1);
+      prevFilterKey.current = filterKey;
+    }
+  }, [filterKey, initialMovies, initialHasMore]);
+
+  // Scroll infinito - usar stableFilters en lugar de filters
+  useEffect(() => {
+    const node = observerRef.current;
+    if (!node || !hasMore) return;
+
+    const observer = new IntersectionObserver(
+      async (entries) => {
+        if (entries[0].isIntersecting && !loadingRef.current) {
+          loadingRef.current = true;
+          setIsLoading(true);
+          const nextPage = page + 1;
+          try {
+            const { data, hasMore: more } = await fetchMoviesFromApi(stableFilters, nextPage);
+            setMovies((prev) => {
+              const existingIds = new Set(prev.map(m => m.documentId || m.id.toString()));
+              const uniqueNewData = data.filter(m => !existingIds.has(m.documentId || m.id.toString()));
+              if (uniqueNewData.length === 0 && more) {
+                setHasMore(false);
+                return prev;
+              }
+              return [...prev, ...uniqueNewData];
+            });
+            setPage(nextPage);
+            setHasMore(more);
+          } catch (error) {
+            console.error("Error loading more movies:", error);
+          } finally {
+            loadingRef.current = false;
+            setIsLoading(false);
+          }
+        }
+      },
+      { rootMargin: '200px', threshold: 0.1 }
+    );
+
+    observer.observe(node);
+
+    return () => {
+      observer.unobserve(node);
+      observer.disconnect();
+    };
+  }, [hasMore, page, stableFilters]);  // ← USAR stableFilters
+
+  let movieCounter = 0;
+
+  return (
+    <>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+        {movies.map((movie) => {
+          movieCounter++;
+          return (
+            <div key={`${movie.id}-${movie.slug}`} className="contents">
+              <MovieCard movie={movie} />
+              {movieCounter % 24 === 0 && (
+                <div className="col-span-full my-2">
+                  <AdBanner format="horizontal" />
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Zona de observación / Loading */}
+      <div ref={observerRef} className="w-full py-12 flex justify-center min-h-[80px]">
+        {isLoading && (
+          <div className="flex items-center gap-3 text-gray-400">
+            <div className="w-5 h-5 border-2 border-red-600/60 border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-sm">Cargando más películas...</span>
+          </div>
+        )}
+        {!hasMore && movies.length > 0 && (
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-8 h-px bg-white/10"></div>
+            <p className="text-gray-500 text-xs">Fin del catálogo</p>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+==> ./components/MovieCard.tsx <==
+"use client";
+import Link from 'next/link';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { Movie, Category } from '@/types';
+import { formatRuntime } from '@/lib/utils/format';
+import { IconStar, IconImagePlaceholder } from '@/components/icons';
+
+export default function MovieCard({ movie }: { movie: Movie }) {
+  const router = useRouter();
+
+  const handleCategoryClick = (e: React.MouseEvent, slug: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    router.push(`/movies?genres=${slug}`);
+  };
+
+  const handleCardClick = () => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('grid-scroll', String(window.scrollY));
+    }
+  };
+
+  const servers = movie.servers || [];
+  const languages = [...new Set(servers.map(s => s.language).filter(Boolean))];
+  const qualities = [...new Set(servers.map(s => s.quality).filter(Boolean))];
+  const hasSubtitles = servers.some(s => s.subtitles === true);
+
+  const runtime = formatRuntime(movie.runtime);  // ← USAR UTILIDAD
+
+  return (
+    <Link
+      href={`/movie/${movie.slug}`}
+      onClick={handleCardClick}
+      className="group block bg-white/[0.03] border border-white/5 rounded-2xl overflow-hidden transition-all duration-300 hover:bg-white/[0.06] hover:border-white/10 hover:shadow-xl hover:shadow-black/20 hover:-translate-y-1"
+    >
+      {/* ─── Imagen ─── */}
+      <div className="relative aspect-[2/3] overflow-hidden">
+        {movie.poster_url ? (
+          <Image
+            src={movie.poster_url}
+            alt={`Póster de ${movie.title}`}
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1400px) 25vw, 20vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="w-full h-full bg-white/5 flex items-center justify-center">
+            <IconImagePlaceholder className="w-10 h-10 text-gray-600" />
+          </div>
+        )}
+
+        {/* Overlay sutil en hover */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+        {/* Badges de calidad y subtítulos (arriba izquierda) */}
+        <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
+          {qualities.length > 0 && (
+            <span className="bg-red-600/90 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wide">
+              {qualities[0]}
+            </span>
+          )}
+          {hasSubtitles && (
+            <span className="bg-black/60 backdrop-blur-sm text-gray-200 text-[10px] font-semibold px-2 py-0.5 rounded-md">
+              CC
+            </span>
+          )}
+        </div>
+
+        {/* ★ Rating visible (arriba derecha) — sin hover */}
+        {movie.rating > 0 && (
+          <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-black/70 backdrop-blur-sm px-2 py-1 rounded-lg">
+            <IconStar className="w-3 h-3 text-amber-400" />
+            <span className="text-xs font-bold text-white">{movie.rating.toFixed(1)}</span>
+          </div>
+        )}
+      </div>
+
+      {/* ─── Información ─── */}
+      <div className="p-3.5">
+        {/* Título: hasta 2 líneas */}
+        <h2 className="text-sm font-semibold text-gray-100 leading-snug line-clamp-2 min-h-[2.5rem] group-hover:text-white transition-colors">
+          {movie.title}
+        </h2>
+
+        {/* Año + Duración */}
+        <div className="flex items-center gap-2 mt-1.5 text-xs">
+          <span className="text-gray-400">{movie.year}</span>
+          {runtime && (
+            <>
+              <span className="text-gray-600">·</span>
+              <span className="text-gray-400">{runtime}</span>
+            </>
+          )}
+          {movie.age_rating && (
+            <>
+              <span className="text-gray-600">·</span>
+              <span className="text-gray-400">{movie.age_rating}</span>
+            </>
+          )}
+        </div>
+
+        {/* Idiomas disponibles */}
+        {languages.length > 0 && (
+          <p className="text-[11px] text-gray-400 mt-1.5 truncate">
+            {languages.join(' · ')}
+          </p>
+        )}
+
+        {/* Todos los géneros visibles */}
+        {movie.categories && movie.categories.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-2.5">
+            {movie.categories.map((cat: Category) => (
+              <button
+                key={cat.id}
+                onClick={(e) => handleCategoryClick(e, cat.slug)}
+                className="text-[10px] font-medium bg-white/5 border border-white/5 text-gray-400 hover:text-white hover:bg-white/10 hover:border-white/10 px-2 py-0.5 rounded-full transition-all duration-150"
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </Link>
+  );
+}
+==> ./components/FilterMenu.tsx <==
+"use client";
+
+import { useRouter, useSearchParams } from "next/navigation";
+import { Category } from "@/types";
+import { useState, useEffect, useRef, ReactNode, useCallback } from "react";
+import {
+  IconFilm,
+  IconStar,
+  IconGlobe,
+  IconCalendar,
+  IconSort,
+  IconChevron,
+  IconClose,
+  IconTrash,
+} from '@/components/icons';
+
+/* ═══════════════════════════════════════════════════════════════════
+   DROPDOWN REUTILIZABLE
+═══════════════════════════════════════════════════════════════════ */
+
+interface DropdownMenuProps {
+  id: string;
+  icon: ReactNode;
+  label: string;
+  currentLabel: string;
+  isActive: boolean;
+  align?: 'left' | 'right';
+  closeOnSelect?: boolean;
+  children: ReactNode;
+}
+
+function DropdownMenu({
+  id,
+  icon,
+  label,
+  currentLabel,
+  isActive,
+  align = 'left',
+  closeOnSelect = true,
+  children,
+}: DropdownMenuProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsOpen(false);
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleEscape);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen]);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+        aria-controls={`${id}-dropdown`}
+        aria-label={`${label}: ${currentLabel}`}
+        title={`${label}: ${currentLabel}`}
+        className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border ${isActive
+            ? 'bg-red-600/80 border-red-500/30 text-white shadow-lg shadow-red-900/20'
+            : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:border-white/20 hover:text-white'
+          }`}
+      >
+        <span className={isActive ? 'text-red-100' : 'text-gray-500'}>{icon}</span>
+        <span className="hidden sm:inline">{currentLabel}</span>
+        <IconChevron open={isOpen} className="w-3 h-3 opacity-60" />
+      </button>
+
+      {isOpen && (
+        <div
+          id={`${id}-dropdown`}
+          className={`absolute z-[60] top-full ${align === 'right' ? 'right-0' : 'left-0'} min-w-[200px] pt-2`}
+          onClick={(e) => {
+            if (closeOnSelect) setIsOpen(false);
+            else e.stopPropagation();
+          }}
+        >
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   COMPONENTE PRINCIPAL: FILTER MENU
+═══════════════════════════════════════════════════════════════════ */
+
+export default function FilterMenu({ categories, countries }: { categories: Category[]; countries: string[] }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const currentYear = new Date().getFullYear();
+
+  const [minYear, setMinYear] = useState(Number(searchParams.get('fromYear')) || 1950);
+  const [maxYear, setMaxYear] = useState(Number(searchParams.get('toYear')) || currentYear);
+
+  // ─── DETECCIÓN DE SCROLL (colapsar/expandir) ───
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const lastScrollY = useRef(0);
+  const ticking = useRef(false);
+
+  // ─── DETECCIÓN DE STICKY (bordes rectos vs redondeados) ───
+  const [isStuck, setIsStuck] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsStuck(!entry.isIntersecting);
+      },
+      { threshold: 0 }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, []);
+
+  const handleScroll = useCallback(() => {
+    if (!ticking.current) {
+      window.requestAnimationFrame(() => {
+        const currentScrollY = window.scrollY;
+
+        if (currentScrollY > lastScrollY.current && currentScrollY > 150) {
+          setIsCollapsed(true);
+        } else if (currentScrollY < lastScrollY.current - 5) {
+          setIsCollapsed(false);
+        }
+
+        lastScrollY.current = currentScrollY;
+        ticking.current = false;
+      });
+      ticking.current = true;
+    }
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
+
+  // ─── SINCRONIZAR AÑOS CON URL ───
+  useEffect(() => {
+    setMinYear(Number(searchParams.get('fromYear')) || 1950);
+    setMaxYear(Number(searchParams.get('toYear')) || currentYear);
+  }, [searchParams, currentYear]);
+
+  // ─── HELPERS DE URL ───
+  const updateParams = (key: string, value: string | null) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value && value !== "all") params.set(key, value);
+    else params.delete(key);
+    router.replace(`/movies?${params.toString()}`);
+  };
+
+  const toggleGenre = (slug: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    const currentGenres = params.getAll("genres");
+    if (currentGenres.includes(slug)) {
+      const newGenres = currentGenres.filter(g => g !== slug);
+      params.delete("genres");
+      newGenres.forEach(g => params.append("genres", g));
+    } else {
+      params.append("genres", slug);
+    }
+    router.replace(`/movies?${params.toString()}`);
+  };
+
+  const clearFilters = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('genres');
+    params.delete('minRating');
+    params.delete('fromYear');
+    params.delete('toYear');
+    params.delete('country');
+    router.replace(`/movies?${params.toString()}`);
+  };
+
+  const removeGenre = (slug: string) => toggleGenre(slug);
+  const removeRating = () => updateParams('minRating', null);
+  const removeCountry = () => updateParams('country', null);
+  const removeYear = () => {
+    setMinYear(1950);
+    setMaxYear(currentYear);
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('fromYear');
+    params.delete('toYear');
+    router.replace(`/movies?${params.toString()}`);
+  };
+
+  const applyYearFilter = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (minYear > 1950) params.set('fromYear', String(minYear)); else params.delete('fromYear');
+    if (maxYear < currentYear) params.set('toYear', String(maxYear)); else params.delete('toYear');
+    router.replace(`/movies?${params.toString()}`);
+  };
+
+  // ─── VALORES DERIVADOS ───
+  const activeGenres = searchParams.getAll("genres");
+  const minRating = searchParams.get('minRating');
+  const currentCountry = searchParams.get('country');
+  const hasYearFilter = searchParams.get('fromYear') || searchParams.get('toYear');
+  const filterCount = activeGenres.length + (minRating ? 1 : 0) + (hasYearFilter ? 1 : 0) + (currentCountry ? 1 : 0);
+
+  const ratingOptions = [
+    { val: 'all', label: 'Todas' }, { val: '5', label: '5.0+' }, { val: '6', label: '6.0+' },
+    { val: '7', label: '7.0+' }, { val: '8', label: '8.0+' }, { val: '9', label: '9.0+' }
+  ];
+  const sortOptions = [
+    { val: 'latest', label: 'Recientes' }, { val: 'oldest', label: 'Antiguas' },
+    { val: 'title', label: 'A - Z' }, { val: 'title-desc', label: 'Z - A' },
+    { val: 'rating', label: 'Mejor Puntuadas' }, { val: 'rating-asc', label: 'Peor Puntuadas' }
+  ];
+
+  const genresLabel = activeGenres.length === 0 ? 'Género'
+    : activeGenres.length === 1 ? categories.find(c => c.slug === activeGenres[0])?.name || '1 Género'
+      : `${activeGenres.length} Géneros`;
+  const currentRating = ratingOptions.find(opt => opt.val === (minRating || 'all'))?.label || 'Puntuación';
+  const currentSort = sortOptions.find(opt => opt.val === (searchParams.get('sort') || 'latest'))?.label || 'Ordenar';
+  const currentCountryLabel = currentCountry || 'País';
+
+  return (
+    <>
+      {/* Sentinel para detectar cuándo el menú está "pegado" al header */}
+      <div ref={sentinelRef} className="h-px" aria-hidden="true" />
+
+      <div className="sticky top-16 z-30 -mx-4 md:-mx-8 px-4 md:px-8 pb-4">
+        <div
+          className={`bg-gray-950/80 backdrop-blur-xl border border-white/5 shadow-2xl shadow-black/20 transition-all duration-300 ${isStuck
+              ? 'rounded-b-2xl rounded-t-none border-t-0'
+              : 'rounded-2xl'
+            }`}
+        >
+          {/* ═══ SECCIÓN COLAPSABLE: CONTROLES DE FILTRO ═══ */}
+          {/* SIN overflow-hidden para que los dropdowns no se recorten */}
+          <div
+            className="transition-all duration-300 ease-in-out"
+            style={{
+              maxHeight: isCollapsed ? '0px' : '400px',
+              opacity: isCollapsed ? 0 : 1,
+              transform: isCollapsed ? 'translateY(-8px)' : 'translateY(0)',
+              pointerEvents: isCollapsed ? 'none' : 'auto',
+            }}
+          >
+            <div className="flex flex-wrap items-center gap-3 px-5 pt-5 pb-4">
+              {/* Género */}
+              <DropdownMenu
+                id="genres"
+                icon={<IconFilm />}
+                label="Género"
+                currentLabel={genresLabel}
+                isActive={activeGenres.length > 0}
+                closeOnSelect={false}
+              >
+                <div className="w-80 bg-gray-950/95 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl shadow-black/40">
+                  <div className="flex flex-wrap gap-2 max-h-56 overflow-y-auto scrollbar-hide">
+                    {categories.map((cat) => (
+                      <button
+                        key={cat.id}
+                        onClick={() => toggleGenre(cat.slug)}
+                        aria-pressed={activeGenres.includes(cat.slug)}
+                        className={`px-3 py-1.5 text-xs rounded-full font-medium transition-all duration-150 border ${activeGenres.includes(cat.slug)
+                            ? 'bg-red-600/80 border-red-500/30 text-white shadow-md shadow-red-900/20'
+                            : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:border-white/20'
+                          }`}
+                      >
+                        {cat.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </DropdownMenu>
+
+              {/* Puntuación */}
+              <DropdownMenu
+                id="rating"
+                icon={<IconStar />}
+                label="Puntuación"
+                currentLabel={currentRating}
+                isActive={!!minRating}
+              >
+                <div className="bg-gray-950/95 backdrop-blur-xl border border-white/10 rounded-2xl p-2 shadow-2xl shadow-black/40 min-w-[160px]">
+                  {ratingOptions.map(opt => (
+                    <button
+                      key={opt.val}
+                      onClick={() => updateParams('minRating', opt.val === 'all' ? null : opt.val)}
+                      className={`block w-full text-left px-3 py-2 text-sm rounded-xl transition-colors ${(minRating || 'all') === opt.val
+                          ? 'bg-red-600/80 text-white font-medium'
+                          : 'text-gray-300 hover:bg-white/5'
+                        }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </DropdownMenu>
+
+              {/* País */}
+              <DropdownMenu
+                id="country"
+                icon={<IconGlobe />}
+                label="País"
+                currentLabel={currentCountryLabel}
+                isActive={!!currentCountry}
+              >
+                <div className="bg-gray-950/95 backdrop-blur-xl border border-white/10 rounded-2xl p-2 shadow-2xl shadow-black/40 w-52 max-h-64 overflow-y-auto scrollbar-hide">
+                  <button
+                    onClick={() => updateParams('country', null)}
+                    className={`block w-full text-left px-3 py-2 text-sm rounded-xl transition-colors ${!currentCountry ? 'bg-red-600/80 text-white font-medium' : 'text-gray-300 hover:bg-white/5'
+                      }`}
+                  >
+                    Todos
+                  </button>
+                  {countries.map((countryName) => (
+                    <button
+                      key={countryName}
+                      onClick={() => updateParams('country', countryName)}
+                      className={`block w-full text-left px-3 py-2 text-sm rounded-xl transition-colors ${currentCountry === countryName
+                          ? 'bg-red-600/80 text-white font-medium'
+                          : 'text-gray-300 hover:bg-white/5'
+                        }`}
+                    >
+                      {countryName}
+                    </button>
+                  ))}
+                </div>
+              </DropdownMenu>
+
+              {/* Año (slider) */}
+              <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10">
+                <span className="text-gray-500"><IconCalendar /></span>
+                <span className="text-sm font-medium text-gray-300 w-10 text-right tabular-nums">{minYear}</span>
+                <div className="range-slider w-56 sm:w-80 relative">
+                  <div className="absolute h-1 w-full bg-gray-700 rounded top-1/2 -translate-y-1/2"></div>
+                  <div
+                    className="absolute h-1 bg-red-600/80 rounded top-1/2 -translate-y-1/2"
+                    style={{
+                      left: `${((minYear - 1950) / (currentYear - 1950)) * 100}%`,
+                      right: `${100 - ((maxYear - 1950) / (currentYear - 1950)) * 100}%`,
+                    }}
+                  ></div>
+                  <input
+                    type="range" min="1950" max={currentYear} value={minYear}
+                    onChange={e => setMinYear(Math.min(Number(e.target.value), maxYear - 1))}
+                    onMouseUp={applyYearFilter}
+                    onTouchEnd={applyYearFilter}
+                    onKeyUp={applyYearFilter}        // ← NUEVO: accesibilidad con teclado
+                    onBlur={applyYearFilter}         // ← NUEVO: aplicar al perder el foco
+                    aria-label="Año mínimo"
+                    className="range-input-min"
+                  />
+                  <input
+                    type="range" min="1950" max={currentYear} value={maxYear}
+                    onChange={e => setMaxYear(Math.max(Number(e.target.value), minYear + 1))}
+                    onMouseUp={applyYearFilter}
+                    onTouchEnd={applyYearFilter}
+                    onKeyUp={applyYearFilter}        // ← NUEVO
+                    onBlur={applyYearFilter}         // ← NUEVO
+                    aria-label="Año máximo"
+                    className="range-input-max"
+                  />
+                </div>
+                <span className="text-sm font-medium text-gray-300 w-10 tabular-nums">{maxYear}</span>
+              </div>
+
+              {/* Spacer */}
+              <div className="flex-1" />
+
+              {/* Ordenar */}
+              <DropdownMenu
+                id="sort"
+                icon={<IconSort />}
+                label="Ordenar"
+                currentLabel={currentSort}
+                isActive={false}
+                align="right"
+              >
+                <div className="bg-gray-950/95 backdrop-blur-xl border border-white/10 rounded-2xl p-2 shadow-2xl shadow-black/40 min-w-[180px]">
+                  {sortOptions.map(opt => (
+                    <button
+                      key={opt.val}
+                      onClick={() => updateParams('sort', opt.val)}
+                      className={`block w-full text-left px-3 py-2 text-sm rounded-xl transition-colors ${(searchParams.get('sort') || 'latest') === opt.val
+                          ? 'bg-red-600/80 text-white font-medium'
+                          : 'text-gray-300 hover:bg-white/5'
+                        }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </DropdownMenu>
+            </div>
+          </div>
+
+          {/* ═══ SECCIÓN SIEMPRE VISIBLE: FILTROS ACTIVOS ═══ */}
+          {filterCount > 0 && (
+            <div className="flex flex-wrap items-center gap-2 px-5 py-3 border-t border-white/5">
+              {activeGenres.map(slug => {
+                const cat = categories.find(c => c.slug === slug);
+                if (!cat) return null;
+                return (
+                  <button
+                    key={slug}
+                    onClick={() => removeGenre(slug)}
+                    aria-label={`Quitar filtro ${cat.name}`}
+                    title={`Quitar ${cat.name}`}
+                    className="flex items-center gap-1.5 bg-white/5 border border-white/10 hover:bg-red-600/20 hover:border-red-500/30 text-gray-300 hover:text-white text-xs px-3 py-1.5 rounded-full transition-all duration-150"
+                  >
+                    <IconFilm className="w-3 h-3 opacity-60" />
+                    {cat.name}
+                    <IconClose className="w-2.5 h-2.5 opacity-60" />
+                  </button>
+                );
+              })}
+
+              {minRating && (
+                <button
+                  onClick={removeRating}
+                  aria-label={`Quitar filtro de puntuación ${currentRating}`}
+                  title={`Quitar puntuación ${currentRating}`}
+                  className="flex items-center gap-1.5 bg-white/5 border border-white/10 hover:bg-red-600/20 hover:border-red-500/30 text-gray-300 hover:text-white text-xs px-3 py-1.5 rounded-full transition-all duration-150"
+                >
+                  <IconStar className="w-3 h-3 opacity-60" />
+                  {currentRating}
+                  <IconClose className="w-2.5 h-2.5 opacity-60" />
+                </button>
+              )}
+
+              {currentCountry && (
+                <button
+                  onClick={removeCountry}
+                  aria-label={`Quitar filtro de país ${currentCountry}`}
+                  title={`Quitar ${currentCountry}`}
+                  className="flex items-center gap-1.5 bg-white/5 border border-white/10 hover:bg-red-600/20 hover:border-red-500/30 text-gray-300 hover:text-white text-xs px-3 py-1.5 rounded-full transition-all duration-150"
+                >
+                  <IconGlobe className="w-3 h-3 opacity-60" />
+                  {currentCountry}
+                  <IconClose className="w-2.5 h-2.5 opacity-60" />
+                </button>
+              )}
+
+              {hasYearFilter && (
+                <button
+                  onClick={removeYear}
+                  aria-label="Quitar filtro de año"
+                  title={`Quitar ${minYear} - ${maxYear}`}
+                  className="flex items-center gap-1.5 bg-white/5 border border-white/10 hover:bg-red-600/20 hover:border-red-500/30 text-gray-300 hover:text-white text-xs px-3 py-1.5 rounded-full transition-all duration-150"
+                >
+                  <IconCalendar className="w-3 h-3 opacity-60" />
+                  {minYear} - {maxYear}
+                  <IconClose className="w-2.5 h-2.5 opacity-60" />
+                </button>
+              )}
+
+              <button
+                onClick={clearFilters}
+                aria-label="Limpiar todos los filtros"
+                title="Limpiar todos los filtros"
+                className="flex items-center gap-1.5 ml-auto bg-red-950/40 border border-red-800/30 text-red-400 hover:bg-red-600/80 hover:text-white hover:border-red-500/30 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-150"
+              >
+                <IconTrash />
+                <span className="hidden sm:inline">Limpiar {filterCount}</span>
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+==> ./components/icons.tsx <==
+// components/icons.tsx
+import { SVGProps } from 'react';
+
+type IconProps = SVGProps<SVGSVGElement> & {
+  className?: string;
+};
+
+export const IconPlay = ({ className = "w-5 h-5" }: IconProps) => (
+  <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+    <path d="M8 5.14v14l11-7-11-7z" />
+  </svg>
+);
+
+export const IconStar = ({ className = "w-4 h-4" }: IconProps) => (
+  <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+    <path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+  </svg>
+);
+
+export const IconSearch = ({ className = "w-4 h-4" }: IconProps) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+  </svg>
+);
+
+export const IconBack = ({ className = "w-4 h-4" }: IconProps) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+  </svg>
+);
+
+export const IconClose = ({ className = "w-5 h-5" }: IconProps) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+  </svg>
+);
+
+export const IconFilm = ({ className = "w-4 h-4" }: IconProps) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h1.5C5.496 19.5 6 18.996 6 18.375m-3.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-1.5A1.125 1.125 0 0118 18.375M20.625 4.5H3.375m17.25 0c.621 0 1.125.504 1.125 1.125M20.625 4.5h-1.5C18.504 4.5 18 5.004 18 5.625m3.75 0v1.5c0 .621-.504 1.125-1.125 1.125M3.375 4.5c-.621 0-1.125.504-1.125 1.125M3.375 4.5h1.5C5.496 4.5 6 5.004 6 5.625m-3.75 0v1.5c0 .621.504 1.125 1.125 1.125m0 0h1.5m-1.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m1.5-3.75C5.496 8.25 6 7.746 6 7.125v-1.5M4.875 8.25C5.496 8.25 6 8.754 6 9.375v1.5m0-5.25v5.25m0-5.25C6 5.004 6.504 4.5 7.125 4.5h9.75c.621 0 1.125.504 1.125 1.125m1.125 2.625h1.5m-1.5 0A1.125 1.125 0 0118 7.125v-1.5m1.125 2.625c-.621 0-1.125.504-1.125 1.125v1.5m2.625-2.625c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125M18 5.625v5.25M7.125 12h9.75m-9.75 0A1.125 1.125 0 016 10.875M7.125 12C6.504 12 6 12.504 6 13.125m0-2.25C6 11.496 5.496 12 4.875 12M18 10.875c0 .621-.504 1.125-1.125 1.125M18 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125m-12 5.25v-5.25m0 5.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125m-12 0v-1.5c0-.621-.504-1.125-1.125-1.125M18 18.375v-5.25m0 5.25v-1.5c0-.621.504-1.125 1.125-1.125M18 13.125v1.5c0 .621.504 1.125 1.125 1.125M18 13.125c0-.621.504-1.125 1.125-1.125M6 13.125v1.5c0 .621-.504 1.125-1.125 1.125M6 13.125C6 12.504 5.496 12 4.875 12m-1.5 0h1.5m-1.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m1.5-3.75C5.496 12 6 12.504 6 13.125m0 0v1.5m0-1.5c0-.621-.504-1.125-1.125-1.125" />
+  </svg>
+);
+
+export const IconGlobe = ({ className = "w-4 h-4" }: IconProps) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+  </svg>
+);
+
+export const IconCalendar = ({ className = "w-4 h-4" }: IconProps) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+  </svg>
+);
+
+export const IconSort = ({ className = "w-4 h-4" }: IconProps) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5" />
+  </svg>
+);
+
+export const IconTrash = ({ className = "w-3.5 h-3.5" }: IconProps) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+  </svg>
+);
+
+export const IconChevron = ({ className = "w-3.5 h-3.5", open = false }: IconProps & { open?: boolean }) => (
+  <svg className={`${className} transition-transform duration-200 ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+  </svg>
+);
+
+export const IconImagePlaceholder = ({ className = "w-10 h-10 text-gray-600" }: IconProps) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A1.5 1.5 0 0021.75 19.5V4.5A1.5 1.5 0 0020.25 3H3.75A1.5 1.5 0 002.25 4.5v15A1.5 1.5 0 003.75 21zM10.5 8.25h.008v.008H10.5V8.25z" />
+  </svg>
+);
+
+export const IconUserPlaceholder = ({ className = "w-16 h-16 text-gray-600" }: IconProps) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+  </svg>
+);
+
+export const IconHome = ({ className = "w-5 h-5" }: IconProps) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+  </svg>
+);
+
+export const IconWarning = ({ className = "w-10 h-10 text-red-600" }: IconProps) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+  </svg>
+);
+
+export const IconAd = ({ className = "w-5 h-5 text-gray-500" }: IconProps) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 010 3.46" />
+  </svg>
+);
+
+export const IconRefresh = ({ className = "w-4 h-4" }: IconProps) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182M20.985 4.356v4.992" />
+  </svg>
+);
+==> ./components/TrailerButton.tsx <==
+"use client";
+
+import { useState, useEffect } from 'react';
+import { IconPlay, IconClose } from '@/components/icons';
+
+export default function TrailerButton({ trailerUrl }: { trailerUrl: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsOpen(false);
+    };
+
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen]);
+
+  if (!trailerUrl) return null;
+
+  const autoplayUrl = `${trailerUrl}${trailerUrl.includes('?') ? '&' : '?'}autoplay=1`;
+
+  return (
+    <>
+      <button
+        onClick={() => setIsOpen(true)}
+        className="inline-flex items-center gap-2.5 bg-white/10 border border-white/10 hover:bg-white/20 hover:border-white/20 text-white font-medium px-5 py-2.5 rounded-full transition-all duration-200 text-sm"
+      >
+        <IconPlay className="w-4 h-4" />
+        Ver Tráiler
+      </button>
+
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex items-center justify-center p-4"
+          onClick={() => setIsOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-5xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <iframe
+              src={autoplayUrl}
+              width="100%"
+              height="100%"
+              allow="autoplay; encrypted-media; fullscreen"
+              allowFullScreen
+              frameBorder="0"
+              title="Tráiler oficial"
+              className="w-full h-full"
+            />
+          </div>
+
+          <button
+            onClick={() => setIsOpen(false)}
+            className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-all duration-200"
+            aria-label="Cerrar tráiler"
+          >
+            <IconClose className="w-5 h-5" />
+          </button>
+        </div>
+      )}
+    </>
+  );
+}
+==> ./components/BackButton.tsx <==
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { IconBack } from '@/components/icons';
+
+export default function BackButton() {
+  const router = useRouter();
+  const [hasHistory, setHasHistory] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      setHasHistory(true);
+    }
+  }, []);
+
+  const handleBack = () => {
+    if (hasHistory) {
+      router.back();
+    } else {
+      router.push("/movies");
+    }
+  };
+
+  return (
+    <button
+      onClick={handleBack}
+      className="inline-flex items-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-gray-300 hover:text-white rounded-full px-4 py-2 text-sm font-medium transition-all duration-200"
+    >
+      <IconBack />
+      Volver
+    </button>
+  );
+}
+==> ./components/WatchButton.tsx <==
+"use client";
+
+import { IconPlay } from '@/components/icons';
+
+export default function WatchButton() {
+  const handleClick = () => {
+    const element = document.getElementById('watch');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      className="inline-flex items-center gap-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-full transition-all duration-200 text-sm shadow-lg shadow-red-600/25 hover:shadow-red-600/40 hover:-translate-y-0.5"
+    >
+      <IconPlay className="w-5 h-5" />
+      Ver Película
+    </button>
+  );
+}
+==> ./package.json <==
+{
+  "name": "mi-plataforma",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "next": "16.3.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.0",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
+
+==> ./lib/api/countries.ts <==
+// lib/api/countries.ts
+
+import { fetchApi } from './http';
+
+export async function fetchCountries(): Promise<string[]> {
+  const json = await fetchApi<unknown>('/movies/countries', {}, {
+    next: {
+      revalidate: 3600,
+      tags: ['countries'],
+    },
+  });
+
+  const rawList = Array.isArray(json)
+    ? json
+    : Array.isArray((json as { data?: unknown[] })?.data)
+      ? (json as { data: unknown[] }).data
+      : [];
+
+  const names = rawList
+    .map((item) => {
+      if (typeof item === 'string') return item;
+
+      if (item && typeof item === 'object') {
+        const obj = item as Record<string, unknown>;
+        return (obj.name ?? obj.country ?? obj.value) as string | undefined;
+      }
+
+      return undefined;
+    })
+    .filter((value): value is string => Boolean(value && value.trim()));
+
+  const unique = Array.from(new Set(names.map((name) => name.trim())));
+
+  return unique.sort(
+    new Intl.Collator('es', { sensitivity: 'base' }).compare
+  );
+}
+==> ./lib/api/actors.ts <==
+// lib/api/actors.ts
+
+import type { Actor, Movie } from '@/types';
+import type { StrapiListResponse } from './config';
+import { fetchApi, getHasMore } from './http';
+import { normalizeActor, normalizeMovieList } from './normalizers';
+
+/**
+ * Obtiene un actor por su slug.
+ */
+export async function fetchActorBySlug(slug: string): Promise<Actor | null> {
+  // Validación robusta
+  if (!slug || slug === 'undefined' || slug === 'null' || slug.trim() === '') {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('[fetchActorBySlug] slug inválido recibido:', slug);
+    }
+    return null;
+  }
+
+  const params = {
+    'filters[slug]': slug,
+  };
+
+  const json = await fetchApi<StrapiListResponse<unknown>>('/actors', params, {
+    next: {
+      revalidate: 3600,
+      tags: ['actors', `actor:${slug}`],
+    },
+  });
+
+  if (!json?.data || !Array.isArray(json.data) || json.data.length === 0) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('[fetchActorBySlug] ningún actor encontrado para slug:', slug);
+    }
+    return null;
+  }
+
+  return normalizeActor(json.data[0]);
+}
+
+/**
+ * Obtiene las películas donde aparece un actor.
+ * Ordenadas por año (más recientes primero) y rating.
+ */
+export async function fetchMoviesByActor(
+  actorSlug: string,
+  page: number = 1,
+  pageSize: number = 60
+): Promise<{ data: Movie[]; hasMore: boolean }> {
+  // Validación robusta
+  if (!actorSlug || actorSlug === 'undefined' || actorSlug === 'null' || actorSlug.trim() === '') {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('[fetchMoviesByActor] slug inválido recibido:', actorSlug);
+    }
+    return { data: [], hasMore: false };
+  }
+
+  const params = {
+    'filters[actors][slug]': actorSlug,
+    'populate[0]': 'poster',
+    'populate[1]': 'servers',
+    'populate[2]': 'categories',
+    'pagination[page]': String(page),
+    'pagination[pageSize]': String(pageSize),
+    'sort[0]': 'year:desc',
+    'sort[1]': 'rating:desc',
+    'sort[2]': 'id:desc',
+  };
+
+  const json = await fetchApi<StrapiListResponse<unknown>>('/movies', params, {
+    next: {
+      revalidate: 3600,
+      tags: ['movies', `actor:${actorSlug}`],
+    },
+  });
+
+  return {
+    data: normalizeMovieList(json),
+    hasMore: getHasMore(json, page, pageSize),
+  };
+}
+
+==> ./lib/api/query.ts <==
+// lib/api/query.ts
+
+import type { MovieFilters } from './config';
+
+export function parseStringArray(value: string | string[] | undefined): string[] {
+  if (!value) return [];
+
+  const values = Array.isArray(value) ? value : [value];
+
+  return values
+    .flatMap((item) => item.split(','))
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+export function parseNumber(value: string | string[] | undefined): number | undefined {
+  const first = Array.isArray(value) ? value[0] : value;
+
+  if (first === undefined || first === null || first === '') {
+    return undefined;
+  }
+
+  const parsed = Number(first);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+const MOVIE_SORT_PRESETS: Record<string, string[]> = {
+  latest: ['year:desc', 'rating:desc', 'id:desc'],
+  oldest: ['year:asc', 'rating:desc', 'id:desc'],
+  title: ['title:asc', 'year:desc', 'id:desc'],
+  'title-desc': ['title:desc', 'year:desc', 'id:desc'],
+  rating: ['rating:desc', 'year:desc', 'id:desc'],
+  'rating-asc': ['rating:asc', 'year:desc', 'id:desc'],
+};
+
+export function getMovieSortPreset(sort: string | string[] | undefined): string[] {
+  const key = Array.isArray(sort) ? sort[0] : sort;
+  return MOVIE_SORT_PRESETS[key ?? 'latest'] ?? MOVIE_SORT_PRESETS.latest;
+}
+
+export function clampYear(year: number) {
+  const currentYear = new Date().getFullYear();
+  return Math.min(Math.max(Math.floor(year), 1900), currentYear);
+}
+
+export function buildMovieListParams(
+  filters: MovieFilters,
+  page: number,
+  pageSize: number
+): Record<string, string> {
+  const params: Record<string, string> = {
+    'populate[0]': 'poster',
+    'populate[1]': 'servers',
+    'populate[2]': 'categories',
+    'pagination[page]': String(page),
+    'pagination[pageSize]': String(pageSize),
+  };
+
+  // Orden estable para paginación
+  const sortPreset = getMovieSortPreset(filters.sort);
+  sortPreset.forEach((sortValue, index) => {
+    params[`sort[${index}]`] = sortValue;
+  });
+
+  const genres = parseStringArray(filters.genres);
+  genres.forEach((genre, index) => {
+    params[`filters[categories][slug][$in][${index}]`] = genre;
+  });
+
+  const minRating = parseNumber(filters.minRating);
+  if (minRating !== undefined) {
+    const safeRating = Math.min(Math.max(minRating, 0), 10);
+    params['filters[rating][$gte]'] = String(safeRating);
+  }
+
+  let fromYear = parseNumber(filters.fromYear);
+  let toYear = parseNumber(filters.toYear);
+
+  if (fromYear !== undefined) fromYear = clampYear(fromYear);
+  if (toYear !== undefined) toYear = clampYear(toYear);
+
+  // Si el usuario pone rango invertido, lo corregimos
+  if (fromYear !== undefined && toYear !== undefined && fromYear > toYear) {
+    [fromYear, toYear] = [toYear, fromYear];
+  }
+
+  if (fromYear !== undefined) {
+    params['filters[year][$gte]'] = String(fromYear);
+  }
+
+  if (toYear !== undefined) {
+    params['filters[year][$lte]'] = String(toYear);
+  }
+
+  const country = Array.isArray(filters.country)
+    ? filters.country[0]
+    : filters.country;
+
+  // Filtro exacto para país
+  if (country && country.trim()) {
+    params['filters[country][$eq]'] = country.trim();
+  }
+
+  return params;
+}
+
+// ─── Palabras vacías que no aportan valor a la búsqueda ───
+const SEARCH_STOPWORDS = new Set([
+  'de', 'la', 'el', 'los', 'las', 'un', 'una', 'unos', 'unas',
+  'y', 'o', 'u', 'en', 'con', 'por', 'para', 'del', 'al', 'a',
+  'lo', 'le', 'se', 'su', 'the', 'of', 'and', 'in', 'on', 'for',
+  'to', 'an', 'pelicula', 'peliculas', 'movie', 'movies', 'film',
+]);
+
+/**
+ * Divide la query en palabras útiles para buscar.
+ * "películas de acción" → ["acción"]
+ * "tom cruise" → ["tom", "cruise"]
+ */
+export function splitSearchWords(query: string, maxWords = 4): string[] {
+  const rawWords = query.split(/\s+/).map(w => w.trim()).filter(w => w.length > 1);
+  const meaningful = rawWords.filter(w => !SEARCH_STOPWORDS.has(w.toLowerCase()));
+  const words = meaningful.length > 0 ? meaningful : rawWords;
+  return words.slice(0, maxWords);
+}
+==> ./lib/api/http.ts <==
+// lib/api/http.ts
+import { API_URL, type NextFetchRequestConfig, type StrapiListResponse } from './config';
+
+// Tiempo máximo de espera para Strapi (10 segundos)
+const FETCH_TIMEOUT_MS = 10_000;
+
+function cleanApiUrl(baseUrl: string) {
+  return baseUrl.replace(/\/$/, '');
+}
+
+function cleanEndpoint(endpoint: string) {
+  return endpoint.replace(/^\/+/, '');
+}
+
+export function buildApiUrl(
+  endpoint: string,
+  params: Record<string, string | string[] | undefined>
+) {
+  const base = cleanApiUrl(API_URL);
+  const path = cleanEndpoint(endpoint);
+  const url = new URL(`${base}/api/${path}`);
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === '') return;
+    if (Array.isArray(value)) {
+      value.forEach((item) => {
+        if (item) url.searchParams.append(key, item);
+      });
+    } else {
+      url.searchParams.set(key, value);
+    }
+  });
+  return url;
+}
+
+export async function fetchApi<TJson = unknown>(
+  endpoint: string,
+  params: Record<string, string | string[] | undefined> = {},
+  options: NextFetchRequestConfig = {}
+): Promise<TJson | null> {
+  const url = buildApiUrl(endpoint, params);
+  const headers = new Headers(options.headers);
+
+  if (options.body && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
+
+  // Timeout con AbortController
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+  try {
+    const res = await fetch(url.toString(), {
+      ...options,
+      headers,
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+
+    if (!res.ok) {
+      let errorBody = '';
+      try {
+        errorBody = await res.text();
+      } catch {
+        // Si no podemos leer el body, continuamos
+      }
+      console.error(`API Error [${res.status}]: ${url.toString()}`);
+      if (errorBody) {
+        console.error('Error details:', errorBody);
+      }
+      return null;
+    }
+
+    return (await res.json()) as TJson;
+  } catch (error) {
+    clearTimeout(timeout);
+
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      console.error(`Timeout: Strapi no respondió en ${FETCH_TIMEOUT_MS / 1000}s → ${url.toString()}`);
+    } else {
+      console.error(`Network Error fetching ${url.toString()}:`, error);
+    }
+    return null;
+  }
+}
+
+export function getHasMore(
+  json: StrapiListResponse<unknown> | null,
+  page: number,
+  pageSize: number
+): boolean {
+  if (!json) return false;
+  const pageCount = json.meta?.pagination?.pageCount;
+  if (typeof pageCount === 'number') {
+    return page < pageCount;
+  }
+  return Array.isArray(json.data) && json.data.length === pageSize;
+}
+==> ./lib/api/schemas.ts <==
+// lib/api/schemas.ts
+
+import { z } from 'zod';
+
+export const StrapiServerSchema = z.object({
+  id: z.number(),
+  documentId: z.string().nullish(),
+  name: z.string(),
+  url: z.string(),
+  language: z.string().nullish(),
+  quality: z.string().nullish(),
+  subtitles: z.boolean().nullish(),
+}).passthrough();
+
+export const StrapiCategorySchema = z.object({
+  id: z.number(),
+  documentId: z.string().nullish(),
+  name: z.string(),
+  slug: z.string().nullish(),
+  tmdb_id: z.number().nullish(),
+}).passthrough();
+
+export const StrapiPersonSchema = z.object({
+  id: z.number(),
+  documentId: z.string().nullish(),
+  name: z.string(),
+  slug: z.string().nullish(),           // ← NUEVO
+  profile_image_url: z.string().nullish(),
+  profile_image: z.unknown().nullish(),
+}).passthrough();
+
+export const StrapiMovieSchema = z.object({
+  id: z.number(),
+  documentId: z.string().nullish(),
+  title: z.string(),
+  english_title: z.string().nullish(),
+  spanish_title: z.string().nullish(),
+  slug: z.string().nullish(),
+  synopsis: z.string().nullish(),
+  year: z.number().nullish(),
+  rating: z.number().nullish(),
+  country: z.string().nullish(),
+  tmdb_id: z.number().nullish(),
+  imdb_id: z.string().nullish(),
+  views: z.number().nullish(),
+  is_featured: z.boolean().nullish(),
+  poster_url: z.string().nullish(),
+  backdrop_url: z.string().nullish(),
+  trailer_url: z.string().nullish(),
+  runtime: z.number().nullish(),
+  age_rating: z.string().nullish(),
+  original_language: z.string().nullish(),
+  release_date: z.string().nullish(),
+
+  // Relaciones / media
+  poster: z.unknown().nullish(),
+  backdrop: z.unknown().nullish(),
+  servers: z.unknown().nullish(),
+  categories: z.unknown().nullish(),
+  actors: z.unknown().nullish(),
+  directors: z.unknown().nullish(),
+}).passthrough();
+
+export const StrapiActorSchema = z.object({
+  id: z.number(),
+  documentId: z.string().nullish(),
+  name: z.string(),
+  slug: z.string().nullish(),
+  profile_image_url: z.string().nullish(),
+  profile_image: z.unknown().nullish(),
+}).passthrough();
+==> ./lib/api/categories.ts <==
+// lib/api/categories.ts
+
+import type { Category } from '@/types';
+import type { StrapiListResponse } from './config';
+import { fetchApi } from './http';
+import { normalizeCategory } from './normalizers';
+
+export async function fetchCategories(): Promise<Category[]> {
+  const params = {
+    'pagination[pageSize]': '100',
+    'sort[0]': 'name:asc',
+  };
+
+  const json = await fetchApi<StrapiListResponse<unknown>>('/categories', params, {
+    next: {
+      revalidate: 3600,
+      tags: ['categories'],
+    },
+  });
+
+  if (!json?.data || !Array.isArray(json.data)) return [];
+
+  return json.data
+    .map(normalizeCategory)
+    .filter((category): category is Category => category !== null);
+}
+==> ./lib/api/config.ts <==
+// lib/api/config.ts
+
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1337';
+
+export const DEFAULT_PAGE_SIZE = 24;
+export const HOME_PAGE_SIZE = 20;
+export const SEARCH_PAGE_SIZE = 24;
+export const CATEGORY_PAGE_SIZE = 24;
+
+export type NextFetchRequestConfig = RequestInit & {
+  next?: {
+    revalidate?: number | false;
+    tags?: string[];
+  };
+};
+
+export type StrapiPagination = {
+  page?: number;
+  pageSize?: number;
+  pageCount?: number;
+  total?: number;
+};
+
+export type StrapiListResponse<T> = {
+  data?: T[];
+  meta?: {
+    pagination?: StrapiPagination;
+  };
+};
+
+export type MovieFilters = Record<string, string | string[] | undefined>;
+
+export type PaginatedResult<T> = {
+  data: T[];
+  hasMore: boolean;
+  page: number;
+  pageSize: number;
+};
+==> ./lib/api/fuzzy.ts <==
+// lib/api/fuzzy.ts
+import { cache } from 'react';
+import { fetchApi } from './http';
+import type { StrapiListResponse } from './config';
+
+interface IndexEntry {
+  display: string;   // Texto original (para mostrar y re-buscar)
+  norm: string;      // Texto normalizado (sin tildes, minúsculas)
+  tokens: string[];  // Palabras del texto normalizado
+}
+
+/**
+ * Normaliza texto: quita tildes, minúsculas, símbolos.
+ * "Misión: Imposible" → "mision imposible"
+ */
+export function normalizeTerm(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Distancia de Levenshtein con límite (early-exit).
+ * Devuelve la distancia si es <= max, o max+1 si la supera.
+ */
+function levenshteinBounded(a: string, b: string, max: number): number {
+  const lenA = a.length;
+  const lenB = b.length;
+  if (Math.abs(lenA - lenB) > max) return max + 1;
+  if (lenA === 0) return lenB <= max ? lenB : max + 1;
+  if (lenB === 0) return lenA <= max ? lenA : max + 1;
+
+  let prev: number[] = Array.from({ length: lenB + 1 }, (_, j) => j);
+
+  for (let i = 1; i <= lenA; i++) {
+    const curr: number[] = [i];
+    let rowMin = i;
+    for (let j = 1; j <= lenB; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      const val = Math.min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + cost);
+      curr.push(val);
+      if (val < rowMin) rowMin = val;
+    }
+    if (rowMin > max) return max + 1;
+    prev = curr;
+  }
+
+  return prev[lenB] <= max ? prev[lenB] : max + 1;
+}
+
+/**
+ * Construye el índice de búsqueda: títulos de películas + nombres de actores.
+ * Usa proyección ligera (solo title/name) para no traer datos de más.
+ */
+async function buildSearchIndex(): Promise<IndexEntry[]> {
+  const entries: IndexEntry[] = [];
+  const seen = new Set<string>();
+
+  const addEntry = (display: string) => {
+    const norm = normalizeTerm(display);
+    if (!norm || seen.has(norm)) return;
+    seen.add(norm);
+    entries.push({ display, norm, tokens: norm.split(' ') });
+  };
+
+  // ─── Títulos de películas ───
+  let page = 1;
+  let pageCount = 1;
+  while (page <= pageCount && page <= 50) {
+    const json = await fetchApi<StrapiListResponse<Record<string, unknown>>>('/movies', {
+      'fields[0]': 'title',
+      'pagination[page]': String(page),
+      'pagination[pageSize]': '100',
+    }, { next: { revalidate: 3600, tags: ['search-index'] } });
+    if (!json?.data) break;
+    json.data.forEach((item) => {
+      if (typeof item?.title === 'string') addEntry(item.title);
+    });
+    pageCount = json.meta?.pagination?.pageCount ?? 1;
+    page++;
+  }
+
+  // ─── Nombres de actores ───
+  page = 1;
+  pageCount = 1;
+  while (page <= pageCount && page <= 50) {
+    const json = await fetchApi<StrapiListResponse<Record<string, unknown>>>('/actors', {
+      'fields[0]': 'name',
+      'pagination[page]': String(page),
+      'pagination[pageSize]': '100',
+    }, { next: { revalidate: 3600, tags: ['search-index'] } });
+    if (!json?.data) break;
+    json.data.forEach((item) => {
+      if (typeof item?.name === 'string') addEntry(item.name);
+    });
+    pageCount = json.meta?.pagination?.pageCount ?? 1;
+    page++;
+  }
+
+  return entries;
+}
+
+// Memoizado por request (React cache) + cache HTTP de 1h (revalidate)
+const getSearchIndex = cache(buildSearchIndex);
+
+/**
+ * Devuelve hasta `limit` sugerencias para una query mal escrita.
+ * Entiende: typos ("inseption"), tildes ("mision"), prefijos ("dicapr").
+ */
+export async function getSuggestions(query: string, limit = 3): Promise<string[]> {
+  const normQuery = normalizeTerm(query);
+  if (normQuery.length < 3) return [];
+
+  const index = await getSearchIndex();
+  const scored: { display: string; score: number }[] = [];
+
+  for (const entry of index) {
+    let best = Number.POSITIVE_INFINITY;
+
+    // 1) Coincidencia exacta o prefijo del nombre completo
+    if (entry.norm === normQuery) {
+      best = 0;
+    } else if (entry.norm.startsWith(normQuery)) {
+      best = 1;
+    } else {
+      // 2) Comparación palabra por palabra
+      for (const token of entry.tokens) {
+        if (token === normQuery) { best = 0; break; }
+
+        if (normQuery.length >= 4 && token.startsWith(normQuery)) {
+          if (best > 1) best = 1;
+          continue;
+        }
+
+        const maxDist = normQuery.length <= 5 ? 1 : 2;
+        if (Math.abs(token.length - normQuery.length) > maxDist) continue;
+
+        const d = levenshteinBounded(normQuery, token, maxDist);
+        if (d < best) best = d;
+        if (best === 0) break;
+      }
+
+      // 3) Para queries de varias palabras, comparar contra el nombre completo
+      if (best > 2 && normQuery.includes(' ')) {
+        const d = levenshteinBounded(normQuery, entry.norm, 2);
+        if (d < best) best = d;
+      }
+    }
+
+    if (best <= 2) scored.push({ display: entry.display, score: best });
+  }
+
+  scored.sort((a, b) => a.score - b.score || a.display.localeCompare(b.display));
+  return scored.slice(0, limit).map((s) => s.display);
+}
+==> ./lib/api/normalizers.ts <==
+// lib/api/normalizers.ts
+
+import type { Actor, Category, Director, Movie, Server } from '@/types';
+import {
+  StrapiActorSchema,
+  StrapiCategorySchema,
+  StrapiMovieSchema,
+  StrapiPersonSchema,
+  StrapiServerSchema,
+} from './schemas';
+import type { StrapiListResponse } from './config';
+import { API_URL } from './config';
+
+function cleanApiUrl(baseUrl: string) {
+  return baseUrl.replace(/\/$/, '');
+}
+
+function toAbsoluteUrl(path?: string | null): string | undefined {
+  if (!path) return undefined;
+
+  if (/^https?:\/\//i.test(path)) {
+    return path;
+  }
+
+  const base = cleanApiUrl(API_URL);
+  return `${base}${path.startsWith('/') ? '' : '/'}${path}`;
+}
+
+function isValidHttpUrl(value: string) {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Permite soportar tanto objetos directos como estructuras tipo Strapi:
+ * - { attributes: {...} }
+ * - { data: { attributes: {...} } }
+ */
+function unwrapStrapiItem(raw: unknown): unknown {
+  if (!raw || typeof raw !== 'object') return raw;
+
+  const obj = raw as Record<string, unknown>;
+
+  if ('attributes' in obj && obj.attributes !== undefined) {
+    return unwrapStrapiItem(obj.attributes);
+  }
+
+  if ('data' in obj && obj.data !== undefined && !Array.isArray(obj.data)) {
+    return unwrapStrapiItem(obj.data);
+  }
+
+  return raw;
+}
+
+/**
+ * Extrae arrays de relaciones aunque vengan como:
+ * - [...]
+ * - { data: [...] }
+ */
+function extractRelationArray(value: unknown): unknown[] {
+  if (!value) return [];
+
+  if (Array.isArray(value)) return value;
+
+  if (typeof value === 'object') {
+    const obj = value as Record<string, unknown>;
+    if (Array.isArray(obj.data)) return obj.data;
+  }
+
+  return [];
+}
+
+function slugify(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^[-]+|[-]+$/g, '');
+}
+
+/**
+ * Convierte media de Strapi en URL usable por Next/Image.
+ * Soporta:
+ * - string directo
+ * - { url }
+ * - { formats: { medium: { url }, ... } }
+ */
+function getMediaUrl(
+  media: unknown,
+  preferredFormat: 'thumbnail' | 'small' | 'medium' | 'large' = 'medium'
+): string | undefined {
+  const source = unwrapStrapiItem(media);
+
+  if (!source) return undefined;
+
+  if (typeof source === 'string') {
+    return toAbsoluteUrl(source);
+  }
+
+  if (typeof source === 'object') {
+    const obj = source as {
+      url?: string | null;
+      formats?: Record<string, { url?: string | null } | undefined>;
+    };
+
+    const formats = obj.formats || {};
+
+    const candidates = [
+      preferredFormat,
+      'large',
+      'medium',
+      'small',
+      'thumbnail',
+    ]
+      .map((formatKey) => formats[formatKey]?.url)
+      .filter(Boolean);
+
+    const selected = candidates[0] ?? obj.url;
+    return toAbsoluteUrl(selected ?? undefined);
+  }
+
+  return undefined;
+}
+
+export function normalizeServer(raw: unknown): Server | null {
+  const source = unwrapStrapiItem(raw);
+  const parsed = StrapiServerSchema.safeParse(source);
+
+  if (!parsed.success) return null;
+
+  const server = parsed.data;
+
+  if (!isValidHttpUrl(server.url)) {
+    return null;
+  }
+
+  return {
+    id: server.id,
+    name: server.name,
+    url: server.url,
+    language: server.language ?? undefined,
+    quality: server.quality ?? undefined,
+    subtitles: Boolean(server.subtitles),
+  };
+}
+
+export function normalizeCategory(raw: unknown): Category | null {
+  const source = unwrapStrapiItem(raw);
+  const parsed = StrapiCategorySchema.safeParse(source);
+
+  if (!parsed.success) return null;
+
+  const category = parsed.data;
+
+  return {
+    id: category.id,
+    name: category.name,
+    slug: category.slug || slugify(category.name),
+  };
+}
+
+export function normalizeMovie(raw: unknown): Movie | null {
+  const source = unwrapStrapiItem(raw);
+  const parsed = StrapiMovieSchema.safeParse(source);
+  if (!parsed.success) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('Invalid movie payload skipped:', parsed.error);
+    }
+    return null;
+  }
+  const movie = parsed.data;
+  const servers = extractRelationArray(movie.servers)
+    .map(normalizeServer)
+    .filter((item): item is Server => item !== null);
+  const categories = extractRelationArray(movie.categories)
+    .map(normalizeCategory)
+    .filter((item): item is Category => item !== null);
+  const actors = extractRelationArray(movie.actors)
+    .map(normalizePerson)
+    .filter((item): item is Actor => item !== null);
+  const directors = extractRelationArray(movie.directors)
+    .map(normalizePerson)
+    .filter((item): item is Director => item !== null);
+
+  const posterUrl = getMediaUrl(movie.poster, 'medium') ?? movie.poster_url ?? undefined;
+  const backdropUrl = getMediaUrl(movie.backdrop ?? movie.poster, 'large') ?? movie.backdrop_url ?? undefined;
+
+  // ═══ SLUG DE FALLBACK ═══
+  // Si Strapi no pudo generar un slug (títulos en escritura no latina),
+  // generamos uno usando el título transliterado o el tmdb_id como último recurso.
+  let slug = movie.slug ?? null;
+  if (!slug) {
+    const transliterated = slugify(movie.title);
+    if (transliterated && transliterated.length >= 3) {
+      slug = `${transliterated}-${movie.id}`;
+    } else {
+      slug = `tmdb-${movie.tmdb_id ?? movie.id}`;
+    }
+  }
+
+  return {
+    id: movie.id,
+    documentId: movie.documentId ?? String(movie.id),
+    title: movie.title,
+    english_title: movie.english_title ?? undefined,  // ← NUEVO
+    spanish_title: movie.spanish_title ?? undefined,
+    slug,  // ← usamos el slug garantizado
+    synopsis: movie.synopsis ?? '',
+    year: movie.year ?? 0,
+    rating: movie.rating ?? 0,
+    country: movie.country ?? '',
+    tmdb_id: movie.tmdb_id ?? 0,
+    views: movie.views ?? undefined,
+    featured_this_week: movie.is_featured ?? undefined,
+    poster_url: posterUrl,
+    backdrop_url: backdropUrl,
+    trailer_url: movie.trailer_url ?? undefined,
+    runtime: movie.runtime ?? undefined,
+    age_rating: movie.age_rating ?? undefined,
+    original_language: movie.original_language ?? undefined,
+    servers,
+    categories,
+    actors,
+    directors,
+  };
+}
+
+export function normalizeMovieList(json: StrapiListResponse<unknown> | null): Movie[] {
+  if (!json?.data || !Array.isArray(json.data)) return [];
+
+  return json.data
+    .map(normalizeMovie)
+    .filter((movie): movie is Movie => movie !== null);
+}
+
+export function normalizeActor(raw: unknown): Actor | null {
+  const source = unwrapStrapiItem(raw);
+  const parsed = StrapiActorSchema.safeParse(source);
+  if (!parsed.success) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('Invalid actor payload skipped:', parsed.error);
+    }
+    return null;
+  }
+  const actor = parsed.data;
+  return {
+    id: actor.id,
+    documentId: actor.documentId ?? String(actor.id),
+    name: actor.name,
+    slug: actor.slug || slugify(actor.name),
+    profile_image_url: getMediaUrl(
+      actor.profile_image ?? actor.profile_image_url,
+      'thumbnail'
+    ),
+  };
+}
+
+// Mantener normalizePerson para directores y otros usos genéricos
+export function normalizePerson(raw: unknown): Actor | Director | null {
+  const source = unwrapStrapiItem(raw);
+  const parsed = StrapiPersonSchema.safeParse(source);
+  if (!parsed.success) return null;
+  const person = parsed.data;
+
+  return {
+    id: person.id,
+    documentId: person.documentId ?? String(person.id),
+    name: person.name,
+    slug: person.slug || slugify(person.name),  // ← NUEVO: agregar slug
+    profile_image_url: getMediaUrl(
+      person.profile_image ?? person.profile_image_url,
+      'thumbnail'
+    ),
+  };
+}
+==> ./lib/api/movies.ts <==
+// lib/api/movies.ts
+
+import type { Movie } from '@/types';
+import {
+  DEFAULT_PAGE_SIZE,
+  HOME_PAGE_SIZE,
+  SEARCH_PAGE_SIZE,
+  CATEGORY_PAGE_SIZE,
+  type MovieFilters,
+  type PaginatedResult,
+  type StrapiListResponse,
+} from './config';
+import { fetchApi, getHasMore } from './http';
+import { normalizeMovie, normalizeMovieList } from './normalizers';
+import { buildMovieListParams} from './query';
+
+
+export async function fetchMoviesWithFilters(
+  queryParams: MovieFilters = {},
+  page = 1,
+  pageSize = DEFAULT_PAGE_SIZE
+): Promise<PaginatedResult<Movie>> {
+  const safePage = Math.max(1, Math.floor(Number(page) || 1));
+  const safePageSize = Math.max(
+    1,
+    Math.floor(Number(pageSize) || DEFAULT_PAGE_SIZE)
+  );
+
+  const params = buildMovieListParams(queryParams, safePage, safePageSize);
+
+  const json = await fetchApi<StrapiListResponse<unknown>>('/movies', params, {
+    next: {
+      revalidate: 60,
+      tags: ['movies', 'movies:list'],
+    },
+  });
+
+  return {
+    data: normalizeMovieList(json),
+    hasMore: getHasMore(json, safePage, safePageSize),
+    page: safePage,
+    pageSize: safePageSize,
+  };
+}
+
+export async function fetchMovies(): Promise<Movie[]> {
+  const params = buildMovieListParams({ sort: 'latest' }, 1, HOME_PAGE_SIZE);
+
+  const json = await fetchApi<StrapiListResponse<unknown>>('/movies', params, {
+    next: {
+      revalidate: 3600,
+      tags: ['movies', 'movies:home'],
+    },
+  });
+
+  return normalizeMovieList(json);
+}
+
+export const fetchHomeMovies = fetchMovies;
+
+export async function fetchMovieBySlug(slug: string): Promise<Movie | null> {
+  if (!slug) return null;
+
+  const params = {
+    'filters[slug][$eq]': slug,
+    'populate[0]': 'poster',
+    'populate[1]': 'servers',
+    'populate[2]': 'categories',
+    'populate[3]': 'actors',
+    'populate[4]': 'directors',
+    'pagination[pageSize]': '1',
+  };
+
+  const json = await fetchApi<StrapiListResponse<unknown>>('/movies', params, {
+    next: {
+      revalidate: 3600,
+      tags: ['movies', `movie:${slug}`],
+    },
+  });
+
+  const firstItem = Array.isArray(json?.data) ? json.data[0] : undefined;
+  if (!firstItem) return null;
+
+  return normalizeMovie(firstItem);
+}
+
+// ═══════════════════════════════════════════════════════════
+// BÚSQUEDA POR RELEVANCIA
+// ═══════════════════════════════════════════════════════════
+
+type SearchSource = 'title' | 'actor' | 'director' | 'category';
+
+const SEARCH_POPULATE: Record<string, string> = {
+  'populate[0]': 'poster',
+  'populate[1]': 'servers',
+  'populate[2]': 'categories',
+  'populate[3]': 'actors',
+  'populate[4]': 'directors',
+};
+
+function normalizeSearchTerm(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .trim();
+}
+
+async function runMovieSearch(
+  params: Record<string, string>,
+  limit: number
+): Promise<Movie[]> {
+  const json = await fetchApi<StrapiListResponse<unknown>>('/movies', {
+    ...SEARCH_POPULATE,
+    'pagination[page]': '1',
+    'pagination[pageSize]': String(limit),
+    ...params,
+  }, { cache: 'no-store' });
+  return normalizeMovieList(json);
+}
+
+async function searchMoviesByTitle(query: string, limit: number): Promise<Movie[]> {
+  // Intento 1: buscar en title + english_title + spanish_title
+  let json = await fetchApi<StrapiListResponse<unknown>>('/movies', {
+    ...SEARCH_POPULATE,
+    'pagination[page]': '1',
+    'pagination[pageSize]': String(limit),
+    'filters[$or][0][title][$containsi]': query,
+    'filters[$or][1][english_title][$containsi]': query,
+    'filters[$or][2][spanish_title][$containsi]': query,
+  }, { cache: 'no-store' });
+
+  if (json !== null) return normalizeMovieList(json);
+
+  // Fallback: solo title (por si english_title/spanish_title no existen en Strapi)
+  json = await fetchApi<StrapiListResponse<unknown>>('/movies', {
+    ...SEARCH_POPULATE,
+    'pagination[page]': '1',
+    'pagination[pageSize]': String(limit),
+    'filters[title][$containsi]': query,
+  }, { cache: 'no-store' });
+
+  return normalizeMovieList(json);
+}
+
+async function searchMoviesByActorName(query: string, limit: number): Promise<Movie[]> {
+  return runMovieSearch({ 'filters[actors][name][$containsi]': query }, limit);
+}
+
+async function searchMoviesByDirectorName(query: string, limit: number): Promise<Movie[]> {
+  return runMovieSearch({ 'filters[directors][name][$containsi]': query }, limit);
+}
+
+async function searchMoviesByCategoryName(query: string, limit: number): Promise<Movie[]> {
+  return runMovieSearch({ 'filters[categories][name][$containsi]': query }, limit);
+}
+
+function computeSearchScore(movie: Movie, normQuery: string, source: SearchSource): number {
+  const SOURCE_BASE: Record<SearchSource, number> = {
+    title: 70,      // ← título siempre gana
+    actor: 45,
+    director: 40,
+    category: 35,
+  };
+
+  let score = SOURCE_BASE[source];
+
+  if (source === 'title') {
+    const candidates = [movie.title, movie.english_title, movie.spanish_title]
+      .filter((t): t is string => Boolean(t && typeof t === 'string'));
+
+    let best = 0;
+    for (const raw of candidates) {
+      const nt = normalizeSearchTerm(raw);
+      if (nt === normQuery) best = Math.max(best, 30);           // coincidencia exacta
+      else if (nt.startsWith(normQuery)) best = Math.max(best, 20); // empieza con
+      else if (nt.includes(normQuery)) best = Math.max(best, 10);   // contiene
+      else {
+        // coincidencia parcial por palabras
+        const qWords = normQuery.split(' ').filter(w => w.length > 1);
+        const tWords = nt.split(' ');
+        const matched = qWords.filter(qw => tWords.some(tw => tw.includes(qw)));
+        if (matched.length > 0) best = Math.max(best, 5 + matched.length * 2);
+      }
+    }
+    score += best;
+  } else if (source === 'actor') {
+    const exact = (movie.actors || []).some(a => normalizeSearchTerm(a.name) === normQuery);
+    if (exact) score += 10;
+  } else if (source === 'director') {
+    const exact = (movie.directors || []).some(d => normalizeSearchTerm(d.name) === normQuery);
+    if (exact) score += 10;
+  } else if (source === 'category') {
+    const exact = (movie.categories || []).some(c => normalizeSearchTerm(c.name) === normQuery);
+    if (exact) score += 10;
+  }
+
+  return score;
+}
+
+export async function searchMovies(
+  query: string,
+  page = 1,
+  pageSize = SEARCH_PAGE_SIZE
+): Promise<PaginatedResult<Movie>> {
+  const safeQuery = query.trim();
+  const safePage = Math.max(1, Math.floor(Number(page) || 1));
+  const safePageSize = Math.max(1, Math.floor(Number(pageSize) || SEARCH_PAGE_SIZE));
+
+  if (!safeQuery) {
+    return { data: [], hasMore: false, page: safePage, pageSize: safePageSize };
+  }
+
+  const normQuery = normalizeSearchTerm(safeQuery);
+
+  // Límites por sub-búsqueda (ajustables)
+  const titleLimit = Math.min(Math.max(safePageSize * 4, 80), 200);
+  const otherLimit = Math.min(Math.max(safePageSize * 2, 40), 100);
+
+  // ─── 4 búsquedas en paralelo, cada una con su fuente ───
+  const [titleMovies, actorMovies, directorMovies, categoryMovies] = await Promise.all([
+    searchMoviesByTitle(safeQuery, titleLimit),
+    searchMoviesByActorName(safeQuery, otherLimit),
+    searchMoviesByDirectorName(safeQuery, otherLimit),
+    searchMoviesByCategoryName(safeQuery, otherLimit),
+  ]);
+
+  // ─── Merge + scoring + dedup por documentId ───
+  const mergedMap = new Map<string, { movie: Movie; score: number }>();
+
+  const addResults = (movies: Movie[], source: SearchSource) => {
+    for (const movie of movies) {
+      const key = movie.documentId || String(movie.id);
+      const score = computeSearchScore(movie, normQuery, source);
+      const existing = mergedMap.get(key);
+      // Nos quedamos con el score más alto si la película aparece en varias fuentes
+      if (!existing || score > existing.score) {
+        mergedMap.set(key, { movie, score });
+      }
+    }
+  };
+
+  addResults(titleMovies, 'title');
+  addResults(actorMovies, 'actor');
+  addResults(directorMovies, 'director');
+  addResults(categoryMovies, 'category');
+
+  // ─── Ordenar por relevancia ───
+  const sorted = Array.from(mergedMap.values()).sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    const ra = a.movie.rating ?? 0;
+    const rb = b.movie.rating ?? 0;
+    if (rb !== ra) return rb - ra;
+    const ya = a.movie.year ?? 0;
+    const yb = b.movie.year ?? 0;
+    if (yb !== ya) return yb - ya;
+    return a.movie.title.localeCompare(b.movie.title);
+  });
+
+  // ─── Paginar ───
+  const start = (safePage - 1) * safePageSize;
+  const paged = sorted.slice(start, start + safePageSize).map(entry => entry.movie);
+  const hasMore = start + safePageSize < sorted.length;
+
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`[searchMovies] "${safeQuery}" → ${sorted.length} resultados relevantes`);
+  }
+
+  return { data: paged, hasMore, page: safePage, pageSize: safePageSize };
+}
+
+export async function fetchMoviesByCategory(
+  slug: string,
+  page = 1,
+  pageSize = CATEGORY_PAGE_SIZE
+): Promise<Movie[]> {
+  const { data } = await fetchMoviesWithFilters(
+    { genres: slug },
+    page,
+    pageSize
+  );
+
+  return data;
+}
+==> ./lib/api/index.ts <==
+// lib/api/index.ts
+
+export * from './movies';
+export * from './categories';
+export * from './countries';
+export * from './actors';
+export * from './cached';
+export type { MovieFilters, PaginatedResult } from './config';
+==> ./lib/api/cached.ts <==
+import { cache } from 'react';
+import { fetchMovies, fetchMovieBySlug } from './movies';
+import { fetchCategories } from './categories';
+import { fetchCountries } from './countries';
+import { fetchActorBySlug } from './actors';   // ← NUEVO
+
+export const getHomeMovies = cache(fetchMovies);
+export const getMovieBySlug = cache(fetchMovieBySlug);
+export const getCategories = cache(fetchCategories);
+export const getCountries = cache(fetchCountries);
+export const getActorBySlug = cache(fetchActorBySlug);  // ← NUEVO
+==> ./lib/config/videoProviders.ts <==
+
+==> ./lib/utils/format.ts <==
+// lib/utils/format.ts
+export function formatRuntime(minutes?: number | null): string | null {
+  if (!minutes || minutes <= 0) return null;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
+==> ./lib/client/movies.ts <==
+// lib/client/movies.ts
+
+import type { Movie } from '@/types';
+import type { MovieFilters, PaginatedResult } from '@/lib/api';
+
+/**
+ * Cliente ligero para componentes cliente.
+ * Llama al BFF en lugar de directamente a Strapi.
+ */
+export async function fetchMoviesFromApi(
+  filters: MovieFilters,
+  page: number = 1,
+  pageSize: number = 24
+): Promise<PaginatedResult<Movie>> {
+  try {
+    const params = new URLSearchParams();
+    
+    // Agregar filtros
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value === undefined || value === null || value === '') return;
+      
+      if (Array.isArray(value)) {
+        value.forEach(v => params.append(key, v));
+      } else {
+        params.set(key, value);
+      }
+    });
+    
+    // Agregar paginación
+    params.set('page', String(page));
+    params.set('pageSize', String(pageSize));
+
+    const response = await fetch(`/api/movies?${params.toString()}`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching movies from API:', error);
+    return {
+      data: [],
+      hasMore: false,
+      page,
+      pageSize,
+    };
+  }
+}
+==> ./types/index.ts <==
+// types/index.ts
+
+export interface Server {
+  id: number | string;
+  name: string;
+  url: string;
+  language?: string;
+  quality?: string;
+  subtitles?: boolean;
+}
+
+export interface Category {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+export interface Actor {
+  id: number;
+  documentId: string;
+  name: string;
+  slug: string;
+  profile_image_url?: string;
+}
+
+export interface Director {
+  id: number;
+  documentId: string;
+  name: string;
+  slug: string;
+  profile_image_url?: string;
+}
+
+export interface Movie {
+  id: number;
+  documentId: string;
+  title: string;
+  english_title: string;
+  spanish_title: string;
+  slug: string;
+  synopsis: string;
+  year: number;
+  rating: number;
+  country: string;
+  tmdb_id: number;
+  views?: number;
+  featured_this_week?: boolean;
+  poster_url?: string;
+  backdrop_url?: string;
+  trailer_url?: string;
+  runtime?: number;
+  age_rating?: string;
+  original_language?: string;
+  servers?: Server[];
+  categories?: Category[];
+  actors?: Actor[];
+  directors?: Director[];
+}
+
+// Re-exportar tipos de API
+export type { MovieFilters, PaginatedResult } from '@/lib/api';
+==> ./README.md <==
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+## Getting Started
+
+First, run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+==> ./app/api/movies/route.ts <==
+// app/api/movies/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { fetchMoviesWithFilters } from '@/lib/api';
+
+export async function GET(request: NextRequest) {
+  try {
+    const searchParams = request.nextUrl.searchParams;
+    const genres = searchParams.getAll('genres');
+
+    const filters = {
+      genres: genres.length ? genres : undefined,
+      minRating: searchParams.get('minRating') ?? undefined,
+      fromYear: searchParams.get('fromYear') ?? undefined,
+      toYear: searchParams.get('toYear') ?? undefined,
+      country: searchParams.get('country') ?? undefined,
+      sort: searchParams.get('sort') ?? undefined,
+    };
+
+    // Validar y limitar parámetros de paginación
+    const page = Math.max(1, Math.min(Number(searchParams.get('page')) || 1, 1000));
+    const pageSize = Math.max(1, Math.min(Number(searchParams.get('pageSize')) || 24, 100));  // ← LÍMITE MÁXIMO
+
+    const result = await fetchMoviesWithFilters(filters, page, pageSize);
+
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error('Error in /api/movies:', error);
+    return NextResponse.json(
+      { data: [], hasMore: false, page: 1, pageSize: 24 },
+      { status: 500 }
+    );
+  }
+}
+==> ./app/movie/[slug]/page.tsx <==
+import { getMovieBySlug } from '@/lib/api';
+import Image from 'next/image';
+import VideoPlayer from '@/components/VideoPlayer';
+import TrailerButton from '@/components/TrailerButton';
+import WatchButton from '@/components/WatchButton';
+import AdBanner from '@/components/AdBanner';
+import BackButton from '@/components/BackButton';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { IconImagePlaceholder, IconStar, IconUserPlaceholder } from '@/components/icons';
+import { formatRuntime } from '@/lib/utils/format';
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = await params;
+    const movie = await getMovieBySlug(slug);
+    if (!movie) return { title: "Película no encontrada" };
+
+    const description = movie.synopsis && movie.synopsis.trim()
+        ? `${movie.synopsis.slice(0, 150)}...`
+        : `Descubre ${movie.title} (${movie.year}) en CineStream. Película disponible en HD con múltiples servidores.`;
+
+    return {
+        title: `${movie.title} (${movie.year}) | CineStream`,
+        description,
+        openGraph: {
+            title: `${movie.title} (${movie.year})`,
+            description,
+            images: movie.poster_url ? [movie.poster_url] : [],
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: `${movie.title} (${movie.year})`,
+            description,
+            images: movie.poster_url ? [movie.poster_url] : [],
+        },
+    };
+}
+
+export default async function MovieDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = await params;
+    const movie = await getMovieBySlug(slug);
+    if (!movie) notFound();
+
+    const servers = movie.servers || [];
+    const directors = movie.directors || [];
+    const actors = movie.actors || [];
+
+    const runtime = formatRuntime(movie.runtime);
+    const backdropImage = movie.backdrop_url || movie.poster_url;
+
+    // ═══════════════════════════════════════════════════════════
+    // JSON-LD Structured Data para Google Rich Results
+    // ═══════════════════════════════════════════════════════════
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://tudominio.com';
+
+
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'Movie',
+        name: movie.title,
+        description: movie.synopsis || undefined,
+        datePublished: movie.year || (movie.year ? `${movie.year}-01-01` : undefined),
+        duration: movie.runtime ? `PT${movie.runtime}M` : undefined,
+        countryOfOrigin: movie.country || undefined,
+        contentRating: movie.age_rating || undefined,
+        inLanguage: movie.original_language || undefined,
+        image: movie.poster_url || undefined,
+        url: `${baseUrl}/movie/${movie.slug}`,
+        actor: actors.length > 0 ? actors.map(actor => ({
+            '@type': 'Person',
+            name: actor.name,
+            url: `${baseUrl}/actor/${actor.slug}`,
+        })) : undefined,
+        director: directors.length > 0 ? directors.map(director => ({
+            '@type': 'Person',
+            name: director.name,
+        })) : undefined,
+        aggregateRating: movie.rating > 0 ? {
+            '@type': 'AggregateRating',
+            ratingValue: movie.rating,
+            bestRating: 10,
+            worstRating: 0,
+            ratingCount: Math.max(1, Math.round(movie.rating * 100)),
+        } : undefined,
+    };
+
+    const jsonLdString = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
+
+    return (
+        <main className="min-h-screen">
+            {/* ═══ JSON-LD Script ═══ */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: jsonLdString }}
+            />
+
+            {/* ═══════════════════════════════════════════════════════════
+      HERO — Full width para máximo impacto cinematográfico
+      ════════════════════════════════════════════════════════════ */}
+            <div className="relative overflow-hidden">
+                {/* Backdrop con blur sutil */}
+                <div className="absolute inset-0">
+                    {backdropImage && (
+                        <Image
+                            src={backdropImage}
+                            alt=""
+                            fill
+                            className="object-cover object-top blur-[2px] scale-[1.02]"
+                            priority
+                            quality={80}
+                        />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/60 to-gray-950/30" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-gray-950/80 via-gray-950/30 to-transparent" />
+                </div>
+
+                {/* Contenido del hero */}
+                <div className="relative z-10 max-w-6xl mx-auto px-4 md:px-8 pt-10 pb-12">
+                    <BackButton />
+
+                    <div className="flex flex-col md:flex-row gap-8 mt-8">
+                        {/* Póster */}
+                        <div className="w-40 md:w-48 flex-shrink-0 mx-auto md:mx-0">
+                            <div className="relative aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl shadow-black/50 border border-white/10">
+                                {movie.poster_url ? (
+                                    <Image
+                                        src={movie.poster_url}
+                                        alt={`Póster de ${movie.title}`}
+                                        fill
+                                        sizes="(max-width: 768px) 160px, 192px"
+                                        className="object-cover"
+                                        priority
+                                    />
+                                ) : (
+                                    <div className="w-full h-full bg-white/5 flex items-center justify-center">
+                                        <IconImagePlaceholder className="w-12 h-12 text-gray-600" />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Info */}
+                        <div className="flex-1 min-w-0 flex flex-col justify-end">
+                            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
+                                {movie.title}
+                                <span className="text-gray-400 font-light text-xl md:text-2xl lg:text-3xl ml-3">
+                                    ({movie.year})
+                                </span>
+                            </h1>
+
+                            {/* Badges */}
+                            <div className="flex flex-wrap items-center gap-3 mt-4">
+                                {movie.rating > 0 && (
+                                    <div className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-full">
+                                        <IconStar className="w-4 h-4 text-amber-400" />
+                                        <span className="text-sm font-bold text-amber-400">{movie.rating.toFixed(1)}</span>
+                                    </div>
+                                )}
+                                {movie.age_rating && (
+                                    <span className="border border-white/20 text-gray-300 px-3 py-1.5 rounded-full text-sm font-medium">
+                                        {movie.age_rating}
+                                    </span>
+                                )}
+                                {runtime && (
+                                    <span className="text-gray-300 text-sm">{runtime}</span>
+                                )}
+                                {movie.original_language && (
+                                    <span className="text-gray-400 text-sm uppercase">{movie.original_language}</span>
+                                )}
+                            </div>
+
+                            {/* Categorías */}
+                            {movie.categories && movie.categories.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mt-4">
+                                    {movie.categories.map((cat) => (
+                                        <Link
+                                            key={cat.id}
+                                            href={`/movies?genres=${cat.slug}`}
+                                            className="text-xs font-medium bg-white/10 border border-white/10 text-gray-300 hover:text-white hover:bg-white/20 px-3 py-1.5 rounded-full transition-all duration-150"
+                                        >
+                                            {cat.name}
+                                        </Link>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* CTA: WatchButton (primario) + TrailerButton (secundario) */}
+                            <div className="mt-6 flex flex-wrap items-center gap-3">
+                                <WatchButton />
+                                <TrailerButton trailerUrl={movie.trailer_url || ''} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* ═══════════════════════════════════════════════════════════
+          CUERPO — Sin banners laterales
+      ═══════════════════════════════════════════════════════════ */}
+            <div className="max-w-6xl mx-auto px-4 md:px-8 py-10">
+
+                {/* Sinopsis + Info lateral */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-12">
+                    {/* Sinopsis (2 columnas) */}
+                    <div className="lg:col-span-2">
+                        <h2 className="text-lg font-semibold text-white mb-3">Sinopsis</h2>
+                        <p className="text-gray-300 leading-relaxed text-sm md:text-base">
+                            {movie.synopsis || "No hay sinopsis disponible para este título."}
+                        </p>
+                    </div>
+
+                    {/* Info lateral (1 columna) */}
+                    <div className="space-y-5">
+                        {directors.length > 0 && (
+                            <div>
+                                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Director</h3>
+                                <p className="text-sm text-gray-300">{directors.map(d => d.name).join(', ')}</p>
+                            </div>
+                        )}
+
+                        {movie.country && (
+                            <div>
+                                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">País</h3>
+                                <p className="text-sm text-gray-300">{movie.country}</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Reparto */}
+                {actors.length > 0 && (
+                    <div className="mb-12">
+                        <h2 className="text-lg font-semibold text-white mb-4">Reparto Principal</h2>
+                        <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
+                            {actors.map((actor) => (
+                                <Link
+                                    key={actor.documentId}
+                                    href={`/actor/${actor.slug}`}
+                                    className="flex-shrink-0 w-24 text-center group"
+                                    title={`Ver películas de ${actor.name}`}
+                                >
+                                    <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-red-500/50 transition-all duration-300 mb-2 mx-auto">
+                                        {actor.profile_image_url ? (
+                                            <Image
+                                                src={actor.profile_image_url}
+                                                alt={actor.name}
+                                                fill
+                                                sizes="96px"
+                                                className="object-cover"
+                                            />
+                                        ) : (
+                                            <IconUserPlaceholder className="w-8 h-8 text-gray-500" />
+                                        )}
+                                    </div>
+                                    <p className="text-xs text-gray-300 font-medium leading-tight group-hover:text-white transition-colors">
+                                        {actor.name}
+                                    </p>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* ─── Línea separadora + Reproductor ─── */}
+                <div id="watch" className="scroll-mt-20 pt-10 border-t border-white/5 mb-10">
+                    <h2 className="text-lg font-semibold text-white mb-4">Ver Película</h2>
+                    <VideoPlayer servers={servers} tmdbId={movie.tmdb_id} movieSlug={movie.slug} />
+                </div>
+
+                {/* Ad horizontal */}
+                <AdBanner format="horizontal" />
+            </div>
+        </main>
+    );
+}
+==> ./app/error.tsx <==
+'use client';
+
+import { useEffect } from 'react';
+import { IconWarning } from '@/components/icons';
+
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  useEffect(() => {
+    // Aquí podrías enviar el error a un servicio como Sentry
+    console.error('Application error:', error);
+  }, [error]);
+
+  return (
+    <main className="min-h-screen flex items-center justify-center bg-gray-900 text-white px-4">
+      <div className="text-center max-w-md">
+        <div className="w-20 h-20 mx-auto mb-6 bg-red-600/10 rounded-full flex items-center justify-center">
+          <IconWarning />
+        </div>
+        <h2 className="text-3xl font-bold mb-3">Algo salió mal</h2>
+        <p className="text-gray-400 mb-8">
+          Ocurrió un error inesperado. Por favor, intenta nuevamente.
+        </p>
+        <button
+          onClick={reset}
+          className="bg-red-600 hover:bg-red-700 text-white font-medium px-6 py-3 rounded-lg transition-colors"
+        >
+          Intentar de nuevo
+        </button>
+      </div>
+    </main>
+  );
+}
+==> ./app/movies/page.tsx <==
+import { fetchMoviesWithFilters, getCategories, getCountries } from '@/lib/api';
+import FilterMenu from '@/components/FilterMenu';
+import MovieGrid from '@/components/MovieGrid';
+import Link from 'next/link';
+import { Suspense } from 'react';
+import { IconSearch, IconRefresh } from '@/components/icons';
+
+export default async function MoviesPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+
+  const [initialData, categories, countries] = await Promise.all([
+    fetchMoviesWithFilters(params, 1),
+    getCategories(),
+    getCountries(),
+  ]);
+
+  return (
+    <main className="min-h-screen px-4 md:px-8 pb-12 pt-6">
+      <div className="flex gap-8 max-w-[1800px] mx-auto">
+        {/* ─── Columna Izquierda: Contenido Principal ─── */}
+        <div className="flex-1 min-w-0">
+          {/* Encabezado con mejor jerarquía tipográfica */}
+          <div className="mb-6">
+            <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
+              Catálogo de Películas
+            </h1>
+            <p className="text-sm text-gray-400 mt-1">
+              Explora {initialData.data.length > 0 ? 'nuestra colección' : 'el catálogo'} — filtra por género, año, puntuación y más.
+            </p>
+          </div>
+
+          <Suspense fallback={<FilterMenuSkeleton />}>
+            <FilterMenu categories={categories} countries={countries} />
+          </Suspense>
+
+          {initialData.data.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-24 text-center">
+              <div className="w-16 h-16 mb-4 rounded-full bg-white/5 flex items-center justify-center">
+                <IconSearch className="w-8 h-8 text-gray-500" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-200 mb-1">Sin resultados</h3>
+              <p className="text-sm text-gray-400 mb-6 max-w-sm">
+                No encontramos películas con los filtros seleccionados. Intenta con otros criterios.
+              </p>
+              <Link
+                href="/movies"
+                className="inline-flex items-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10 text-gray-300 hover:text-white px-4 py-2 rounded-full text-sm font-medium transition-all"
+              >
+                <IconRefresh />
+                Limpiar filtros
+              </Link>
+            </div>
+          ) : (
+            <MovieGrid
+              initialMovies={initialData.data}
+              initialHasMore={initialData.hasMore}
+              filters={params}
+            />
+          )}
+        </div>
+
+        {/* ─── Columna Derecha: Publicidad Rascacielos ─── */}
+        <aside className="hidden xl:block w-64 flex-shrink-0">
+          <div className="sticky top-24 h-[calc(100vh-8rem)]">
+            <div className="w-full h-full bg-white/[0.02] border border-white/5 rounded-2xl flex flex-col items-center justify-center gap-3 p-6">
+              <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+                <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 010 3.46" />
+                </svg>
+              </div>
+              <p className="text-xs text-gray-500 text-center leading-relaxed">
+                Espacio<br />Publicitario
+              </p>
+              <p className="text-[10px] text-gray-600 font-mono">160 × 600</p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </main>
+  );
+}
+
+function FilterMenuSkeleton() {
+  return (
+    <div className="bg-gray-950/80 backdrop-blur-xl border border-white/5 rounded-2xl p-5 mb-4 animate-pulse">
+      <div className="flex gap-3">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="h-10 w-32 bg-white/5 rounded-full"></div>
+        ))}
+      </div>
+    </div>
+  );
+}
+==> ./app/movies/loading.tsx <==
+export default function MoviesLoading() {
+  return (
+    <main className="min-h-screen p-4 md:p-8 pt-24">
+      <div className="flex gap-8 max-w-[1800px] mx-auto">
+        <div className="flex-1 min-w-0">
+          <div className="h-10 w-80 bg-gray-800 rounded mb-6 animate-pulse"></div>
+          <div className="h-32 bg-gray-900/50 rounded-xl mb-8 animate-pulse"></div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+            {Array.from({ length: 24 }).map((_, i) => (
+              <div key={i} className="animate-pulse">
+                <div className="bg-gray-800 rounded-lg h-64 mb-2"></div>
+                <div className="h-4 bg-gray-800 rounded w-3/4 mb-1"></div>
+                <div className="h-3 bg-gray-800 rounded w-1/2"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <aside className="hidden xl:block w-64 flex-shrink-0">
+          <div className="sticky top-24 h-[calc(100vh-8rem)] bg-gray-800/30 border border-dashed border-gray-700 rounded-lg animate-pulse"></div>
+        </aside>
+      </div>
+    </main>
+  );
+}
+
+==> ./app/layout.tsx <==
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import Header from '@/components/Header';
+import ScrollToTop from '@/components/ScrollToTop';
+
+const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  ),
+  title: "CineStream | Películas y Series en HD",
+  description:
+    "Disfruta de las mejores películas y series en streaming. Latino, Castellano y Subtitulado en alta calidad.",
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="es">
+      <body suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} bg-gray-900 text-white antialiased`}>
+        <ScrollToTop />
+        <Header />
+        <main className="pt-16 min-h-screen">
+          {children}
+        </main>
+      </body>
+    </html>
+  );
+}
+==> ./app/actor/[slug]/page.tsx <==
+import { getActorBySlug } from '@/lib/api';
+import { fetchMoviesByActor } from '@/lib/api';
+import MovieCard from '@/components/MovieCard';
+import BackButton from '@/components/BackButton';
+import Image from 'next/image';
+import { notFound } from 'next/navigation';
+import { IconUserPlaceholder } from '@/components/icons';
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = await params;
+    const actor = await getActorBySlug(slug);
+
+    if (!actor) return { title: "Actor no encontrado" };
+
+    return {
+        title: `${actor.name} | CineStream`,
+        description: `Descubre todas las películas de ${actor.name} en CineStream. Filmografía completa en HD.`,
+        openGraph: {
+            title: `${actor.name} | CineStream`,
+            description: `Descubre todas las películas de ${actor.name} en CineStream.`,
+            images: actor.profile_image_url ? [actor.profile_image_url] : [],
+        },
+    };
+}
+
+export default async function ActorPage({ params }: { params: Promise<{ slug: string }> }) {
+    const resolvedParams = await params;
+    const slug = resolvedParams?.slug;
+
+    // Si el slug no es válido, devolver 404 inmediatamente
+    if (!slug || slug === 'undefined' || slug === 'null') {
+        notFound();
+    }
+
+    // Obtenemos actor y filmografía en paralelo
+    const [actor, moviesData] = await Promise.all([
+        getActorBySlug(slug),
+        fetchMoviesByActor(slug),
+    ]);
+
+    if (!actor) notFound();
+
+    const movies = moviesData.data;
+
+    return (
+        <main className="min-h-screen">
+            {/* ═══════════════════════════════════════════════════════════
+          HERO DEL ACTOR
+      ═══════════════════════════════════════════════════════════ */}
+            <div className="relative overflow-hidden">
+                {/* Fondo con gradiente sutil (los actores no tienen backdrop) */}
+                <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] to-gray-950" />
+
+                <div className="relative z-10 max-w-6xl mx-auto px-4 md:px-8 pt-10 pb-12">
+                    <BackButton />
+
+                    <div className="flex flex-col md:flex-row items-center md:items-end gap-8 mt-8">
+                        {/* Foto del actor */}
+                        <div className="w-40 h-40 md:w-48 md:h-48 flex-shrink-0">
+                            <div className="relative w-full h-full rounded-full overflow-hidden border-2 border-white/10 shadow-2xl shadow-black/50">
+                                {actor.profile_image_url ? (
+                                    <Image
+                                        src={actor.profile_image_url}
+                                        alt={actor.name}
+                                        fill
+                                        sizes="(max-width: 768px) 160px, 192px"
+                                        className="object-cover"
+                                        priority
+                                    />
+                                ) : (
+                                    <div className="w-full h-full bg-white/5 flex items-center justify-center">
+                                        <IconUserPlaceholder />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Info del actor */}
+                        <div className="text-center md:text-left flex-1 min-w-0">
+                            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">
+                                Actor
+                            </p>
+                            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
+                                {actor.name}
+                            </h1>
+                            <p className="text-gray-400 mt-3 text-sm md:text-base">
+                                {movies.length} {movies.length === 1 ? 'película' : 'películas'} disponibles en el catálogo
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* ═══════════════════════════════════════════════════════════
+          FILMOGRAFÍA
+      ═══════════════════════════════════════════════════════════ */}
+            <div className="max-w-6xl mx-auto px-4 md:px-8 py-10">
+                {movies.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-24 text-center">
+                        <div className="w-16 h-16 mb-4 rounded-full bg-white/5 flex items-center justify-center">
+                            <IconUserPlaceholder />
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-200 mb-1">Sin películas disponibles</h3>
+                        <p className="text-sm text-gray-400 max-w-sm">
+                            Aún no tenemos películas de {actor.name} en el catálogo.
+                        </p>
+                    </div>
+                ) : (
+                    <>
+                        <h2 className="text-lg font-semibold text-white mb-6">Filmografía</h2>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+                            {movies.map((movie) => (
+                                <MovieCard key={movie.id} movie={movie} />
+                            ))}
+                        </div>
+                    </>
+                )}
+            </div>
+        </main>
+    );
+}
+==> ./app/globals.css <==
+/* app/globals.css */
+
+@import "tailwindcss";
+
+:root {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), sans-serif;
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* CSS para el Dual Range Slider (Años) */
+/* ═══ Dual Range Slider (Años) ═══ */
+.range-slider {
+  position: relative;
+  height: 20px;
+}
+
+.range-slider input[type=range] {
+  position: absolute;
+  width: 100%;
+  height: 4px;
+  background: none;
+  pointer-events: none;           /* ← CRUCIAL: el input no captura clicks */
+  -webkit-appearance: none;
+  appearance: none;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
+}
+
+.range-slider input[type=range]::-webkit-slider-thumb {
+  pointer-events: auto;           /* ← CRUCIAL: solo el thumb es interactivo */
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #dc2626;
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.range-slider input[type=range]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 2px 12px rgba(220, 38, 38, 0.5);
+}
+
+.range-slider input[type=range]::-moz-range-thumb {
+  pointer-events: auto;           /* ← CRUCIAL para Firefox */
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #dc2626;
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+}
+
+.range-slider input[type=range]::-moz-range-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* ═══ Tipografía global ═══ */
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Títulos con tracking ajustado para verse más premium */
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.02em;
+}
+
+/* ═══ Utilidad para texto con gradiente (usar con moderación) ═══ */
+.text-gradient {
+  background: linear-gradient(135deg, #fff 0%, #a1a1aa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ═══ Animación de entrada suave para tarjetas ═══ */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out both;
+}
+
+@layer utilities {
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+==> ./app/robots.ts <==
+// app/robots.ts
+import type { MetadataRoute } from 'next';
+
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://tudominio.com';
+
+export default function robots(): MetadataRoute.Robots {
+  return {
+    rules: [
+      {
+        userAgent: '*',
+        allow: '/',
+        disallow: ['/api/', '/admin/'],
+      },
+    ],
+    sitemap: `${BASE_URL}/sitemap.xml`,
+  };
+}
+==> ./app/page.tsx <==
+// app/page.tsx
+
+import { getHomeMovies } from '@/lib/api';
+import AdBanner from '@/components/AdBanner';
+import MovieCard from '@/components/MovieCard';
+
+export default async function Home() {
+  const movies = await getHomeMovies();
+
+  return (
+    <main className="min-h-screen p-8">
+      <h2 className="text-2xl font-bold mb-6 text-white">Trending Now</h2>
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+        {movies.map((movie) => (
+          <MovieCard key={movie.id} movie={movie} />
+        ))}
+      </div>
+      <AdBanner format="horizontal" />
+    </main>
+  );
+}
+==> ./app/not-found.tsx <==
+import Link from 'next/link';
+
+export default function NotFound() {
+  return (
+    <main className="min-h-screen flex items-center justify-center bg-gray-900 text-white px-4">
+      <div className="text-center max-w-md">
+        <h1 className="text-8xl font-extrabold text-red-600 mb-4">404</h1>
+        <h2 className="text-3xl font-bold mb-4">Página no encontrada</h2>
+        <p className="text-gray-400 mb-8">
+          La página que buscas no existe o fue movida a otra ubicación.
+        </p>
+        <div className="flex gap-4 justify-center flex-wrap">
+          <Link
+            href="/"
+            className="bg-red-600 hover:bg-red-700 text-white font-medium px-6 py-3 rounded-lg transition-colors"
+          >
+            Volver al inicio
+          </Link>
+          <Link
+            href="/movies"
+            className="bg-gray-800 hover:bg-gray-700 text-white font-medium px-6 py-3 rounded-lg transition-colors"
+          >
+            Ver catálogo
+          </Link>
+        </div>
+      </div>
+    </main>
+  );
+}
+==> ./app/search/page.tsx <==
+// app/search/page.tsx
+import { searchMovies } from '@/lib/api';
+import AdBanner from '@/components/AdBanner';
+import MovieCard from '@/components/MovieCard';
+import Link from 'next/link';
+
+export default async function SearchPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q } = await searchParams;
+
+  // ─── Sin query: estado inicial ───
+  if (!q || !q.trim()) {
+    return (
+      <main className="min-h-screen p-8 text-center">
+        <p className="text-gray-400 mt-20">
+          Escribe algo en la barra de búsqueda...
+        </p>
+      </main>
+    );
+  }
+
+  const query = q.trim();
+
+  // ─── Búsqueda principal ───
+  let result = await searchMovies(query);
+  const count = result.data.length;
+
+  return (
+    <main className="min-h-screen p-8">
+      {/* ─── Encabezado ─── */}
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-white">
+          Buscaste: <span className="text-red-500">"{query}"</span>
+        </h2>
+        <p className="text-sm text-gray-400 mt-1">
+          {count === 0
+            ? 'Sin coincidencias en el catálogo'
+            : `${count} ${count === 1 ? 'resultado' : 'resultados'}`}
+        </p>
+      </div>
+
+      {/* ─── Resultados ─── */}
+      {count === 0 ? (
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <h3 className="text-lg font-semibold text-gray-200 mb-1">Sin resultados</h3>
+          <p className="text-sm text-gray-400 mb-6 max-w-sm">
+            No encontramos películas para tu búsqueda. Revisa la ortografía o intenta con otro término.
+          </p>
+          <Link
+            href="/movies"
+            className="inline-flex items-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10 text-gray-300 hover:text-white px-4 py-2 rounded-full text-sm font-medium transition-all"
+          >
+            Explorar catálogo completo
+          </Link>
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            {result.data.map((movie) => (
+              <MovieCard key={movie.id} movie={movie} />
+            ))}
+          </div>
+          <AdBanner format="horizontal" />
+        </>
+      )}
+    </main>
+  );
+}
+==> ./app/search/loading.tsx <==
+export default function SearchLoading() {
+  return (
+    <main className="min-h-screen p-8">
+      <div className="h-10 w-96 bg-gray-800 rounded mb-6 animate-pulse"></div>
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <div key={i} className="animate-pulse">
+            <div className="bg-gray-800 rounded-lg h-64 mb-2"></div>
+            <div className="h-4 bg-gray-800 rounded w-3/4 mb-1"></div>
+            <div className="h-3 bg-gray-800 rounded w-1/2"></div>
+          </div>
+        ))}
+      </div>
+    </main>
+  );
+}
+==> ./app/sitemap.ts <==
+// app/sitemap.ts
+import type { MetadataRoute } from 'next';
+import { fetchMoviesWithFilters } from '@/lib/api';
+
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://tudominio.com';
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Rutas estáticas
+  const staticRoutes: MetadataRoute.Sitemap = [
+    {
+      url: BASE_URL,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 1.0,
+    },
+    {
+      url: `${BASE_URL}/movies`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+  ];
+
+  // Películas: obtener slugs del catálogo
+  // Nota: para catálogos muy grandes, considera paginar aquí
+  const movieRoutes: MetadataRoute.Sitemap = [];
+  let page = 1;
+  let hasMore = true;
+
+  while (hasMore && page <= 50) { // Límite de seguridad: 50 páginas × 100 = 5000 películas
+    try {
+      const result = await fetchMoviesWithFilters({}, page, 100);
+      const movies = result.data;
+
+      movies.forEach((movie) => {
+        movieRoutes.push({
+          url: `${BASE_URL}/movie/${movie.slug}`,
+          lastModified: new Date(),
+          changeFrequency: 'weekly',
+          priority: 0.8,
+        });
+      });
+
+      hasMore = result.hasMore;
+      page++;
+    } catch {
+      break;
+    }
+  }
+
+  return [...staticRoutes, ...movieRoutes];
+}
+==> ./app/loading.tsx <==
+export default function Loading() {
+  return (
+    <main className="min-h-screen flex items-center justify-center bg-gray-900">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-gray-400 text-sm">Cargando...</p>
+      </div>
+    </main>
+  );
+}
+==> ./next.config.ts <==
+import type { NextConfig } from 'next';
+
+// ─── Headers de seguridad ───
+// Se aplican a TODAS las rutas del sitio
+const securityHeaders = [
+  {
+    // Evita que el navegador adivine el tipo MIME de archivos.
+    // Ejemplo: un atacante no puede subir un .jpg que en realidad es un .js malicioso.
+    key: 'X-Content-Type-Options',
+    value: 'nosniff',
+  },
+  {
+    // Evita que tu página sea embebida en un iframe de otro sitio (protege contra clickjacking).
+    // Nota: nuestros iframes de video no se ven afectados porque están EN nuestra página,
+    // esto protege que OTROS sitios embebidos carguen CineStream dentro de ellos.
+    key: 'X-Frame-Options',
+    value: 'DENY',
+  },
+  {
+    // Activa el filtro XSS básico del navegador (legacy, pero no hace daño tenerlo).
+    key: 'X-XSS-Protection',
+    value: '1; mode=block',
+  },
+  {
+    // Controla cuánto información del "referrer" se envía cuando un usuario sale de tu sitio.
+    // "strict-origin-when-cross-origin" es el balance correcto:
+    // - Navegación interna: URL completa
+    // - Navegación a otro sitio: solo el dominio (protege URLs con slugs de películas)
+    key: 'Referrer-Policy',
+    value: 'strict-origin-when-cross-origin',
+  },
+  {
+    // Desactiva APIs del navegador que no necesitamos.
+    // Reduce la superficie de ataque y mejora la privacidad del usuario.
+    key: 'Permissions-Policy',
+    value: 'camera=(), microphone=(), geolocation=(), browsing-topics=()',
+  },
+  {
+    // Fuerza HTTPS por un año. Solo útil si tu sitio ya está en HTTPS.
+    // En desarrollo local (http), este header se ignora por el navegador, así que no molesta.
+    key: 'Strict-Transport-Security',
+    value: 'max-age=31536000; includeSubDomains; preload',
+  },
+];
+
+const nextConfig: NextConfig = {
+  // Activa el modo estricto de React: ayuda a detectar bugs en desarrollo
+  // haciendo doble-render de componentes. No afecta producción.
+  reactStrictMode: true,
+
+  // Oculta el header "X-Powered-By: Next.js" de las respuestas HTTP.
+  // No revelar la tecnología que usas es una buena práctica de seguridad.
+  poweredByHeader: false,
+
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
+    remotePatterns: [
+      // Strapi local (desarrollo)
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '1337',
+        pathname: '/uploads/**',
+      },
+      // TMDB (imágenes de pósters/backdrops)
+      {
+        protocol: 'https',
+        hostname: 'image.tmdb.org',
+        pathname: '/t/p/**',
+      },
+      // ⚠️ AGREGA AQUÍ tu Strapi de producción cuando lo tengas desplegado
+      // Ejemplo:
+      // {
+      //   protocol: 'https',
+      //   hostname: 'api.tudominio.com',
+      //   pathname: '/uploads/**',
+      // },
+    ],
+  },
+
+  // Aplicar los headers de seguridad a todas las rutas
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: securityHeaders,
+      },
+    ];
+  },
+};
+
+export default nextConfig;
+==> ./postcss.config.mjs <==
+const config = {
+  plugins: {
+    "@tailwindcss/postcss": {},
+  },
+};
+
+export default config;
