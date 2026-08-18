@@ -1,14 +1,12 @@
-// types/index.ts
-
 /**
- * Cap de compatibilidad hacia afuera.
+ * @deprecated
  *
- * Los tipos de dominio ahora pertenecen a sus entidades:
- * - Movie / Server → entities/movie
- * - Category → entities/category
- * - Actor / Director / Person → entities/person
+ * Este archivo existe solo como capa de compatibilidad temporal.
  *
- * Este archivo solo re-exporta para no romper imports existentes.
+ * Los tipos de dominio deben importarse desde sus entidades:
+ * - @/entities/movie
+ * - @/entities/category
+ * - @/entities/person
  */
 export type { Movie, Server } from '@/entities/movie/types/movie';
 export type { Category } from '@/entities/category/types';

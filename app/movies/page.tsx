@@ -1,13 +1,12 @@
-// app/movies/page.tsx
-
-import type { MovieFiltersQuery } from '@/entities/movie/types/filters';
+import type { MovieFiltersQuery } from '@/entities/movie';
 import {
   MoviesPage,
   getMoviesPageData,
   buildMoviesPageMetadata,
 } from '@/features/movies-page';
 import { parseMovieFiltersFromRecord } from '@/lib/url/movieFilters';
-import { AdBanner, MovieGridWithAds } from '@/features/ads';
+import { AdBanner } from '@/features/ads';
+import { CatalogGridWithAds } from '@/widgets/composition/catalog-grid-with-ads';
 
 export const metadata = buildMoviesPageMetadata();
 
@@ -26,7 +25,7 @@ export default async function MoviesRoute({
     <MoviesPage
       data={pageData}
       catalogSlot={
-        <MovieGridWithAds
+        <CatalogGridWithAds
           initialMovies={pageData.initialMovies}
           initialHasMore={pageData.initialHasMore}
           filters={pageData.filters}

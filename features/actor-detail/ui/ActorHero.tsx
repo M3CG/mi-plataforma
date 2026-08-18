@@ -1,10 +1,7 @@
-// features/actor-detail/ui/ActorHero.tsx
-
 import Image from 'next/image';
-
 import BackButton from '@/shared/ui/BackButton';
 import { IconUserPlaceholder } from '@/shared/ui/icons';
-
+import { routes } from '@/lib/routes';
 import type { ActorDetailViewModel } from '../types';
 
 interface ActorHeroProps {
@@ -21,7 +18,7 @@ export default function ActorHero({ viewModel }: ActorHeroProps) {
 
       {/* Contenido del hero */}
       <div className="relative z-10 max-w-6xl mx-auto px-4 md:px-8 pt-10 pb-12">
-        <BackButton />
+        <BackButton fallbackHref={routes.movies} />
 
         <div className="flex flex-col md:flex-row items-center md:items-end gap-8 mt-8">
           {/* Foto del actor */}
@@ -56,7 +53,9 @@ export default function ActorHero({ viewModel }: ActorHeroProps) {
 
             <p className="text-gray-400 mt-3 text-sm md:text-base">
               {movieCount}{' '}
-              {movieCount === 1 ? 'película disponible' : 'películas disponibles'}{' '}
+              {movieCount === 1
+                ? 'película disponible'
+                : 'películas disponibles'}{' '}
               en el catálogo
             </p>
           </div>

@@ -1,6 +1,5 @@
-// entities/movie/ui/MovieCardCategoryLink.tsx
 import Link from 'next/link';
-import type { Category } from '@/types';
+import type { Category } from '@/entities/category';
 
 interface MovieCardCategoryLinkProps {
   category: Category;
@@ -21,11 +20,7 @@ export default function MovieCardCategoryLink({
   `;
 
   if (!href) {
-    return (
-      <span className={baseClasses}>
-        {category.name}
-      </span>
-    );
+    return <span className={baseClasses}>{category.name}</span>;
   }
 
   return (

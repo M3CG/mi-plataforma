@@ -1,46 +1,42 @@
-// lib/scroll/defer.ts
-
-const SCROLL_DEFER_KEY = '__scroll_restore_pending';
+const SCROLL_DEFER_KEY = '__scroll_restore_pending_path';
 
 function isBrowser(): boolean {
   return typeof window !== 'undefined';
 }
 
 /**
- * Marca que una feature quiere controlar el scroll.
- *
- * Esta señal es leída por ScrollToTop para no intervenir.
+ * Marca que una feature quiere controlar el scroll
+ * cuando el usuario regrese a una ruta concreta.
  */
-export function deferScrollRestore(): void {
+export function deferScrollRestore(returnPath: string): void {
   if (!isBrowser()) return;
 
   try {
-    sessionStorage.setItem(SCROLL_DEFER_KEY, 'true');
+    sessionStorage.setItem(SCROLL_DEFER_KEY, returnPath);
   } catch {
     // Si sessionStorage falla, igualmente dejamos que el flujo continúe.
   }
 }
 
 /**
- * Consulta si hay una señal pendiente de restauración de scroll.
- * No la consume.
+ * Consulta si hay una señal pendiente de restauración de scroll
+ * para una ruta específica.
  */
-export function isScrollRestoreDeferred(): boolean {
+export function isScrollRestoreDeferredFor(pathname: string): boolean {
   if (!isBrowser()) return false;
 
   try {
-    return sessionStorage.getItem(SCROLL_DEFER_KEY) === 'true';
+    return sessionStorage.getItem(SCROLL_DEFER_KEY) === pathname;
   } catch {
     return false;
   }
 }
 
 /**
- * Consume la señal pendiente.
- * Devuelve true si existía y fue limpiada.
+ * Consume la señal pendiente si corresponde a la ruta indicada.
  */
-export function consumeScrollRestoreSignal(): boolean {
-  if (!isScrollRestoreDeferred()) return false;
+export function consumeScrollRestoreSignal(pathname: string): boolean {
+  if (!isScrollRestoreDeferredFor(pathname)) return false;
 
   try {
     sessionStorage.removeItem(SCROLL_DEFER_KEY);

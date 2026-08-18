@@ -1,6 +1,4 @@
-// entities/movie/lib/movieKey.ts
-
-import type { Movie } from '@/types';
+import type { Movie } from '../types/movie';
 
 /**
  * Identidad única de una película.
@@ -22,7 +20,6 @@ export function dedupeMovies(
   incomingMovies: Movie[]
 ): Movie[] {
   const seenKeys = new Set(existingMovies.map(getMovieKey));
-
   return incomingMovies.filter(
     (movie) => !seenKeys.has(getMovieKey(movie))
   );

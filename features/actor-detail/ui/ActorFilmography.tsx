@@ -1,7 +1,6 @@
-// features/actor-detail/ui/ActorFilmography.tsx
-import type { Movie } from '@/types';
+import type { Movie } from '@/entities/movie';
 import { getMovieKey } from '@/entities/movie';
-import AppMovieCard from '@/widgets/MovieCard/AppMovieCard';
+import { AppMovieCard } from '@/widgets/movie-card';
 import ActorEmptyState from './ActorEmptyState';
 
 interface ActorFilmographyProps {

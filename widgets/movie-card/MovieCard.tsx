@@ -1,23 +1,25 @@
-// entities/movie/ui/MovieCard.tsx
 'use client';
 
 import Image from 'next/image';
 import Link from 'next/link';
-import type { Movie } from '@/types';
+import type { MouseEvent } from 'react';
+import type { Movie } from '@/entities/movie';
+import { createMovieCardViewModel } from '@/entities/movie';
 import { IconImagePlaceholder, IconStar } from '@/shared/ui/icons';
-import { createMovieCardViewModel } from '../lib/createMovieCardViewModel';
 import MovieCardCategoryLink from './MovieCardCategoryLink';
 
 export interface MovieCardProps {
   movie: Movie;
   href: string;
   getCategoryHref?: (categorySlug: string) => string;
+  onPrimaryLinkClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
 }
 
 export default function MovieCard({
   movie,
   href,
   getCategoryHref,
+  onPrimaryLinkClick,
 }: MovieCardProps) {
   const viewModel = createMovieCardViewModel(movie);
 
@@ -35,12 +37,13 @@ export default function MovieCard({
     >
       <Link
         href={href}
+        onClick={onPrimaryLinkClick}
         aria-label={`Ver detalle de ${viewModel.title}`}
         title={`Ver detalle de ${viewModel.title}`}
         className="absolute inset-0 z-10"
       />
 
-      {/* ─── Imagen ─── */}
+      {/* Imagen */}
       <div className="relative aspect-[2/3] overflow-hidden">
         {viewModel.posterUrl ? (
           <Image
@@ -113,7 +116,7 @@ export default function MovieCard({
         )}
       </div>
 
-      {/* ─── Información ─── */}
+      {/* Información */}
       <div className="relative p-3.5">
         <h2
           className="

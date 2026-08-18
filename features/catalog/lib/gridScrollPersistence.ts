@@ -1,13 +1,11 @@
-// features/catalog/lib/gridScrollPersistence.ts
-
 import { GRID_SCROLL_STORAGE_KEY } from '../config/grid';
 import { deferScrollRestore } from '@/lib/scroll/defer';
 
 /**
- * Guarda la posición de scroll actual y marca la señal global
- * para que ScrollToTop no intervenga.
+ * Guarda la posición de scroll actual y marca la señal
+ * para que ScrollToTop no intervenga al regresar a la ruta indicada.
  */
-export function saveGridScrollPosition(): void {
+export function saveGridScrollPosition(returnPath: string): void {
   if (typeof window === 'undefined') return;
 
   try {
@@ -19,5 +17,5 @@ export function saveGridScrollPosition(): void {
     // Si sessionStorage falla, igualmente marcamos la señal.
   }
 
-  deferScrollRestore();
+  deferScrollRestore(returnPath);
 }

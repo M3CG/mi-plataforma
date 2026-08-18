@@ -41,7 +41,7 @@ export default function MovieHero({ viewModel }: MovieHeroProps) {
 
       {/* Contenido del hero */}
       <div className="relative z-10 max-w-6xl mx-auto px-4 md:px-8 pt-10 pb-12">
-        <BackButton />
+        <BackButton fallbackHref={routes.movies} />
 
         <div className="flex flex-col md:flex-row gap-8 mt-8">
           {/* Póster */}

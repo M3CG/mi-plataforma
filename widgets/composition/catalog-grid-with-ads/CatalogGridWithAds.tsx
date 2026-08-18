@@ -1,22 +1,20 @@
-// features/ads/ui/MovieGridWithAds.tsx
 'use client';
 
-import type { Movie } from '@/types';
-import type { MovieFilters } from '@/entities/movie/types/filters';
+import type { Movie, MovieFilters } from '@/entities/movie';
 import { MovieGrid } from '@/features/catalog';
-import MovieGridAdSlot from './MovieGridAdSlot';
+import { MovieGridAdSlot } from '@/features/ads';
 
-interface MovieGridWithAdsProps {
+interface CatalogGridWithAdsProps {
   initialMovies: Movie[];
   initialHasMore: boolean;
   filters: MovieFilters;
 }
 
-export default function MovieGridWithAds({
+export default function CatalogGridWithAds({
   initialMovies,
   initialHasMore,
   filters,
-}: MovieGridWithAdsProps) {
+}: CatalogGridWithAdsProps) {
   return (
     <MovieGrid
       initialMovies={initialMovies}

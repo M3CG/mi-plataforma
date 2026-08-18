@@ -1,18 +1,19 @@
-// components/BackButton.tsx
+'use client';
 
-"use client";
-
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { IconBack } from '@/shared/ui/icons';
-import { routes } from '@/lib/routes';
 
-export default function BackButton() {
+interface BackButtonProps {
+  fallbackHref: string;
+}
+
+export default function BackButton({ fallbackHref }: BackButtonProps) {
   const router = useRouter();
   const [hasHistory, setHasHistory] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && window.history.length > 1) {
+    if (typeof window !== 'undefined' && window.history.length > 1) {
       setHasHistory(true);
     }
   }, []);
@@ -21,7 +22,7 @@ export default function BackButton() {
     if (hasHistory) {
       router.back();
     } else {
-      router.push(routes.movies);
+      router.push(fallbackHref);
     }
   };
 
