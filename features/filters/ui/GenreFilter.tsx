@@ -1,7 +1,7 @@
 // features/filters/ui/GenreFilter.tsx
 'use client';
 
-import { Category } from '@/types';
+import type { Category } from '@/entities/category';
 import DropdownMenu from './DropdownMenu';
 import { IconFilm } from '@/shared/ui/icons';
 

@@ -1,6 +1,7 @@
 // features/movies-page/types.ts
 
-import type { Category, Movie } from '@/types';
+import type { Category } from '@/entities/category';
+import type { Movie } from '@/entities/movie';
 import type { MovieFilters } from '@/entities/movie/types/filters';
 
 export interface MoviesPageData {

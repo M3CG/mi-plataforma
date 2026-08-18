@@ -1,10 +1,10 @@
-// app/movie/[slug]/page.tsx
 import { notFound } from 'next/navigation';
 import {
   MovieDetailPage,
   getMovieDetailPage,
   buildMovieMetadata,
 } from '@/features/movie-detail';
+import { MoviePlayerSection } from '@/widgets/composition/movie-player';
 import { AdBanner } from '@/features/ads';
 
 interface MovieDetailRouteParams {
@@ -32,6 +32,13 @@ export default async function MovieDetailRoute({
   return (
     <MovieDetailPage
       viewModel={viewModel}
+      playerSlot={
+        <MoviePlayerSection
+          movieSlug={viewModel.slug}
+          tmdbId={viewModel.tmdbId}
+          servers={viewModel.servers}
+        />
+      }
       afterPlayerSlot={<AdBanner format="horizontal" />}
     />
   );

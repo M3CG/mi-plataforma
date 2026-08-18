@@ -4,9 +4,11 @@ import {
   getMoviesPageData,
   buildMoviesPageMetadata,
 } from '@/features/movies-page';
+import { FilterMenu } from '@/features/filters';
 import { parseMovieFiltersFromRecord } from '@/lib/url/movieFilters';
 import { AdBanner } from '@/features/ads';
 import { CatalogGridWithAds } from '@/widgets/composition/catalog-grid-with-ads';
+import FilterMenuSkeleton from '@/features/movies-page/ui/FilterMenuSkeleton';
 
 export const metadata = buildMoviesPageMetadata();
 
@@ -24,6 +26,13 @@ export default async function MoviesRoute({
   return (
     <MoviesPage
       data={pageData}
+      filtersSlot={
+        <FilterMenu
+          categories={pageData.categories}
+          countries={pageData.countries}
+        />
+      }
+      filtersFallback={<FilterMenuSkeleton />}
       catalogSlot={
         <CatalogGridWithAds
           initialMovies={pageData.initialMovies}

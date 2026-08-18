@@ -1,6 +1,7 @@
 import type { Movie } from '@/entities/movie';
 import { getMovieKey } from '@/entities/movie';
 import { AppMovieCard } from '@/widgets/movie-card';
+import PosterGrid from '@/shared/ui/PosterGrid';
 import ActorEmptyState from './ActorEmptyState';
 
 interface ActorFilmographyProps {
@@ -22,14 +23,14 @@ export default function ActorFilmography({
         Filmografía
       </h2>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+      <PosterGrid variant="compact">
         {movies.map((movie) => (
           <AppMovieCard
             key={getMovieKey(movie)}
             movie={movie}
           />
         ))}
-      </div>
+      </PosterGrid>
     </>
   );
 }

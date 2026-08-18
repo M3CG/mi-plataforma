@@ -1,6 +1,7 @@
 // features/actor-detail/types.ts
 
-import type { Actor, Movie } from '@/types';
+import type { Actor } from '@/entities/person';
+import type { Movie } from '@/entities/movie';
 
 export interface ActorDetailViewModel {
   actor: Actor;

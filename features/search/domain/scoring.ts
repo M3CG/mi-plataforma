@@ -1,6 +1,6 @@
 // features/search/domain/scoring.ts
 
-import type { Movie } from '@/types';
+import type { Movie } from '@/entities/movie';
 import { normalizeSearchTerm } from './normalize';
 
 export type SearchSource =

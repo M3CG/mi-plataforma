@@ -1,7 +1,6 @@
-// features/filters/ui/YearRangeFilter.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { IconCalendar } from '@/shared/ui/icons';
 import { YEAR_MIN, YEAR_MAX } from '../config/options';
 import styles from './year-range.module.css';
@@ -20,10 +19,24 @@ export default function YearRangeFilter({
   const [minYear, setMinYear] = useState(fromYear ?? YEAR_MIN);
   const [maxYear, setMaxYear] = useState(toYear ?? YEAR_MAX);
 
-  useEffect(() => {
+  // ─── Patrón React 19: ajustar estado durante render ───
+  // Usamos variables de estado (no refs) para trackear los valores
+  // previos de las props. Esto permite sincronizar el estado local
+  // con props cambiantes sin usar useEffect ni acceder a refs en render.
+  //
+  // React agrupa los setStates llamados durante el render con el render
+  // actual, por lo que no causa renders adicionales.
+  const [prevFromYear, setPrevFromYear] = useState(fromYear);
+  const [prevToYear, setPrevToYear] = useState(toYear);
+
+  if (prevFromYear !== fromYear) {
+    setPrevFromYear(fromYear);
     setMinYear(fromYear ?? YEAR_MIN);
+  }
+  if (prevToYear !== toYear) {
+    setPrevToYear(toYear);
     setMaxYear(toYear ?? YEAR_MAX);
-  }, [fromYear, toYear]);
+  }
 
   const apply = () => {
     onApply(minYear, maxYear);
@@ -45,7 +58,6 @@ export default function YearRangeFilter({
 
       <div className={`${styles.rangeSlider} w-56 sm:w-80 relative`}>
         <div className={styles.track} />
-
         <div
           className={styles.trackActive}
           style={{

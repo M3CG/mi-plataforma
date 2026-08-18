@@ -1,5 +1,3 @@
-// features/search/services/getSearchPageData.ts
-
 import type { SearchPageData } from '../types';
 import { normalizeSearchQuery } from '../lib/normalizeSearchQuery';
 import { searchMovies } from '../application/searchMovies';
@@ -17,19 +15,17 @@ export async function getSearchPageData(
       results: [],
       count: 0,
       hasResults: false,
-      hasMore: false,
     };
   }
 
-  const result = await searchMovies(normalizedQuery);
+  const results = await searchMovies(normalizedQuery);
 
   return {
     query: normalizedQuery,
     normalizedQuery,
     hasQuery: true,
-    results: result.data,
-    count: result.data.length,
-    hasResults: result.data.length > 0,
-    hasMore: result.hasMore,
+    results,
+    count: results.length,
+    hasResults: results.length > 0,
   };
 }

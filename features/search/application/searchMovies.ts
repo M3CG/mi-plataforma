@@ -1,7 +1,4 @@
-// features/search/application/searchMovies.ts
-
-import type { Movie } from '@/types';
-import type { PaginatedResult } from '@/lib/api/pagination/types';
+import type { Movie } from '@/entities/movie';
 import { SEARCH_PAGE_SIZE } from '@/lib/api/pagination/config';
 import { normalizeSearchTerm } from '../domain/normalize';
 import { mergeSearchResults } from '../domain/mergeSearchResults';
@@ -11,33 +8,29 @@ import {
 } from '../infrastructure/strapiMovieSearchRepository';
 import { logger } from '@/lib/utils/logger';
 
+/**
+ * Responsabilidad:
+ * buscar películas por múltiples fuentes y devolver
+ * un array consolidado y ordenado por relevancia.
+ *
+ * No expone paginación porque la UI actual consume
+ * todos los resultados disponibles.
+ */
 export async function searchMovies(
   query: string,
-  page: number = 1,
-  pageSize: number = SEARCH_PAGE_SIZE,
+  limit: number = SEARCH_PAGE_SIZE * 4,
   repository: MovieSearchRepository = strapiMovieSearchRepository
-): Promise<PaginatedResult<Movie>> {
+): Promise<Movie[]> {
   const safeQuery = query.trim();
 
-  const safePage = Math.max(1, Math.floor(Number(page) || 1));
-  const safePageSize = Math.max(
-    1,
-    Math.floor(Number(pageSize) || SEARCH_PAGE_SIZE)
-  );
-
   if (!safeQuery) {
-    return {
-      data: [],
-      hasMore: false,
-      page: safePage,
-      pageSize: safePageSize,
-    };
+    return [];
   }
 
   const normalizedQuery = normalizeSearchTerm(safeQuery);
 
-  const titleLimit = Math.min(Math.max(safePageSize * 4, 80), 200);
-  const otherLimit = Math.min(Math.max(safePageSize * 2, 40), 100);
+  const titleLimit = Math.min(Math.max(limit, 80), 200);
+  const otherLimit = Math.min(Math.max(Math.floor(limit / 2), 40), 100);
 
   const [
     titleMovies,
@@ -61,10 +54,6 @@ export async function searchMovies(
     normalizedQuery
   );
 
-  const start = (safePage - 1) * safePageSize;
-  const pagedMovies = mergedMovies.slice(start, start + safePageSize);
-  const hasMore = start + safePageSize < mergedMovies.length;
-
   logger.debug('Search results merged', {
     component: 'Search',
     action: 'searchMovies',
@@ -72,10 +61,5 @@ export async function searchMovies(
     count: mergedMovies.length,
   });
 
-  return {
-    data: pagedMovies,
-    hasMore,
-    page: safePage,
-    pageSize: safePageSize,
-  };
+  return mergedMovies.slice(0, limit);
 }

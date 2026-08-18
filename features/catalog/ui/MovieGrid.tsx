@@ -1,12 +1,9 @@
-// features/catalog/ui/MovieGrid.tsx
 'use client';
 
 import { Fragment, type ReactNode } from 'react';
-import type { Movie } from '@/types';
-import type { MovieFilters } from '@/entities/movie/types/filters';
-import { getMovieKey } from '@/entities/movie/lib/movieKey';
-
-import CatalogMovieCard from './CatalogMovieCard';
+import type { Movie, MovieFilters } from '@/entities/movie';
+import { getMovieKey } from '@/entities/movie';
+import PosterGrid from '@/shared/ui/PosterGrid';
 import { useInfiniteMovies } from '../model/useInfiniteMovies';
 import { useInfiniteScroll } from '../model/useInfiniteScroll';
 
@@ -14,6 +11,7 @@ export interface MovieGridProps {
   initialMovies: Movie[];
   initialHasMore: boolean;
   filters: MovieFilters;
+  renderMovie: (movie: Movie, index: number) => ReactNode;
   renderAfterMovie?: (index: number, movie: Movie) => ReactNode;
 }
 
@@ -21,6 +19,7 @@ export default function MovieGrid({
   initialMovies,
   initialHasMore,
   filters,
+  renderMovie,
   renderAfterMovie,
 }: MovieGridProps) {
   const {
@@ -42,19 +41,15 @@ export default function MovieGrid({
 
   return (
     <>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+      <PosterGrid variant="compact">
         {movies.map((movie, index) => (
           <Fragment key={getMovieKey(movie)}>
-            <div className="contents">
-              <CatalogMovieCard movie={movie} />
-            </div>
-
+            {renderMovie(movie, index)}
             {renderAfterMovie?.(index, movie)}
           </Fragment>
         ))}
-      </div>
+      </PosterGrid>
 
-      {/* Zona de observación / Loading */}
       <div
         ref={sentinelRef}
         className="w-full py-12 flex justify-center min-h-[80px]"

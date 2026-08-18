@@ -1,5 +1,5 @@
 // features/search/infrastructure/strapiMovieSearchRepository.ts
-import type { Movie } from '@/types';
+import type { Movie } from '@/entities/movie';
 import type { StrapiListResponse } from '@/lib/api/strapi/types';
 
 import { fetchApi } from '@/lib/api/http/client';

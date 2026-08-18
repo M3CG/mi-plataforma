@@ -1,6 +1,4 @@
-// features/search/types.ts
-
-import type { Movie } from '@/types';
+import type { Movie } from '@/entities/movie';
 
 export interface SearchPageData {
   query: string;
@@ -9,5 +7,4 @@ export interface SearchPageData {
   results: Movie[];
   count: number;
   hasResults: boolean;
-  hasMore: boolean;
 }

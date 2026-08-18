@@ -1,7 +1,7 @@
 // features/filters/ui/FilterMenu.tsx
 'use client';
 
-import { Category } from '@/types';
+import type { Category } from '@/entities/category';
 
 import { useMovieFilters } from '../model/useMovieFilters';
 import { useScrollCollapse } from '../model/useScrollCollapse';

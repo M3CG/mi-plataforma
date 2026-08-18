@@ -1,5 +1,5 @@
 // lib/api/resources/categories.ts
-import type { Category } from '@/types';
+import type { Category } from '@/entities/category';
 import type { StrapiListResponse } from '../strapi/types';
 
 import { fetchApi } from '../http/client';

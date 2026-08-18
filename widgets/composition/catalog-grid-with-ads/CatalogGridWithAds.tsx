@@ -1,7 +1,7 @@
 'use client';
 
 import type { Movie, MovieFilters } from '@/entities/movie';
-import { MovieGrid } from '@/features/catalog';
+import { MovieGrid, CatalogMovieCard } from '@/features/catalog';
 import { MovieGridAdSlot } from '@/features/ads';
 
 interface CatalogGridWithAdsProps {
@@ -20,6 +20,7 @@ export default function CatalogGridWithAds({
       initialMovies={initialMovies}
       initialHasMore={initialHasMore}
       filters={filters}
+      renderMovie={(movie) => <CatalogMovieCard movie={movie} />}
       renderAfterMovie={(index) => <MovieGridAdSlot index={index} />}
     />
   );

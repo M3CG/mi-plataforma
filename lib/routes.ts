@@ -1,19 +1,13 @@
-// lib/routes.ts
 import { SITE_URL } from './config/site';
-
-// ─── Rutas relativas (para <Link> y router.push) ───
 
 export const routes = {
   home: '/',
-  movies: '/movies',                          // ← Ahora es string constante
+  movies: '/movies',
   movie: (slug: string) => `/movie/${slug}`,
   actor: (slug: string) => `/actor/${slug}`,
   search: (query: string) => `/search?q=${encodeURIComponent(query)}`,
   moviesByGenre: (genreSlug: string) => `/movies?genres=${genreSlug}`,
-  moviesWithParams: (params: string) => `/movies?${params}`,  // ← Para casos excepcionales
 } as const;
-
-// ─── URLs absolutas (para SEO, sitemap, JSON-LD) ───
 
 export const absoluteRoutes = {
   home: `${SITE_URL}`,

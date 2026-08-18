@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import type { Movie } from '@/types';
+import type { Movie } from '@/entities/movie';
 import type { MovieFilters } from '@/entities/movie/types/filters';
 import { dedupeMovies } from '@/entities/movie';
 import { logger } from '@/lib/utils/logger';

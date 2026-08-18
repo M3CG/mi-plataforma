@@ -1,5 +1,6 @@
 // lib/api/repositories/actors.ts
-import type { Actor, Movie } from '@/types';
+import type { Actor } from '@/entities/person';
+import type { Movie } from '@/entities/movie';
 import type { StrapiListResponse } from '../strapi/types';
 
 import { fetchApi } from '../http/client';

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import type { Movie } from '@/entities/movie';
 import { getMovieKey } from '@/entities/movie';
 import { AppMovieCard } from '@/widgets/movie-card';
+import PosterGrid from '@/shared/ui/PosterGrid';
 
 interface HomePageProps {
   movies: Movie[];
@@ -18,14 +19,14 @@ export default function HomePage({
         Trending Now
       </h2>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+      <PosterGrid variant="spacious">
         {movies.map((movie) => (
           <AppMovieCard
             key={getMovieKey(movie)}
             movie={movie}
           />
         ))}
-      </div>
+      </PosterGrid>
 
       {afterTrendingSlot}
     </main>

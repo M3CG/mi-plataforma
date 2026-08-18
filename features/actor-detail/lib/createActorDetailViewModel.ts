@@ -1,6 +1,7 @@
 // features/actor-detail/lib/createActorDetailViewModel.ts
 
-import type { Actor, Movie } from '@/types';
+import type { Actor } from '@/entities/person';
+import type { Movie } from '@/entities/movie';
 import type { ActorDetailViewModel } from '../types';
 
 export function createActorDetailViewModel(

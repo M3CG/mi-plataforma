@@ -1,4 +1,3 @@
-// features/filters/model/useMovieFilters.ts
 'use client';
 
 import { useCallback, useMemo } from 'react';
@@ -7,17 +6,14 @@ import {
   useSearchParams,
   usePathname,
 } from 'next/navigation';
-
 import { YEAR_MIN, YEAR_MAX } from '../config/options';
 import { buildFiltersUrl } from '../lib/filterUrlSerializer';
-
 import {
   DEFAULT_MOVIE_SORT,
   MOVIE_FILTER_PARAM_KEYS,
   type MovieFilterParamKey,
   type MovieSort,
 } from '@/entities/movie';
-
 import { parseMovieFiltersForUI } from '@/lib/url/movieFilters';
 
 export interface UseMovieFiltersResult {
@@ -29,21 +25,15 @@ export interface UseMovieFiltersResult {
   toYear: number | null;
   hasYearFilter: boolean;
   filterCount: number;
-
   toggleGenre: (slug: string) => void;
   removeGenre: (slug: string) => void;
-
   setRating: (value: string | null) => void;
   removeRating: () => void;
-
   setCountry: (value: string | null) => void;
   removeCountry: () => void;
-
   setSort: (value: MovieSort) => void;
-
   applyYearRange: (fromYear: number, toYear: number) => void;
   removeYear: () => void;
-
   clearFilters: () => void;
 }
 
@@ -52,12 +42,6 @@ export function useMovieFilters(): UseMovieFiltersResult {
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  /**
-   * La URL se interpreta en una sola capa.
-   *
-   * Antes este hook volvía a parsear manualmente los mismos
-   * query params que ya parseaba lib/url/movieFilters.ts.
-   */
   const uiState = useMemo(
     () => parseMovieFiltersForUI(searchParams),
     [searchParams]
@@ -100,7 +84,6 @@ export function useMovieFilters(): UseMovieFiltersResult {
       replaceParams((params) => {
         const genreKey = MOVIE_FILTER_PARAM_KEYS.genres;
         const currentGenres = params.getAll(genreKey);
-
         params.delete(genreKey);
 
         if (currentGenres.includes(slug)) {
@@ -185,6 +168,14 @@ export function useMovieFilters(): UseMovieFiltersResult {
     });
   }, [replaceParams]);
 
+  /**
+   * Limpia todos los filtros, incluido el ordenamiento.
+   *
+   * Semántica:
+   * "Limpiar filtros" lleva al usuario al estado inicial
+   * del catálogo, sin ningún filtro ni orden personalizado.
+   * El sort vuelve a su valor por defecto (latest).
+   */
   const clearFilters = useCallback(() => {
     replaceParams((params) => {
       params.delete(MOVIE_FILTER_PARAM_KEYS.genres);
@@ -192,6 +183,7 @@ export function useMovieFilters(): UseMovieFiltersResult {
       params.delete(MOVIE_FILTER_PARAM_KEYS.fromYear);
       params.delete(MOVIE_FILTER_PARAM_KEYS.toYear);
       params.delete(MOVIE_FILTER_PARAM_KEYS.country);
+      params.delete(MOVIE_FILTER_PARAM_KEYS.sort);
     });
   }, [replaceParams]);
 
@@ -204,21 +196,15 @@ export function useMovieFilters(): UseMovieFiltersResult {
     toYear,
     hasYearFilter,
     filterCount,
-
     toggleGenre,
     removeGenre,
-
     setRating,
     removeRating,
-
     setCountry,
     removeCountry,
-
     setSort,
-
     applyYearRange,
     removeYear,
-
     clearFilters,
   };
 }

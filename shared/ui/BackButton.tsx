@@ -1,25 +1,26 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import { IconBack } from '@/shared/ui/icons';
 
 interface BackButtonProps {
   fallbackHref: string;
 }
 
+/**
+ * Botón "Volver" genérico.
+ *
+ * Usa history.back() cuando existe historial previo;
+ * si no, redirige al fallback proporcionado por quien lo consume.
+ *
+ * La verificación de window.history.length se hace en el handler,
+ * no en un useEffect, para evitar renders innecesarios.
+ */
 export default function BackButton({ fallbackHref }: BackButtonProps) {
   const router = useRouter();
-  const [hasHistory, setHasHistory] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.history.length > 1) {
-      setHasHistory(true);
-    }
-  }, []);
 
   const handleBack = () => {
-    if (hasHistory) {
+    if (typeof window !== 'undefined' && window.history.length > 1) {
       router.back();
     } else {
       router.push(fallbackHref);

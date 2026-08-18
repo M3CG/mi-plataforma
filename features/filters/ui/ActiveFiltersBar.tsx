@@ -1,7 +1,7 @@
 // features/filters/ui/ActiveFiltersBar.tsx
 'use client';
 
-import { Category } from '@/types';
+import type { Category } from '@/entities/category';
 import {
   IconCalendar,
   IconClose,
@@ -116,8 +116,8 @@ export default function ActiveFiltersBar({
 
       <button
         onClick={onClearAll}
-        aria-label="Limpiar todos los filtros"
-        title="Limpiar todos los filtros"
+        aria-label="Limpiar filtros activos"
+        title="Limpiar filtros activos"
         className="flex items-center gap-1.5 ml-auto bg-red-950/40 border border-red-800/30 text-red-400 hover:bg-red-600/80 hover:text-white hover:border-red-500/30 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-150"
       >
         <IconTrash />

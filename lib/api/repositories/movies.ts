@@ -1,5 +1,5 @@
 // lib/api/repositories/movies.ts
-import type { Movie } from '@/types';
+import type { Movie } from '@/entities/movie';
 import type { MovieFilters } from '@/entities/movie/types/filters';
 import type { PaginatedResult } from '../pagination/types';
 import type { StrapiListResponse } from '../strapi/types';

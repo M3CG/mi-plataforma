@@ -1,4 +1,3 @@
-// features/player/model/useServerFailover.ts
 'use client';
 
 import {
@@ -8,7 +7,6 @@ import {
   useRef,
   useState,
 } from 'react';
-
 import type { LoadStatus, PlayableSource } from '../types';
 import { LOAD_TIMEOUT_MS } from '../config/player';
 import { findNextAvailableSource } from '../lib/findNextAvailableSource';
@@ -23,7 +21,13 @@ export function useServerFailover({
   timeoutMs = LOAD_TIMEOUT_MS,
 }: UseServerFailoverProps) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [loadStatus, setLoadStatus] = useState<LoadStatus>('idle');
+  // Estado interno que solo cambia por eventos explícitos:
+  // - 'loaded'   cuando el iframe carga
+  // - 'timeout'  cuando expira el timer
+  // - 'loading'  cuando el usuario reintenta o cambia de servidor
+  // El estado 'idle' se deriva cuando no hay fuente activa.
+  const [internalLoadStatus, setInternalLoadStatus] =
+    useState<LoadStatus>('idle');
   const [autoSwitched, setAutoSwitched] = useState(false);
   const [retryCounter, setRetryCounter] = useState(0);
   const [failedSourceIds, setFailedSourceIds] = useState<Set<string>>(
@@ -33,11 +37,28 @@ export function useServerFailover({
   const failedSourceIdsRef = useRef<Set<string>>(failedSourceIds);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const activeSource = sources[activeIndex] ?? null;
-
   useEffect(() => {
     failedSourceIdsRef.current = failedSourceIds;
   }, [failedSourceIds]);
+
+  // ─── Derivación durante render ───
+  // Si la lista de fuentes cambia y activeIndex queda fuera de rango,
+  // derivamos un índice seguro sin usar efecto + setState.
+  const safeActiveIndex =
+    sources.length > 0 && activeIndex >= sources.length ? 0 : activeIndex;
+
+  const activeSource = sources[safeActiveIndex] ?? null;
+
+  // Estado efectivo derivado:
+  // - Sin fuente activa  → 'idle'
+  // - Con fuente activa  → lo que diga internalLoadStatus,
+  //   pero si está en 'idle' por defecto, asumimos 'loading'
+  //   (porque tener una fuente implica que estamos intentando cargar).
+  const effectiveLoadStatus: LoadStatus = useMemo(() => {
+    if (!activeSource) return 'idle';
+    if (internalLoadStatus === 'idle') return 'loading';
+    return internalLoadStatus;
+  }, [activeSource, internalLoadStatus]);
 
   const clearLoadTimeout = useCallback(() => {
     if (timeoutRef.current) {
@@ -66,32 +87,22 @@ export function useServerFailover({
     setFailedSourceIds(next);
   }, []);
 
-  // Protección por si la lista de fuentes cambia y el índice queda fuera de rango.
-  useEffect(() => {
-    if (sources.length === 0) return;
-
-    if (activeIndex >= sources.length) {
-      setActiveIndex(0);
-    }
-  }, [sources.length, activeIndex]);
-
   // Timer de carga del servidor activo.
+  // Este efecto SOLO configura el timer de failover.
+  // No cambia loadStatus: el estado se deriva durante el render.
   useEffect(() => {
     clearLoadTimeout();
 
     if (!activeSource) {
-      setLoadStatus('idle');
       return;
     }
-
-    setLoadStatus('loading');
 
     timeoutRef.current = setTimeout(() => {
       markSourceFailed(activeSource.id);
 
       const nextIndex = findNextAvailableSource(
         sources,
-        activeIndex,
+        safeActiveIndex,
         failedSourceIdsRef.current
       );
 
@@ -99,7 +110,7 @@ export function useServerFailover({
         setAutoSwitched(true);
         setActiveIndex(nextIndex);
       } else {
-        setLoadStatus('timeout');
+        setInternalLoadStatus('timeout');
       }
     }, timeoutMs);
 
@@ -107,7 +118,7 @@ export function useServerFailover({
   }, [
     activeSource,
     sources,
-    activeIndex,
+    safeActiveIndex,
     clearLoadTimeout,
     markSourceFailed,
     retryCounter,
@@ -116,7 +127,7 @@ export function useServerFailover({
 
   const handleIframeLoad = useCallback(() => {
     clearLoadTimeout();
-    setLoadStatus('loaded');
+    setInternalLoadStatus('loaded');
   }, [clearLoadTimeout]);
 
   const handleRetry = useCallback(() => {
@@ -124,51 +135,49 @@ export function useServerFailover({
 
     clearSourceFailed(activeSource.id);
     setAutoSwitched(false);
-    setLoadStatus('loading');
+    setInternalLoadStatus('loading');
     setRetryCounter((previous) => previous + 1);
   }, [activeSource, clearSourceFailed]);
 
   const handleSelectSource = useCallback(
     (index: number) => {
       const source = sources[index];
-
       if (!source) return;
 
       clearSourceFailed(source.id);
       setAutoSwitched(false);
 
-      if (index === activeIndex) {
+      if (index === safeActiveIndex) {
         // Reintento manual del mismo servidor.
-        setLoadStatus('loading');
+        setInternalLoadStatus('loading');
         setRetryCounter((previous) => previous + 1);
       } else {
         setActiveIndex(index);
+        // Al cambiar de fuente, el estado derivado
+        // pasará automáticamente a 'loading'.
+        setInternalLoadStatus('idle');
       }
     },
-    [sources, activeIndex, clearSourceFailed]
+    [sources, safeActiveIndex, clearSourceFailed]
   );
 
   const allFailed = useMemo(() => {
     if (sources.length === 0) return false;
-
     return sources.every((source) => failedSourceIds.has(source.id));
   }, [sources, failedSourceIds]);
 
   return {
     sources,
     activeSource,
-    activeIndex,
+    activeIndex: safeActiveIndex,
     failedSourceIds,
-    loadStatus,
+    loadStatus: effectiveLoadStatus,
     autoSwitched,
     retryCounter,
     allFailed,
-
     handleIframeLoad,
     handleRetry,
     handleSelectSource,
-
-    // Lo exponemos por si algún componente visual lo necesita.
     resetFailedSources,
   };
 }

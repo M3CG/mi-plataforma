@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import type { Movie } from '@/types';
+import type { Movie } from '@/entities/movie';
 import { writeGridState } from '../lib/gridStateStorage';
 
 interface UseGridStatePersistenceProps {

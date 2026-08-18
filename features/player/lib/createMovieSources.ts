@@ -1,6 +1,6 @@
 // features/player/lib/createMovieSources.ts
 
-import type { Server } from '@/types';
+import type { Server } from '@/entities/movie';
 import type { PlayableSource } from '../types';
 import { EMBED_PROVIDERS } from '../config/providers';
 

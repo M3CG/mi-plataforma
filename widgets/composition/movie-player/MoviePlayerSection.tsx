@@ -1,9 +1,6 @@
-// features/movie-detail/ui/MoviePlayerSection.tsx
-
-import type { Server } from '@/types';
+import type { Server } from '@/entities/movie';
 import { VideoPlayer, createMovieSources } from '@/features/player';
-import { WATCH_SECTION_ID } from '../config/movieDetail';
-
+import { WATCH_SECTION_ID } from '@/features/movie-detail/config/movieDetail';
 
 interface MoviePlayerSectionProps {
   movieSlug: string;
@@ -29,7 +26,6 @@ export default function MoviePlayerSection({
       <h2 className="text-lg font-semibold text-white mb-4">
         Ver Película
       </h2>
-
       <VideoPlayer key={movieSlug} sources={sources} />
     </div>
   );

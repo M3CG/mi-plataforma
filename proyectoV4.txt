@@ -34,29 +34,335 @@
   "exclude": ["node_modules"]
 }
 
-==> ./widgets/MovieCard/AppMovieCard.tsx <==
-// components/AppMovieCard.tsx
+==> ./widgets/movie-card/AppMovieCard.tsx <==
 'use client';
 
-import type { Movie } from '@/types';
-import MovieCard from '@/entities/movie/ui/MovieCard';
+import type { MouseEvent } from 'react';
+import type { Movie } from '@/entities/movie';
+import MovieCard from './MovieCard';
 import { routes } from '@/lib/routes';
 
 interface AppMovieCardProps {
   movie: Movie;
+  onPrimaryLinkClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
 }
 
-export default function AppMovieCard({ movie }: AppMovieCardProps) {
+export default function AppMovieCard({
+  movie,
+  onPrimaryLinkClick,
+}: AppMovieCardProps) {
   return (
     <MovieCard
       movie={movie}
       href={routes.movie(movie.slug)}
-      getCategoryHref={(categorySlug) =>
-        routes.moviesByGenre(categorySlug)
-      }
+      getCategoryHref={(categorySlug) => routes.moviesByGenre(categorySlug)}
+      onPrimaryLinkClick={onPrimaryLinkClick}
     />
   );
 }
+
+==> ./widgets/movie-card/MovieCardSkeleton.tsx <==
+export default function MovieCardSkeleton() {
+  return (
+    <div className="bg-white/[0.03] border border-white/5 rounded-2xl overflow-hidden animate-pulse">
+      <div className="aspect-[2/3] bg-white/5" />
+      <div className="p-3.5 space-y-2">
+        <div className="h-4 bg-white/10 rounded w-4/5" />
+        <div className="h-3 bg-white/10 rounded w-2/5" />
+        <div className="h-3 bg-white/10 rounded w-3/5" />
+      </div>
+    </div>
+  );
+}
+
+==> ./widgets/movie-card/MovieCard.tsx <==
+'use client';
+
+import Image from 'next/image';
+import Link from 'next/link';
+import type { MouseEvent } from 'react';
+import type { Movie } from '@/entities/movie';
+import { createMovieCardViewModel } from '@/entities/movie';
+import { IconImagePlaceholder, IconStar } from '@/shared/ui/icons';
+import MovieCardCategoryLink from './MovieCardCategoryLink';
+
+export interface MovieCardProps {
+  movie: Movie;
+  href: string;
+  getCategoryHref?: (categorySlug: string) => string;
+  onPrimaryLinkClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
+}
+
+export default function MovieCard({
+  movie,
+  href,
+  getCategoryHref,
+  onPrimaryLinkClick,
+}: MovieCardProps) {
+  const viewModel = createMovieCardViewModel(movie);
+
+  return (
+    <article
+      className="
+        group relative
+        bg-white/[0.03] border border-white/5
+        rounded-2xl overflow-hidden
+        transition-all duration-300
+        hover:bg-white/[0.06] hover:border-white/10
+        hover:shadow-xl hover:shadow-black/20
+        hover:-translate-y-1
+      "
+    >
+      <Link
+        href={href}
+        onClick={onPrimaryLinkClick}
+        aria-label={`Ver detalle de ${viewModel.title}`}
+        title={`Ver detalle de ${viewModel.title}`}
+        className="absolute inset-0 z-10"
+      />
+
+      {/* Imagen */}
+      <div className="relative aspect-[2/3] overflow-hidden">
+        {viewModel.posterUrl ? (
+          <Image
+            src={viewModel.posterUrl}
+            alt={`Póster de ${viewModel.title}`}
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1400px) 25vw, 20vw"
+            className="
+              object-cover
+              transition-transform duration-500
+              group-hover:scale-105
+            "
+          />
+        ) : (
+          <div className="w-full h-full bg-white/5 flex items-center justify-center">
+            <IconImagePlaceholder className="w-10 h-10 text-gray-600" />
+          </div>
+        )}
+
+        <div
+          className="
+            absolute inset-0
+            bg-gradient-to-t from-black/60 via-transparent to-transparent
+            opacity-0 group-hover:opacity-100
+            transition-opacity duration-300
+          "
+        />
+
+        <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
+          {viewModel.primaryQuality && (
+            <span
+              className="
+                bg-red-600/90 backdrop-blur-sm
+                text-white text-[10px] font-bold
+                px-2 py-0.5 rounded-md
+                uppercase tracking-wide
+              "
+            >
+              {viewModel.primaryQuality}
+            </span>
+          )}
+
+          {viewModel.hasSubtitles && (
+            <span
+              className="
+                bg-black/60 backdrop-blur-sm
+                text-gray-200 text-[10px] font-semibold
+                px-2 py-0.5 rounded-md
+              "
+            >
+              CC
+            </span>
+          )}
+        </div>
+
+        {viewModel.rating > 0 && (
+          <div
+            className="
+              absolute top-2.5 right-2.5
+              flex items-center gap-1
+              bg-black/70 backdrop-blur-sm
+              px-2 py-1 rounded-lg
+            "
+          >
+            <IconStar className="w-3 h-3 text-amber-400" />
+            <span className="text-xs font-bold text-white">
+              {viewModel.rating.toFixed(1)}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Información */}
+      <div className="relative p-3.5">
+        <h2
+          className="
+            text-sm font-semibold text-gray-100
+            leading-snug line-clamp-2 min-h-[2.5rem]
+            group-hover:text-white transition-colors
+          "
+        >
+          {viewModel.title}
+        </h2>
+
+        <div className="flex items-center gap-2 mt-1.5 text-xs">
+          <span className="text-gray-400">{viewModel.year}</span>
+
+          {viewModel.runtimeLabel && (
+            <>
+              <span className="text-gray-600">·</span>
+              <span className="text-gray-400">{viewModel.runtimeLabel}</span>
+            </>
+          )}
+
+          {viewModel.ageRating && (
+            <>
+              <span className="text-gray-600">·</span>
+              <span className="text-gray-400">{viewModel.ageRating}</span>
+            </>
+          )}
+        </div>
+
+        {viewModel.languages.length > 0 && (
+          <p className="text-[11px] text-gray-400 mt-1.5 truncate">
+            {viewModel.languages.join(' · ')}
+          </p>
+        )}
+
+        {viewModel.categories.length > 0 && (
+          <div className="relative z-20 flex flex-wrap gap-1 mt-2.5">
+            {viewModel.categories.map((category) => (
+              <MovieCardCategoryLink
+                key={category.id}
+                category={category}
+                href={getCategoryHref?.(category.slug)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </article>
+  );
+}
+
+==> ./widgets/movie-card/index.ts <==
+export { default as MovieCard } from './MovieCard';
+export type { MovieCardProps } from './MovieCard';
+export { default as MovieCardCategoryLink } from './MovieCardCategoryLink';
+export { default as MovieCardSkeleton } from './MovieCardSkeleton';
+export { default as AppMovieCard } from './AppMovieCard';
+
+==> ./widgets/movie-card/MovieCardCategoryLink.tsx <==
+import Link from 'next/link';
+import type { Category } from '@/entities/category';
+
+interface MovieCardCategoryLinkProps {
+  category: Category;
+  href?: string;
+}
+
+export default function MovieCardCategoryLink({
+  category,
+  href,
+}: MovieCardCategoryLinkProps) {
+  const baseClasses = `
+    relative z-20
+    text-[10px] font-medium
+    bg-white/5 border border-white/5
+    text-gray-400
+    px-2 py-0.5 rounded-full
+    transition-all duration-150
+  `;
+
+  if (!href) {
+    return <span className={baseClasses}>{category.name}</span>;
+  }
+
+  return (
+    <Link
+      href={href}
+      title={`Filtrar películas por ${category.name}`}
+      aria-label={`Filtrar películas por ${category.name}`}
+      className={`
+        ${baseClasses}
+        hover:text-white hover:bg-white/10 hover:border-white/10
+      `}
+    >
+      {category.name}
+    </Link>
+  );
+}
+
+==> ./widgets/composition/movie-player/MoviePlayerSection.tsx <==
+import type { Server } from '@/entities/movie';
+import { VideoPlayer, createMovieSources } from '@/features/player';
+import { WATCH_SECTION_ID } from '@/features/movie-detail/config/movieDetail';
+
+interface MoviePlayerSectionProps {
+  movieSlug: string;
+  tmdbId: number;
+  servers: Server[];
+}
+
+export default function MoviePlayerSection({
+  movieSlug,
+  tmdbId,
+  servers,
+}: MoviePlayerSectionProps) {
+  const sources = createMovieSources({
+    tmdbId,
+    manualServers: servers,
+  });
+
+  return (
+    <div
+      id={WATCH_SECTION_ID}
+      className="scroll-mt-20 pt-10 border-t border-white/5 mb-10"
+    >
+      <h2 className="text-lg font-semibold text-white mb-4">
+        Ver Película
+      </h2>
+      <VideoPlayer key={movieSlug} sources={sources} />
+    </div>
+  );
+}
+
+==> ./widgets/composition/movie-player/index.ts <==
+export { default as MoviePlayerSection } from './MoviePlayerSection';
+
+==> ./widgets/composition/catalog-grid-with-ads/CatalogGridWithAds.tsx <==
+'use client';
+
+import type { Movie, MovieFilters } from '@/entities/movie';
+import { MovieGrid, CatalogMovieCard } from '@/features/catalog';
+import { MovieGridAdSlot } from '@/features/ads';
+
+interface CatalogGridWithAdsProps {
+  initialMovies: Movie[];
+  initialHasMore: boolean;
+  filters: MovieFilters;
+}
+
+export default function CatalogGridWithAds({
+  initialMovies,
+  initialHasMore,
+  filters,
+}: CatalogGridWithAdsProps) {
+  return (
+    <MovieGrid
+      initialMovies={initialMovies}
+      initialHasMore={initialHasMore}
+      filters={filters}
+      renderMovie={(movie) => <CatalogMovieCard movie={movie} />}
+      renderAfterMovie={(index) => <MovieGridAdSlot index={index} />}
+    />
+  );
+}
+
+==> ./widgets/composition/catalog-grid-with-ads/index.ts <==
+export { default as CatalogGridWithAds } from './CatalogGridWithAds';
+
 ==> ./widgets/Header/Header.tsx <==
 // components/Header.tsx
 'use client';
@@ -114,9 +420,7 @@ export function clampMovieYear(year: number): number {
   );
 }
 ==> ./entities/movie/lib/movieKey.ts <==
-// entities/movie/lib/movieKey.ts
-
-import type { Movie } from '@/types';
+import type { Movie } from '../types/movie';
 
 /**
  * Identidad única de una película.
@@ -138,14 +442,14 @@ export function dedupeMovies(
   incomingMovies: Movie[]
 ): Movie[] {
   const seenKeys = new Set(existingMovies.map(getMovieKey));
-
   return incomingMovies.filter(
     (movie) => !seenKeys.has(getMovieKey(movie))
   );
 }
+
 ==> ./entities/movie/lib/createMovieCardViewModel.ts <==
-// entities/movie/lib/createMovieCardViewModel.ts
-import type { Category, Movie } from '@/types';
+import type { Category } from '@/entities/category';
+import type { Movie } from '../types/movie';
 import { formatRuntime } from '@/lib/utils/format';
 
 export interface MovieCardViewModel {
@@ -197,6 +501,7 @@ export function createMovieCardViewModel(
     categories: movie.categories ?? [],
   };
 }
+
 ==> ./entities/movie/config/filterParams.ts <==
 // entities/movie/config/filterParams.ts
 
@@ -366,253 +671,29 @@ export type MovieFiltersQuery = Record<
   string,
   string | string[] | undefined
 >;
-==> ./entities/movie/ui/MovieCardSkeleton.tsx <==
-// entities/movie/ui/MovieCardSkeleton.tsx
-
-export default function MovieCardSkeleton() {
-  return (
-    <div className="bg-white/[0.03] border border-white/5 rounded-2xl overflow-hidden animate-pulse">
-      <div className="aspect-[2/3] bg-white/5" />
-
-      <div className="p-3.5 space-y-2">
-        <div className="h-4 bg-white/10 rounded w-4/5" />
-        <div className="h-3 bg-white/10 rounded w-2/5" />
-        <div className="h-3 bg-white/10 rounded w-3/5" />
-      </div>
-    </div>
-  );
-}
-==> ./entities/movie/ui/MovieCard.tsx <==
-// entities/movie/ui/MovieCard.tsx
-'use client';
-
-import Image from 'next/image';
-import Link from 'next/link';
-import type { Movie } from '@/types';
-import { IconImagePlaceholder, IconStar } from '@/shared/ui/icons';
-import { createMovieCardViewModel } from '../lib/createMovieCardViewModel';
-import MovieCardCategoryLink from './MovieCardCategoryLink';
-
-export interface MovieCardProps {
-  movie: Movie;
-  href: string;
-  getCategoryHref?: (categorySlug: string) => string;
-}
-
-export default function MovieCard({
-  movie,
-  href,
-  getCategoryHref,
-}: MovieCardProps) {
-  const viewModel = createMovieCardViewModel(movie);
-
-  return (
-    <article
-      className="
-        group relative
-        bg-white/[0.03] border border-white/5
-        rounded-2xl overflow-hidden
-        transition-all duration-300
-        hover:bg-white/[0.06] hover:border-white/10
-        hover:shadow-xl hover:shadow-black/20
-        hover:-translate-y-1
-      "
-    >
-      <Link
-        href={href}
-        aria-label={`Ver detalle de ${viewModel.title}`}
-        title={`Ver detalle de ${viewModel.title}`}
-        className="absolute inset-0 z-10"
-      />
-
-      {/* ─── Imagen ─── */}
-      <div className="relative aspect-[2/3] overflow-hidden">
-        {viewModel.posterUrl ? (
-          <Image
-            src={viewModel.posterUrl}
-            alt={`Póster de ${viewModel.title}`}
-            fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1400px) 25vw, 20vw"
-            className="
-              object-cover
-              transition-transform duration-500
-              group-hover:scale-105
-            "
-          />
-        ) : (
-          <div className="w-full h-full bg-white/5 flex items-center justify-center">
-            <IconImagePlaceholder className="w-10 h-10 text-gray-600" />
-          </div>
-        )}
-
-        <div
-          className="
-            absolute inset-0
-            bg-gradient-to-t from-black/60 via-transparent to-transparent
-            opacity-0 group-hover:opacity-100
-            transition-opacity duration-300
-          "
-        />
-
-        <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
-          {viewModel.primaryQuality && (
-            <span
-              className="
-                bg-red-600/90 backdrop-blur-sm
-                text-white text-[10px] font-bold
-                px-2 py-0.5 rounded-md
-                uppercase tracking-wide
-              "
-            >
-              {viewModel.primaryQuality}
-            </span>
-          )}
-
-          {viewModel.hasSubtitles && (
-            <span
-              className="
-                bg-black/60 backdrop-blur-sm
-                text-gray-200 text-[10px] font-semibold
-                px-2 py-0.5 rounded-md
-              "
-            >
-              CC
-            </span>
-          )}
-        </div>
-
-        {viewModel.rating > 0 && (
-          <div
-            className="
-              absolute top-2.5 right-2.5
-              flex items-center gap-1
-              bg-black/70 backdrop-blur-sm
-              px-2 py-1 rounded-lg
-            "
-          >
-            <IconStar className="w-3 h-3 text-amber-400" />
-            <span className="text-xs font-bold text-white">
-              {viewModel.rating.toFixed(1)}
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* ─── Información ─── */}
-      <div className="relative p-3.5">
-        <h2
-          className="
-            text-sm font-semibold text-gray-100
-            leading-snug line-clamp-2 min-h-[2.5rem]
-            group-hover:text-white transition-colors
-          "
-        >
-          {viewModel.title}
-        </h2>
-
-        <div className="flex items-center gap-2 mt-1.5 text-xs">
-          <span className="text-gray-400">{viewModel.year}</span>
-
-          {viewModel.runtimeLabel && (
-            <>
-              <span className="text-gray-600">·</span>
-              <span className="text-gray-400">{viewModel.runtimeLabel}</span>
-            </>
-          )}
-
-          {viewModel.ageRating && (
-            <>
-              <span className="text-gray-600">·</span>
-              <span className="text-gray-400">{viewModel.ageRating}</span>
-            </>
-          )}
-        </div>
-
-        {viewModel.languages.length > 0 && (
-          <p className="text-[11px] text-gray-400 mt-1.5 truncate">
-            {viewModel.languages.join(' · ')}
-          </p>
-        )}
-
-        {viewModel.categories.length > 0 && (
-          <div className="relative z-20 flex flex-wrap gap-1 mt-2.5">
-            {viewModel.categories.map((category) => (
-              <MovieCardCategoryLink
-                key={category.id}
-                category={category}
-                href={getCategoryHref?.(category.slug)}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    </article>
-  );
-}
-==> ./entities/movie/ui/MovieCardCategoryLink.tsx <==
-// entities/movie/ui/MovieCardCategoryLink.tsx
-import Link from 'next/link';
-import type { Category } from '@/types';
-
-interface MovieCardCategoryLinkProps {
-  category: Category;
-  href?: string;
-}
-
-export default function MovieCardCategoryLink({
-  category,
-  href,
-}: MovieCardCategoryLinkProps) {
-  const baseClasses = `
-    relative z-20
-    text-[10px] font-medium
-    bg-white/5 border border-white/5
-    text-gray-400
-    px-2 py-0.5 rounded-full
-    transition-all duration-150
-  `;
-
-  if (!href) {
-    return (
-      <span className={baseClasses}>
-        {category.name}
-      </span>
-    );
-  }
-
-  return (
-    <Link
-      href={href}
-      title={`Filtrar películas por ${category.name}`}
-      aria-label={`Filtrar películas por ${category.name}`}
-      className={`
-        ${baseClasses}
-        hover:text-white hover:bg-white/10 hover:border-white/10
-      `}
-    >
-      {category.name}
-    </Link>
-  );
-}
 ==> ./entities/movie/index.ts <==
-// entities/movie/index.ts
-export { default as MovieCard } from './ui/MovieCard';
-export type { MovieCardProps } from './ui/MovieCard';
+export type { Movie, Server } from './types/movie';
+
 export { createMovieCardViewModel } from './lib/createMovieCardViewModel';
 export type { MovieCardViewModel } from './lib/createMovieCardViewModel';
+
 export { getMovieKey, dedupeMovies } from './lib/movieKey';
+
 export type {
   MovieFilters,
   MovieFiltersQuery,
   MovieSort,
 } from './types/filters';
+
 export {
   MOVIE_SORT_VALUES,
   DEFAULT_MOVIE_SORT,
   MOVIE_SORT_OPTIONS,
   isMovieSort,
 } from './config/sort';
+
 export type { MovieSortOption } from './config/sort';
+
 export {
   MOVIE_YEAR_MIN,
   getMovieYearMax,
@@ -625,6 +706,7 @@ export {
 } from './config/filterParams';
 
 export type { MovieFilterParamKey } from './config/filterParams';
+
 ==> ./entities/person/types.ts <==
 // entities/person/types.ts
 
@@ -669,7 +751,7 @@ export type { Category } from './types';
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint ."
   },
   "dependencies": {
     "next": "16.3.0",
@@ -687,6 +769,36 @@ export type { Category } from './types';
     "tailwindcss": "^4",
     "typescript": "^5"
   }
+}
+
+==> ./shared/ui/PosterGrid.tsx <==
+import type { ReactNode } from 'react';
+
+export type PosterGridVariant = 'compact' | 'spacious';
+
+interface PosterGridProps {
+  children: ReactNode;
+  variant?: PosterGridVariant;
+  className?: string;
+}
+
+const VARIANT_CLASSES: Record<PosterGridVariant, string> = {
+  compact:
+    'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4',
+  spacious:
+    'grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6',
+};
+
+export default function PosterGrid({
+  children,
+  variant = 'compact',
+  className,
+}: PosterGridProps) {
+  const classes = [VARIANT_CLASSES[variant], className]
+    .filter(Boolean)
+    .join(' ');
+
+  return <div className={classes}>{children}</div>;
 }
 
 ==> ./shared/ui/icons.tsx <==
@@ -799,30 +911,32 @@ export const IconRefresh = ({ className = "w-4 h-4" }: IconProps) => (
   </svg>
 );
 ==> ./shared/ui/BackButton.tsx <==
-// components/BackButton.tsx
+'use client';
 
-"use client";
-
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter } from 'next/navigation';
 import { IconBack } from '@/shared/ui/icons';
-import { routes } from '@/lib/routes';
 
-export default function BackButton() {
+interface BackButtonProps {
+  fallbackHref: string;
+}
+
+/**
+ * Botón "Volver" genérico.
+ *
+ * Usa history.back() cuando existe historial previo;
+ * si no, redirige al fallback proporcionado por quien lo consume.
+ *
+ * La verificación de window.history.length se hace en el handler,
+ * no en un useEffect, para evitar renders innecesarios.
+ */
+export default function BackButton({ fallbackHref }: BackButtonProps) {
   const router = useRouter();
-  const [hasHistory, setHasHistory] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.history.length > 1) {
-      setHasHistory(true);
-    }
-  }, []);
 
   const handleBack = () => {
-    if (hasHistory) {
+    if (typeof window !== 'undefined' && window.history.length > 1) {
       router.back();
     } else {
-      router.push(routes.movies);
+      router.push(fallbackHref);
     }
   };
 
@@ -836,6 +950,7 @@ export default function BackButton() {
     </button>
   );
 }
+
 ==> ./lib/api/http/url.ts <==
 // lib/api/http/url.ts
 import { API_URL } from './config';
@@ -968,11 +1083,10 @@ export { buildApiUrl, cleanApiUrl } from './url';
 export { API_URL, FETCH_TIMEOUT_MS } from './config';
 export type { NextFetchRequestConfig } from './types';
 ==> ./lib/api/pagination/config.ts <==
-// lib/api/pagination/config.ts
 export const DEFAULT_PAGE_SIZE = 24;
 export const HOME_PAGE_SIZE = 20;
 export const SEARCH_PAGE_SIZE = 24;
-export const CATEGORY_PAGE_SIZE = 24;
+
 ==> ./lib/api/pagination/types.ts <==
 // lib/api/pagination/types.ts
 export type PaginatedResult<T> = {
@@ -1544,7 +1658,8 @@ export async function fetchCountries(): Promise<string[]> {
 }
 ==> ./lib/api/repositories/actors.ts <==
 // lib/api/repositories/actors.ts
-import type { Actor, Movie } from '@/types';
+import type { Actor } from '@/entities/person';
+import type { Movie } from '@/entities/movie';
 import type { StrapiListResponse } from '../strapi/types';
 
 import { fetchApi } from '../http/client';
@@ -1647,7 +1762,7 @@ export async function fetchMoviesByActor(
 }
 ==> ./lib/api/repositories/categories.ts <==
 // lib/api/resources/categories.ts
-import type { Category } from '@/types';
+import type { Category } from '@/entities/category';
 import type { StrapiListResponse } from '../strapi/types';
 
 import { fetchApi } from '../http/client';
@@ -1678,7 +1793,7 @@ export async function fetchCategories(): Promise<Category[]> {
 }
 ==> ./lib/api/repositories/movies.ts <==
 // lib/api/repositories/movies.ts
-import type { Movie } from '@/types';
+import type { Movie } from '@/entities/movie';
 import type { MovieFilters } from '@/entities/movie/types/filters';
 import type { PaginatedResult } from '../pagination/types';
 import type { StrapiListResponse } from '../strapi/types';
@@ -2117,22 +2232,16 @@ export const getHomeMovies = cache(fetchHomeMovies);
 export const getMovieBySlug = cache(fetchMovieBySlug);
 export const getMoviesWithFilters = cache(fetchMoviesWithFilters);
 ==> ./lib/routes.ts <==
-// lib/routes.ts
 import { SITE_URL } from './config/site';
-
-// ─── Rutas relativas (para <Link> y router.push) ───
 
 export const routes = {
   home: '/',
-  movies: '/movies',                          // ← Ahora es string constante
+  movies: '/movies',
   movie: (slug: string) => `/movie/${slug}`,
   actor: (slug: string) => `/actor/${slug}`,
   search: (query: string) => `/search?q=${encodeURIComponent(query)}`,
   moviesByGenre: (genreSlug: string) => `/movies?genres=${genreSlug}`,
-  moviesWithParams: (params: string) => `/movies?${params}`,  // ← Para casos excepcionales
 } as const;
-
-// ─── URLs absolutas (para SEO, sitemap, JSON-LD) ───
 
 export const absoluteRoutes = {
   home: `${SITE_URL}`,
@@ -2140,6 +2249,7 @@ export const absoluteRoutes = {
   movie: (slug: string) => `${SITE_URL}/movie/${slug}`,
   actor: (slug: string) => `${SITE_URL}/actor/${slug}`,
 } as const;
+
 ==> ./lib/utils/logger.ts <==
 // lib/utils/logger.ts
 // Sistema de logging unificado.
@@ -2293,49 +2403,45 @@ export function formatRuntime(minutes?: number | null): string | null {
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 ==> ./lib/scroll/defer.ts <==
-// lib/scroll/defer.ts
-
-const SCROLL_DEFER_KEY = '__scroll_restore_pending';
+const SCROLL_DEFER_KEY = '__scroll_restore_pending_path';
 
 function isBrowser(): boolean {
   return typeof window !== 'undefined';
 }
 
 /**
- * Marca que una feature quiere controlar el scroll.
- *
- * Esta señal es leída por ScrollToTop para no intervenir.
+ * Marca que una feature quiere controlar el scroll
+ * cuando el usuario regrese a una ruta concreta.
  */
-export function deferScrollRestore(): void {
+export function deferScrollRestore(returnPath: string): void {
   if (!isBrowser()) return;
 
   try {
-    sessionStorage.setItem(SCROLL_DEFER_KEY, 'true');
+    sessionStorage.setItem(SCROLL_DEFER_KEY, returnPath);
   } catch {
     // Si sessionStorage falla, igualmente dejamos que el flujo continúe.
   }
 }
 
 /**
- * Consulta si hay una señal pendiente de restauración de scroll.
- * No la consume.
+ * Consulta si hay una señal pendiente de restauración de scroll
+ * para una ruta específica.
  */
-export function isScrollRestoreDeferred(): boolean {
+export function isScrollRestoreDeferredFor(pathname: string): boolean {
   if (!isBrowser()) return false;
 
   try {
-    return sessionStorage.getItem(SCROLL_DEFER_KEY) === 'true';
+    return sessionStorage.getItem(SCROLL_DEFER_KEY) === pathname;
   } catch {
     return false;
   }
 }
 
 /**
- * Consume la señal pendiente.
- * Devuelve true si existía y fue limpiada.
+ * Consume la señal pendiente si corresponde a la ruta indicada.
  */
-export function consumeScrollRestoreSignal(): boolean {
-  if (!isScrollRestoreDeferred()) return false;
+export function consumeScrollRestoreSignal(pathname: string): boolean {
+  if (!isScrollRestoreDeferredFor(pathname)) return false;
 
   try {
     sessionStorage.removeItem(SCROLL_DEFER_KEY);
@@ -2345,22 +2451,22 @@ export function consumeScrollRestoreSignal(): boolean {
 
   return true;
 }
-==> ./types/index.ts <==
-// types/index.ts
 
+==> ./types/index.ts <==
 /**
- * Cap de compatibilidad hacia afuera.
+ * @deprecated
  *
- * Los tipos de dominio ahora pertenecen a sus entidades:
- * - Movie / Server → entities/movie
- * - Category → entities/category
- * - Actor / Director / Person → entities/person
+ * Este archivo existe solo como capa de compatibilidad temporal.
  *
- * Este archivo solo re-exporta para no romper imports existentes.
+ * Los tipos de dominio deben importarse desde sus entidades:
+ * - @/entities/movie
+ * - @/entities/category
+ * - @/entities/person
  */
 export type { Movie, Server } from '@/entities/movie/types/movie';
 export type { Category } from '@/entities/category/types';
 export type { Actor, Director, Person } from '@/entities/person/types';
+
 ==> ./README.md <==
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
@@ -2400,27 +2506,70 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
 ==> ./features/catalog/infrastructure/moviesClient.ts <==
-// features/catalog/infrastructure/moviesClient.ts
-import type { Movie } from '@/types';
-import type { MovieFilters } from '@/entities/movie/types/filters';
+import { z } from 'zod';
+import type { Movie, MovieFilters } from '@/entities/movie';
 import type { PaginatedResult } from '@/lib/api/pagination/types';
-
 import { DEFAULT_PAGE_SIZE } from '@/lib/api/pagination/config';
 import { serializeMovieFiltersToSearchParams } from '@/lib/url/movieFilters';
-
-import {
-  MOVIE_PAGINATION_PARAM_KEYS,
-} from '@/entities/movie/config/filterParams';
-
+import { MOVIE_PAGINATION_PARAM_KEYS } from '@/entities/movie/config/filterParams';
 import { logger } from '@/lib/utils/logger';
 
-/**
- * Cliente HTTP exclusivo del catálogo.
- *
- * Responsabilidad:
- * - comunicar el infinite scroll con el BFF
- * - serializar filtros de dominio a query params
- */
+const ServerSchema = z.object({
+  id: z.union([z.number(), z.string()]),
+  name: z.string(),
+  url: z.string(),
+  language: z.string().optional(),
+  quality: z.string().optional(),
+  subtitles: z.boolean().optional(),
+});
+
+const CategorySchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  slug: z.string(),
+});
+
+const PersonSchema = z.object({
+  id: z.number(),
+  documentId: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  profile_image_url: z.string().optional(),
+});
+
+const MovieSchema = z.object({
+  id: z.number(),
+  documentId: z.string(),
+  title: z.string(),
+  english_title: z.string().optional(),
+  spanish_title: z.string().optional(),
+  slug: z.string(),
+  synopsis: z.string(),
+  year: z.number(),
+  rating: z.number(),
+  country: z.string(),
+  tmdb_id: z.number(),
+  views: z.number().optional(),
+  featured_this_week: z.boolean().optional(),
+  poster_url: z.string().optional(),
+  backdrop_url: z.string().optional(),
+  trailer_url: z.string().optional(),
+  runtime: z.number().optional(),
+  age_rating: z.string().optional(),
+  original_language: z.string().optional(),
+  servers: z.array(ServerSchema).optional(),
+  categories: z.array(CategorySchema).optional(),
+  actors: z.array(PersonSchema).optional(),
+  directors: z.array(PersonSchema).optional(),
+});
+
+const PaginatedMoviesSchema = z.object({
+  data: z.array(MovieSchema),
+  hasMore: z.boolean(),
+  page: z.number(),
+  pageSize: z.number(),
+});
+
 export async function fetchMoviesFromApi(
   filters: MovieFilters,
   page: number = 1,
@@ -2428,7 +2577,6 @@ export async function fetchMoviesFromApi(
 ): Promise<PaginatedResult<Movie>> {
   try {
     const params = serializeMovieFiltersToSearchParams(filters);
-
     params.set(MOVIE_PAGINATION_PARAM_KEYS.page, String(page));
     params.set(MOVIE_PAGINATION_PARAM_KEYS.pageSize, String(pageSize));
 
@@ -2438,7 +2586,27 @@ export async function fetchMoviesFromApi(
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return await response.json();
+    const json = await response.json();
+    const parsed = PaginatedMoviesSchema.safeParse(json);
+
+    if (!parsed.success) {
+      logger.error('Invalid BFF payload for catalog movies', {
+        component: 'CatalogClient',
+        action: 'fetchMoviesFromApi',
+        error: parsed.error,
+        page,
+        pageSize,
+      });
+
+      return {
+        data: [],
+        hasMore: false,
+        page,
+        pageSize,
+      };
+    }
+
+    return parsed.data as PaginatedResult<Movie>;
   } catch (error) {
     logger.error('Error fetching movies from BFF', {
       component: 'CatalogClient',
@@ -2456,17 +2624,16 @@ export async function fetchMoviesFromApi(
     };
   }
 }
-==> ./features/catalog/lib/gridScrollPersistence.ts <==
-// features/catalog/lib/gridScrollPersistence.ts
 
+==> ./features/catalog/lib/gridScrollPersistence.ts <==
 import { GRID_SCROLL_STORAGE_KEY } from '../config/grid';
 import { deferScrollRestore } from '@/lib/scroll/defer';
 
 /**
- * Guarda la posición de scroll actual y marca la señal global
- * para que ScrollToTop no intervenga.
+ * Guarda la posición de scroll actual y marca la señal
+ * para que ScrollToTop no intervenga al regresar a la ruta indicada.
  */
-export function saveGridScrollPosition(): void {
+export function saveGridScrollPosition(returnPath: string): void {
   if (typeof window === 'undefined') return;
 
   try {
@@ -2478,17 +2645,19 @@ export function saveGridScrollPosition(): void {
     // Si sessionStorage falla, igualmente marcamos la señal.
   }
 
-  deferScrollRestore();
+  deferScrollRestore(returnPath);
 }
-==> ./features/catalog/lib/gridStateStorage.ts <==
-// features/catalog/lib/gridStateStorage.ts
 
-import type { Movie } from '@/types';
+==> ./features/catalog/lib/gridStateStorage.ts <==
+import type { Movie } from '@/entities/movie';
 import {
   GRID_SCROLL_STORAGE_KEY,
   GRID_STATE_STORAGE_PREFIX,
 } from '../config/grid';
-import { consumeScrollRestoreSignal } from '@/lib/scroll/defer';
+import {
+  consumeScrollRestoreSignal,
+  isScrollRestoreDeferredFor,
+} from '@/lib/scroll/defer';
 
 export interface SavedGridState {
   movies: Movie[];
@@ -2508,47 +2677,72 @@ export function getFilterKey(filters: unknown): string {
   }
 }
 
-/**
- * Consume la señal de scroll pendiente y devuelve la posición guardada.
- *
- * Si no hay señal pendiente, limpia cualquier valor huérfano y devuelve null.
- */
-export function consumePendingScroll(): number | null {
-  if (!isBrowser()) return null;
-
-  const hasPendingSignal = consumeScrollRestoreSignal();
-
-  let rawValue: string | null = null;
-
+function readRawScrollValue(): string | null {
   try {
-    rawValue = sessionStorage.getItem(GRID_SCROLL_STORAGE_KEY);
+    return sessionStorage.getItem(GRID_SCROLL_STORAGE_KEY);
   } catch {
     return null;
   }
+}
 
-  if (!hasPendingSignal) {
-    if (rawValue !== null) {
-      try {
-        sessionStorage.removeItem(GRID_SCROLL_STORAGE_KEY);
-      } catch {
-        // Ignorar errores de almacenamiento.
-      }
-    }
-
-    return null;
-  }
-
-  if (rawValue === null) return null;
-
+function removeRawScrollValue(): void {
   try {
     sessionStorage.removeItem(GRID_SCROLL_STORAGE_KEY);
   } catch {
     // Ignorar errores de almacenamiento.
   }
+}
+
+/**
+ * Consulta si hay scroll pendiente para una ruta,
+ * sin consumir la señal global.
+ *
+ * Esto permite que ScrollToTop todavía pueda verla
+ * durante el mismo ciclo de navegación.
+ */
+export function peekPendingScrollFor(returnPath: string): number | null {
+  if (!isBrowser()) return null;
+
+  if (!isScrollRestoreDeferredFor(returnPath)) {
+    removeRawScrollValue();
+    return null;
+  }
+
+  const rawValue = readRawScrollValue();
+  if (rawValue === null) return null;
 
   const parsedValue = Number(rawValue);
+  if (!Number.isFinite(parsedValue)) {
+    removeRawScrollValue();
+    return null;
+  }
 
-  if (!Number.isFinite(parsedValue)) return null;
+  return parsedValue;
+}
+
+/**
+ * Consume la señal de scroll pendiente para una ruta
+ * y devuelve la posición guardada.
+ */
+export function consumePendingScrollFor(returnPath: string): number | null {
+  if (!isBrowser()) return null;
+
+  const hasPendingSignal = consumeScrollRestoreSignal(returnPath);
+  const rawValue = readRawScrollValue();
+
+  if (!hasPendingSignal) {
+    removeRawScrollValue();
+    return null;
+  }
+
+  if (rawValue === null) return null;
+
+  removeRawScrollValue();
+
+  const parsedValue = Number(rawValue);
+  if (!Number.isFinite(parsedValue)) {
+    return null;
+  }
 
   return parsedValue;
 }
@@ -2562,7 +2756,6 @@ export function readSavedGridState(
 
   try {
     const rawState = sessionStorage.getItem(storageKey);
-
     if (!rawState) return null;
 
     const parsedState = JSON.parse(rawState);
@@ -2601,11 +2794,6 @@ export function writeGridState(
   }
 }
 
-export function hasPendingGridScroll(): boolean {
-  if (!isBrowser()) return false;
-
-  return sessionStorage.getItem(GRID_SCROLL_STORAGE_KEY) !== null;
-}
 ==> ./features/catalog/config/grid.ts <==
 // features/catalog/config/grid.ts
 
@@ -2617,28 +2805,49 @@ export const GRID_STATE_STORAGE_PREFIX = 'grid-state-';
 export const INFINITE_SCROLL_ROOT_MARGIN = '200px';
 export const INFINITE_SCROLL_THRESHOLD = 0.1;
 ==> ./features/catalog/ui/CatalogMovieCard.tsx <==
-// features/catalog/ui/CatalogMovieCard.tsx
 'use client';
 
-import type { Movie } from '@/types';
-import AppMovieCard from '@/widgets/MovieCard/AppMovieCard';
+import type { MouseEvent } from 'react';
+import type { Movie } from '@/entities/movie';
+import { AppMovieCard } from '@/widgets/movie-card';
 import { saveGridScrollPosition } from '../lib/gridScrollPersistence';
+import { routes } from '@/lib/routes';
 
 interface CatalogMovieCardProps {
   movie: Movie;
 }
 
-export default function CatalogMovieCard({ movie }: CatalogMovieCardProps) {
+export default function CatalogMovieCard({
+  movie,
+}: CatalogMovieCardProps) {
+  const handlePrimaryLinkClick = (
+    event: MouseEvent<HTMLAnchorElement>
+  ) => {
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return;
+    }
+
+    saveGridScrollPosition(routes.movies);
+  };
+
   return (
-    <div onClickCapture={saveGridScrollPosition}>
-      <AppMovieCard movie={movie} />
-    </div>
+    <AppMovieCard
+      movie={movie}
+      onPrimaryLinkClick={handlePrimaryLinkClick}
+    />
   );
 }
-==> ./features/catalog/ui/MovieGridSkeleton.tsx <==
-// features/catalog/ui/MovieGridSkeleton.tsx
 
-import MovieCardSkeleton from '@/entities/movie/ui/MovieCardSkeleton';
+==> ./features/catalog/ui/MovieGridSkeleton.tsx <==
+import { MovieCardSkeleton } from '@/widgets/movie-card';
+import PosterGrid from '@/shared/ui/PosterGrid';
 
 interface MovieGridSkeletonProps {
   count?: number;
@@ -2648,23 +2857,21 @@ export default function MovieGridSkeleton({
   count = 24,
 }: MovieGridSkeletonProps) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+    <PosterGrid variant="compact">
       {Array.from({ length: count }).map((_, index) => (
         <MovieCardSkeleton key={index} />
       ))}
-    </div>
+    </PosterGrid>
   );
 }
+
 ==> ./features/catalog/ui/MovieGrid.tsx <==
-// features/catalog/ui/MovieGrid.tsx
 'use client';
 
 import { Fragment, type ReactNode } from 'react';
-import type { Movie } from '@/types';
-import type { MovieFilters } from '@/entities/movie/types/filters';
-import { getMovieKey } from '@/entities/movie/lib/movieKey';
-
-import CatalogMovieCard from './CatalogMovieCard';
+import type { Movie, MovieFilters } from '@/entities/movie';
+import { getMovieKey } from '@/entities/movie';
+import PosterGrid from '@/shared/ui/PosterGrid';
 import { useInfiniteMovies } from '../model/useInfiniteMovies';
 import { useInfiniteScroll } from '../model/useInfiniteScroll';
 
@@ -2672,6 +2879,7 @@ export interface MovieGridProps {
   initialMovies: Movie[];
   initialHasMore: boolean;
   filters: MovieFilters;
+  renderMovie: (movie: Movie, index: number) => ReactNode;
   renderAfterMovie?: (index: number, movie: Movie) => ReactNode;
 }
 
@@ -2679,6 +2887,7 @@ export default function MovieGrid({
   initialMovies,
   initialHasMore,
   filters,
+  renderMovie,
   renderAfterMovie,
 }: MovieGridProps) {
   const {
@@ -2700,19 +2909,15 @@ export default function MovieGrid({
 
   return (
     <>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+      <PosterGrid variant="compact">
         {movies.map((movie, index) => (
           <Fragment key={getMovieKey(movie)}>
-            <div className="contents">
-              <CatalogMovieCard movie={movie} />
-            </div>
-
+            {renderMovie(movie, index)}
             {renderAfterMovie?.(index, movie)}
           </Fragment>
         ))}
-      </div>
+      </PosterGrid>
 
-      {/* Zona de observación / Loading */}
       <div
         ref={sentinelRef}
         className="w-full py-12 flex justify-center min-h-[80px]"
@@ -2734,6 +2939,7 @@ export default function MovieGrid({
     </>
   );
 }
+
 ==> ./features/catalog/model/useMoviePagination.ts <==
 // features/catalog/model/useMoviePagination.ts
 'use client';
@@ -2745,7 +2951,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import type { Movie } from '@/types';
+import type { Movie } from '@/entities/movie';
 import type { MovieFilters } from '@/entities/movie/types/filters';
 import { dedupeMovies } from '@/entities/movie';
 import { logger } from '@/lib/utils/logger';
@@ -2862,7 +3068,7 @@ export function useMoviePagination({
 'use client';
 
 import { useEffect } from 'react';
-import type { Movie } from '@/types';
+import type { Movie } from '@/entities/movie';
 import { writeGridState } from '../lib/gridStateStorage';
 
 interface UseGridStatePersistenceProps {
@@ -2949,7 +3155,7 @@ export function useInfiniteScroll({
 'use client';
 
 import { useMemo } from 'react';
-import type { Movie } from '@/types';
+import type { Movie } from '@/entities/movie';
 import type { MovieFilters } from '@/entities/movie/types/filters';
 import { getFilterKey } from '../lib/gridStateStorage';
 import { useMoviePagination } from './useMoviePagination';
@@ -3009,48 +3215,57 @@ export function useInfiniteMovies({
   };
 }
 ==> ./features/catalog/model/useGridScrollRestore.ts <==
-// features/catalog/model/useGridScrollRestore.ts
 'use client';
 
 import { useEffect } from 'react';
 import {
-  consumePendingScroll,
+  peekPendingScrollFor,
+  consumePendingScrollFor,
   readSavedGridState,
   type SavedGridState,
 } from '../lib/gridStateStorage';
 import { SCROLL_RESTORE_DELAY_MS } from '../config/grid';
+import { routes } from '@/lib/routes';
 
 /**
  * Responsabilidad única:
- * restaurar scroll y estado guardado del grid.
+ * restaurar scroll y estado guardado del grid
+ * cuando el usuario regresa al catálogo.
  */
 export function useGridScrollRestore(
   filterKey: string,
   restoreState: (state: SavedGridState) => void
 ) {
   useEffect(() => {
-    const savedScroll = consumePendingScroll();
+    const returnPath = routes.movies;
+    const savedScroll = peekPendingScrollFor(returnPath);
 
     if (savedScroll === null) return;
 
     const savedState = readSavedGridState(filterKey);
 
-    if (!savedState) return;
+    if (!savedState) {
+      consumePendingScrollFor(returnPath);
+      return;
+    }
 
     restoreState(savedState);
 
     const timeout = setTimeout(() => {
       window.scrollTo(0, savedScroll);
+      consumePendingScrollFor(returnPath);
     }, SCROLL_RESTORE_DELAY_MS);
 
     return () => clearTimeout(timeout);
   }, [filterKey, restoreState]);
 }
-==> ./features/catalog/index.ts <==
-// features/catalog/index.ts
 
+==> ./features/catalog/index.ts <==
 export { default as MovieGrid } from './ui/MovieGrid';
 export type { MovieGridProps } from './ui/MovieGrid';
+export { default as CatalogMovieCard } from './ui/CatalogMovieCard';
+export { default as MovieGridSkeleton } from './ui/MovieGridSkeleton';
+
 ==> ./features/navigation/config/nav-links.ts <==
 // features/navigation/config/nav-links.ts
 
@@ -3192,7 +3407,7 @@ export function findNextAvailableSource(
 ==> ./features/player/lib/createMovieSources.ts <==
 // features/player/lib/createMovieSources.ts
 
-import type { Server } from '@/types';
+import type { Server } from '@/entities/movie';
 import type { PlayableSource } from '../types';
 import { EMBED_PROVIDERS } from '../config/providers';
 
@@ -3597,7 +3812,6 @@ export interface PlayableSource {
   sandbox?: string | false;
 }
 ==> ./features/player/model/useServerFailover.ts <==
-// features/player/model/useServerFailover.ts
 'use client';
 
 import {
@@ -3607,7 +3821,6 @@ import {
   useRef,
   useState,
 } from 'react';
-
 import type { LoadStatus, PlayableSource } from '../types';
 import { LOAD_TIMEOUT_MS } from '../config/player';
 import { findNextAvailableSource } from '../lib/findNextAvailableSource';
@@ -3622,7 +3835,13 @@ export function useServerFailover({
   timeoutMs = LOAD_TIMEOUT_MS,
 }: UseServerFailoverProps) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [loadStatus, setLoadStatus] = useState<LoadStatus>('idle');
+  // Estado interno que solo cambia por eventos explícitos:
+  // - 'loaded'   cuando el iframe carga
+  // - 'timeout'  cuando expira el timer
+  // - 'loading'  cuando el usuario reintenta o cambia de servidor
+  // El estado 'idle' se deriva cuando no hay fuente activa.
+  const [internalLoadStatus, setInternalLoadStatus] =
+    useState<LoadStatus>('idle');
   const [autoSwitched, setAutoSwitched] = useState(false);
   const [retryCounter, setRetryCounter] = useState(0);
   const [failedSourceIds, setFailedSourceIds] = useState<Set<string>>(
@@ -3632,11 +3851,28 @@ export function useServerFailover({
   const failedSourceIdsRef = useRef<Set<string>>(failedSourceIds);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const activeSource = sources[activeIndex] ?? null;
-
   useEffect(() => {
     failedSourceIdsRef.current = failedSourceIds;
   }, [failedSourceIds]);
+
+  // ─── Derivación durante render ───
+  // Si la lista de fuentes cambia y activeIndex queda fuera de rango,
+  // derivamos un índice seguro sin usar efecto + setState.
+  const safeActiveIndex =
+    sources.length > 0 && activeIndex >= sources.length ? 0 : activeIndex;
+
+  const activeSource = sources[safeActiveIndex] ?? null;
+
+  // Estado efectivo derivado:
+  // - Sin fuente activa  → 'idle'
+  // - Con fuente activa  → lo que diga internalLoadStatus,
+  //   pero si está en 'idle' por defecto, asumimos 'loading'
+  //   (porque tener una fuente implica que estamos intentando cargar).
+  const effectiveLoadStatus: LoadStatus = useMemo(() => {
+    if (!activeSource) return 'idle';
+    if (internalLoadStatus === 'idle') return 'loading';
+    return internalLoadStatus;
+  }, [activeSource, internalLoadStatus]);
 
   const clearLoadTimeout = useCallback(() => {
     if (timeoutRef.current) {
@@ -3665,32 +3901,22 @@ export function useServerFailover({
     setFailedSourceIds(next);
   }, []);
 
-  // Protección por si la lista de fuentes cambia y el índice queda fuera de rango.
-  useEffect(() => {
-    if (sources.length === 0) return;
-
-    if (activeIndex >= sources.length) {
-      setActiveIndex(0);
-    }
-  }, [sources.length, activeIndex]);
-
   // Timer de carga del servidor activo.
+  // Este efecto SOLO configura el timer de failover.
+  // No cambia loadStatus: el estado se deriva durante el render.
   useEffect(() => {
     clearLoadTimeout();
 
     if (!activeSource) {
-      setLoadStatus('idle');
       return;
     }
-
-    setLoadStatus('loading');
 
     timeoutRef.current = setTimeout(() => {
       markSourceFailed(activeSource.id);
 
       const nextIndex = findNextAvailableSource(
         sources,
-        activeIndex,
+        safeActiveIndex,
         failedSourceIdsRef.current
       );
 
@@ -3698,7 +3924,7 @@ export function useServerFailover({
         setAutoSwitched(true);
         setActiveIndex(nextIndex);
       } else {
-        setLoadStatus('timeout');
+        setInternalLoadStatus('timeout');
       }
     }, timeoutMs);
 
@@ -3706,7 +3932,7 @@ export function useServerFailover({
   }, [
     activeSource,
     sources,
-    activeIndex,
+    safeActiveIndex,
     clearLoadTimeout,
     markSourceFailed,
     retryCounter,
@@ -3715,7 +3941,7 @@ export function useServerFailover({
 
   const handleIframeLoad = useCallback(() => {
     clearLoadTimeout();
-    setLoadStatus('loaded');
+    setInternalLoadStatus('loaded');
   }, [clearLoadTimeout]);
 
   const handleRetry = useCallback(() => {
@@ -3723,54 +3949,53 @@ export function useServerFailover({
 
     clearSourceFailed(activeSource.id);
     setAutoSwitched(false);
-    setLoadStatus('loading');
+    setInternalLoadStatus('loading');
     setRetryCounter((previous) => previous + 1);
   }, [activeSource, clearSourceFailed]);
 
   const handleSelectSource = useCallback(
     (index: number) => {
       const source = sources[index];
-
       if (!source) return;
 
       clearSourceFailed(source.id);
       setAutoSwitched(false);
 
-      if (index === activeIndex) {
+      if (index === safeActiveIndex) {
         // Reintento manual del mismo servidor.
-        setLoadStatus('loading');
+        setInternalLoadStatus('loading');
         setRetryCounter((previous) => previous + 1);
       } else {
         setActiveIndex(index);
+        // Al cambiar de fuente, el estado derivado
+        // pasará automáticamente a 'loading'.
+        setInternalLoadStatus('idle');
       }
     },
-    [sources, activeIndex, clearSourceFailed]
+    [sources, safeActiveIndex, clearSourceFailed]
   );
 
   const allFailed = useMemo(() => {
     if (sources.length === 0) return false;
-
     return sources.every((source) => failedSourceIds.has(source.id));
   }, [sources, failedSourceIds]);
 
   return {
     sources,
     activeSource,
-    activeIndex,
+    activeIndex: safeActiveIndex,
     failedSourceIds,
-    loadStatus,
+    loadStatus: effectiveLoadStatus,
     autoSwitched,
     retryCounter,
     allFailed,
-
     handleIframeLoad,
     handleRetry,
     handleSelectSource,
-
-    // Lo exponemos por si algún componente visual lo necesita.
     resetFailedSources,
   };
 }
+
 ==> ./features/player/index.ts <==
 // features/player/index.ts
 
@@ -3877,45 +4102,12 @@ export default function AdBanner({
     </div>
   );
 }
-==> ./features/ads/ui/MovieGridWithAds.tsx <==
-// features/ads/ui/MovieGridWithAds.tsx
-'use client';
-
-import type { Movie } from '@/types';
-import type { MovieFilters } from '@/entities/movie/types/filters';
-import { MovieGrid } from '@/features/catalog';
-import MovieGridAdSlot from './MovieGridAdSlot';
-
-interface MovieGridWithAdsProps {
-  initialMovies: Movie[];
-  initialHasMore: boolean;
-  filters: MovieFilters;
-}
-
-export default function MovieGridWithAds({
-  initialMovies,
-  initialHasMore,
-  filters,
-}: MovieGridWithAdsProps) {
-  return (
-    <MovieGrid
-      initialMovies={initialMovies}
-      initialHasMore={initialHasMore}
-      filters={filters}
-      renderAfterMovie={(index) => <MovieGridAdSlot index={index} />}
-    />
-  );
-}
 ==> ./features/ads/index.ts <==
-// features/ads/index.ts
-
 export { default as AdBanner } from './ui/AdBanner';
-export { default as MovieGridWithAds } from './ui/MovieGridWithAds';
 export { default as MovieGridAdSlot } from './ui/MovieGridAdSlot';
-
 export { shouldShowAdAtIndex } from './lib/adPlacement';
-
 export { MOVIES_PER_AD } from './config/ads';
+
 ==> ./features/movie-detail/services/getMovieDetailPage.ts <==
 // features/movie-detail/services/getMovieDetailPage.ts
 
@@ -4125,53 +4317,43 @@ export function buildMovieMetadata(
 
 export const WATCH_SECTION_ID = 'watch';
 ==> ./features/movie-detail/ui/MovieDetailPage.tsx <==
-// features/movie-detail/ui/MovieDetailPage.tsx
 import type { ReactNode } from 'react';
 import type { MovieDetailViewModel } from '../lib/createMovieDetailViewModel';
 import { buildMovieJsonLdString } from '../lib/movieJsonLd';
-
 import MovieHero from './MovieHero';
 import MovieInfoSection from './MovieInfoSection';
 import MovieCastSection from './MovieCastSection';
-import MoviePlayerSection from './MoviePlayerSection';
 
 interface MovieDetailPageProps {
   viewModel: MovieDetailViewModel;
+  playerSlot: ReactNode;
   afterPlayerSlot?: ReactNode;
 }
 
 export default function MovieDetailPage({
   viewModel,
+  playerSlot,
   afterPlayerSlot,
 }: MovieDetailPageProps) {
   const jsonLdString = buildMovieJsonLdString(viewModel);
 
   return (
     <main className="min-h-screen">
-      {/* JSON-LD */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLdString }}
       />
-
-      {/* Hero */}
       <MovieHero viewModel={viewModel} />
-
-      {/* Cuerpo */}
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-10">
         <MovieInfoSection viewModel={viewModel} />
         <MovieCastSection actors={viewModel.actors} />
-        <MoviePlayerSection
-          movieSlug={viewModel.slug}
-          tmdbId={viewModel.tmdbId}
-          servers={viewModel.servers}
-        />
-
+        {playerSlot}
         {afterPlayerSlot}
       </div>
     </main>
   );
 }
+
 ==> ./features/movie-detail/ui/TrailerModal.tsx <==
 // features/movie-detail/ui/TrailerModal.tsx
 'use client';
@@ -4285,7 +4467,7 @@ export default function MovieHero({ viewModel }: MovieHeroProps) {
 
       {/* Contenido del hero */}
       <div className="relative z-10 max-w-6xl mx-auto px-4 md:px-8 pt-10 pb-12">
-        <BackButton />
+        <BackButton fallbackHref={routes.movies} />
 
         <div className="flex flex-col md:flex-row gap-8 mt-8">
           {/* Póster */}
@@ -4380,50 +4562,13 @@ export default function MovieHero({ viewModel }: MovieHeroProps) {
     </div>
   );
 }
-==> ./features/movie-detail/ui/MoviePlayerSection.tsx <==
-// features/movie-detail/ui/MoviePlayerSection.tsx
-
-import type { Server } from '@/types';
-import { VideoPlayer, createMovieSources } from '@/features/player';
-import { WATCH_SECTION_ID } from '../config/movieDetail';
-
-
-interface MoviePlayerSectionProps {
-  movieSlug: string;
-  tmdbId: number;
-  servers: Server[];
-}
-
-export default function MoviePlayerSection({
-  movieSlug,
-  tmdbId,
-  servers,
-}: MoviePlayerSectionProps) {
-  const sources = createMovieSources({
-    tmdbId,
-    manualServers: servers,
-  });
-
-  return (
-    <div
-      id={WATCH_SECTION_ID}
-      className="scroll-mt-20 pt-10 border-t border-white/5 mb-10"
-    >
-      <h2 className="text-lg font-semibold text-white mb-4">
-        Ver Película
-      </h2>
-
-      <VideoPlayer key={movieSlug} sources={sources} />
-    </div>
-  );
-}
 ==> ./features/movie-detail/ui/MovieCastSection.tsx <==
 // features/movie-detail/ui/MovieCastSection.tsx
 
 import Image from 'next/image';
 import Link from 'next/link';
 
-import type { Actor } from '@/types';
+import type { Actor } from '@/entities/person';
 import { IconUserPlaceholder } from '@/shared/ui/icons';
 import { routes } from '@/lib/routes';
 
@@ -4666,11 +4811,67 @@ export function useModal(initialOpen = false) {
   };
 }
 ==> ./features/movie-detail/index.ts <==
-// features/movie-detail/index.ts
-
 export { default as MovieDetailPage } from './ui/MovieDetailPage';
 export { getMovieDetailPage } from './services/getMovieDetailPage';
 export { buildMovieMetadata } from './lib/movieMetadata';
+export { WATCH_SECTION_ID } from './config/movieDetail';
+
+==> ./features/home/services/getHomePageData.ts <==
+import { getHomeMovies } from '@/lib/queries/movies';
+import type { Movie } from '@/entities/movie';
+
+export interface HomePageData {
+  movies: Movie[];
+}
+
+export async function getHomePageData(): Promise<HomePageData> {
+  const movies = await getHomeMovies();
+
+  return {
+    movies,
+  };
+}
+
+==> ./features/home/ui/HomePage.tsx <==
+import type { ReactNode } from 'react';
+import type { Movie } from '@/entities/movie';
+import { getMovieKey } from '@/entities/movie';
+import { AppMovieCard } from '@/widgets/movie-card';
+import PosterGrid from '@/shared/ui/PosterGrid';
+
+interface HomePageProps {
+  movies: Movie[];
+  afterTrendingSlot?: ReactNode;
+}
+
+export default function HomePage({
+  movies,
+  afterTrendingSlot,
+}: HomePageProps) {
+  return (
+    <main className="min-h-screen p-8">
+      <h2 className="text-2xl font-bold mb-6 text-white">
+        Trending Now
+      </h2>
+
+      <PosterGrid variant="spacious">
+        {movies.map((movie) => (
+          <AppMovieCard
+            key={getMovieKey(movie)}
+            movie={movie}
+          />
+        ))}
+      </PosterGrid>
+
+      {afterTrendingSlot}
+    </main>
+  );
+}
+
+==> ./features/home/index.ts <==
+export { default as HomePage } from './ui/HomePage';
+export { getHomePageData } from './services/getHomePageData';
+
 ==> ./features/actor-detail/services/getActorPageData.ts <==
 // features/actor-detail/services/getActorPageData.ts
 import { cache } from 'react';
@@ -4708,7 +4909,8 @@ export const getActorPageData = cache(
 ==> ./features/actor-detail/lib/createActorDetailViewModel.ts <==
 // features/actor-detail/lib/createActorDetailViewModel.ts
 
-import type { Actor, Movie } from '@/types';
+import type { Actor } from '@/entities/person';
+import type { Movie } from '@/entities/movie';
 import type { ActorDetailViewModel } from '../types';
 
 export function createActorDetailViewModel(
@@ -4786,13 +4988,10 @@ export default function ActorPage({ viewModel }: ActorPageProps) {
   );
 }
 ==> ./features/actor-detail/ui/ActorHero.tsx <==
-// features/actor-detail/ui/ActorHero.tsx
-
 import Image from 'next/image';
-
 import BackButton from '@/shared/ui/BackButton';
 import { IconUserPlaceholder } from '@/shared/ui/icons';
-
+import { routes } from '@/lib/routes';
 import type { ActorDetailViewModel } from '../types';
 
 interface ActorHeroProps {
@@ -4809,7 +5008,7 @@ export default function ActorHero({ viewModel }: ActorHeroProps) {
 
       {/* Contenido del hero */}
       <div className="relative z-10 max-w-6xl mx-auto px-4 md:px-8 pt-10 pb-12">
-        <BackButton />
+        <BackButton fallbackHref={routes.movies} />
 
         <div className="flex flex-col md:flex-row items-center md:items-end gap-8 mt-8">
           {/* Foto del actor */}
@@ -4844,7 +5043,9 @@ export default function ActorHero({ viewModel }: ActorHeroProps) {
 
             <p className="text-gray-400 mt-3 text-sm md:text-base">
               {movieCount}{' '}
-              {movieCount === 1 ? 'película disponible' : 'películas disponibles'}{' '}
+              {movieCount === 1
+                ? 'película disponible'
+                : 'películas disponibles'}{' '}
               en el catálogo
             </p>
           </div>
@@ -4853,6 +5054,7 @@ export default function ActorHero({ viewModel }: ActorHeroProps) {
     </div>
   );
 }
+
 ==> ./features/actor-detail/ui/ActorEmptyState.tsx <==
 // features/actor-detail/ui/ActorEmptyState.tsx
 
@@ -4882,10 +5084,10 @@ export default function ActorEmptyState({
   );
 }
 ==> ./features/actor-detail/ui/ActorFilmography.tsx <==
-// features/actor-detail/ui/ActorFilmography.tsx
-import type { Movie } from '@/types';
+import type { Movie } from '@/entities/movie';
 import { getMovieKey } from '@/entities/movie';
-import AppMovieCard from '@/widgets/MovieCard/AppMovieCard';
+import { AppMovieCard } from '@/widgets/movie-card';
+import PosterGrid from '@/shared/ui/PosterGrid';
 import ActorEmptyState from './ActorEmptyState';
 
 interface ActorFilmographyProps {
@@ -4907,21 +5109,23 @@ export default function ActorFilmography({
         Filmografía
       </h2>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+      <PosterGrid variant="compact">
         {movies.map((movie) => (
           <AppMovieCard
             key={getMovieKey(movie)}
             movie={movie}
           />
         ))}
-      </div>
+      </PosterGrid>
     </>
   );
 }
+
 ==> ./features/actor-detail/types.ts <==
 // features/actor-detail/types.ts
 
-import type { Actor, Movie } from '@/types';
+import type { Actor } from '@/entities/person';
+import type { Movie } from '@/entities/movie';
 
 export interface ActorDetailViewModel {
   actor: Actor;
@@ -4936,8 +5140,6 @@ export { default as ActorPage } from './ui/ActorPage';
 export { getActorPageData } from './services/getActorPageData';
 export { buildActorMetadata } from './lib/actorMetadata';
 ==> ./features/search/services/getSearchPageData.ts <==
-// features/search/services/getSearchPageData.ts
-
 import type { SearchPageData } from '../types';
 import { normalizeSearchQuery } from '../lib/normalizeSearchQuery';
 import { searchMovies } from '../application/searchMovies';
@@ -4955,25 +5157,24 @@ export async function getSearchPageData(
       results: [],
       count: 0,
       hasResults: false,
-      hasMore: false,
     };
   }
 
-  const result = await searchMovies(normalizedQuery);
+  const results = await searchMovies(normalizedQuery);
 
   return {
     query: normalizedQuery,
     normalizedQuery,
     hasQuery: true,
-    results: result.data,
-    count: result.data.length,
-    hasResults: result.data.length > 0,
-    hasMore: result.hasMore,
+    results,
+    count: results.length,
+    hasResults: results.length > 0,
   };
 }
+
 ==> ./features/search/infrastructure/strapiMovieSearchRepository.ts <==
 // features/search/infrastructure/strapiMovieSearchRepository.ts
-import type { Movie } from '@/types';
+import type { Movie } from '@/entities/movie';
 import type { StrapiListResponse } from '@/lib/api/strapi/types';
 
 import { fetchApi } from '@/lib/api/http/client';
@@ -5145,7 +5346,7 @@ export function normalizeSearchTerm(value: string): string {
 ==> ./features/search/domain/scoring.ts <==
 // features/search/domain/scoring.ts
 
-import type { Movie } from '@/types';
+import type { Movie } from '@/entities/movie';
 import { normalizeSearchTerm } from './normalize';
 
 export type SearchSource =
@@ -5237,7 +5438,7 @@ export function computeSearchScore(
 ==> ./features/search/domain/mergeSearchResults.ts <==
 // features/search/domain/mergeSearchResults.ts
 
-import type { Movie } from '@/types';
+import type { Movie } from '@/entities/movie';
 import { getMovieKey } from '@/entities/movie';
 import {
   computeSearchScore,
@@ -5306,8 +5507,6 @@ export function mergeSearchResults(
     .map((entry) => entry.movie);
 }
 ==> ./features/search/ui/SearchHeader.tsx <==
-// features/search/ui/SearchHeader.tsx
-
 interface SearchHeaderProps {
   query: string;
   count: number;
@@ -5320,9 +5519,8 @@ export default function SearchHeader({
   return (
     <div className="mb-6">
       <h2 className="text-2xl font-bold text-white">
-        Buscaste: <span className="text-red-500">"{query}"</span>
+        Buscaste: <span className="text-red-500">&quot;{query}&quot;</span>
       </h2>
-
       <p className="text-sm text-gray-400 mt-1">
         {count === 0
           ? 'Sin coincidencias en el catálogo'
@@ -5331,6 +5529,7 @@ export default function SearchHeader({
     </div>
   );
 }
+
 ==> ./features/search/ui/SearchBar.tsx <==
 // features/search/ui/SearchBar.tsx
 'use client';
@@ -5509,10 +5708,10 @@ export default function SearchEmptyState() {
   );
 }
 ==> ./features/search/ui/SearchResults.tsx <==
-// features/search/ui/SearchResults.tsx
-import type { Movie } from '@/types';
+import type { Movie } from '@/entities/movie';
 import { getMovieKey } from '@/entities/movie';
-import AppMovieCard from '@/widgets/MovieCard/AppMovieCard';
+import { AppMovieCard } from '@/widgets/movie-card';
+import PosterGrid from '@/shared/ui/PosterGrid';
 
 interface SearchResultsProps {
   results: Movie[];
@@ -5520,20 +5719,19 @@ interface SearchResultsProps {
 
 export default function SearchResults({ results }: SearchResultsProps) {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+    <PosterGrid variant="spacious">
       {results.map((movie) => (
         <AppMovieCard
           key={getMovieKey(movie)}
           movie={movie}
         />
       ))}
-    </div>
+    </PosterGrid>
   );
 }
-==> ./features/search/types.ts <==
-// features/search/types.ts
 
-import type { Movie } from '@/types';
+==> ./features/search/types.ts <==
+import type { Movie } from '@/entities/movie';
 
 export interface SearchPageData {
   query: string;
@@ -5542,8 +5740,8 @@ export interface SearchPageData {
   results: Movie[];
   count: number;
   hasResults: boolean;
-  hasMore: boolean;
 }
+
 ==> ./features/search/index.ts <==
 // features/search/index.ts
 
@@ -5551,10 +5749,7 @@ export { default as SearchPage } from './ui/SearchPage';
 export { getSearchPageData } from './services/getSearchPageData';
 export { buildSearchMetadata } from './lib/searchPageMetadata';
 ==> ./features/search/application/searchMovies.ts <==
-// features/search/application/searchMovies.ts
-
-import type { Movie } from '@/types';
-import type { PaginatedResult } from '@/lib/api/pagination/types';
+import type { Movie } from '@/entities/movie';
 import { SEARCH_PAGE_SIZE } from '@/lib/api/pagination/config';
 import { normalizeSearchTerm } from '../domain/normalize';
 import { mergeSearchResults } from '../domain/mergeSearchResults';
@@ -5564,33 +5759,29 @@ import {
 } from '../infrastructure/strapiMovieSearchRepository';
 import { logger } from '@/lib/utils/logger';
 
+/**
+ * Responsabilidad:
+ * buscar películas por múltiples fuentes y devolver
+ * un array consolidado y ordenado por relevancia.
+ *
+ * No expone paginación porque la UI actual consume
+ * todos los resultados disponibles.
+ */
 export async function searchMovies(
   query: string,
-  page: number = 1,
-  pageSize: number = SEARCH_PAGE_SIZE,
+  limit: number = SEARCH_PAGE_SIZE * 4,
   repository: MovieSearchRepository = strapiMovieSearchRepository
-): Promise<PaginatedResult<Movie>> {
+): Promise<Movie[]> {
   const safeQuery = query.trim();
 
-  const safePage = Math.max(1, Math.floor(Number(page) || 1));
-  const safePageSize = Math.max(
-    1,
-    Math.floor(Number(pageSize) || SEARCH_PAGE_SIZE)
-  );
-
   if (!safeQuery) {
-    return {
-      data: [],
-      hasMore: false,
-      page: safePage,
-      pageSize: safePageSize,
-    };
+    return [];
   }
 
   const normalizedQuery = normalizeSearchTerm(safeQuery);
 
-  const titleLimit = Math.min(Math.max(safePageSize * 4, 80), 200);
-  const otherLimit = Math.min(Math.max(safePageSize * 2, 40), 100);
+  const titleLimit = Math.min(Math.max(limit, 80), 200);
+  const otherLimit = Math.min(Math.max(Math.floor(limit / 2), 40), 100);
 
   const [
     titleMovies,
@@ -5614,10 +5805,6 @@ export async function searchMovies(
     normalizedQuery
   );
 
-  const start = (safePage - 1) * safePageSize;
-  const pagedMovies = mergedMovies.slice(start, start + safePageSize);
-  const hasMore = start + safePageSize < mergedMovies.length;
-
   logger.debug('Search results merged', {
     component: 'Search',
     action: 'searchMovies',
@@ -5625,13 +5812,9 @@ export async function searchMovies(
     count: mergedMovies.length,
   });
 
-  return {
-    data: pagedMovies,
-    hasMore,
-    page: safePage,
-    pageSize: safePageSize,
-  };
+  return mergedMovies.slice(0, limit);
 }
+
 ==> ./features/filters/lib/filterUrlSerializer.ts <==
 // features/filters/lib/filterUrlSerializer.ts
 
@@ -5905,7 +6088,7 @@ export default function CountryFilter({
 // features/filters/ui/GenreFilter.tsx
 'use client';
 
-import { Category } from '@/types';
+import type { Category } from '@/entities/category';
 import DropdownMenu from './DropdownMenu';
 import { IconFilm } from '@/shared/ui/icons';
 
@@ -6005,10 +6188,9 @@ export default function RatingFilter({ value, onChange }: RatingFilterProps) {
   );
 }
 ==> ./features/filters/ui/YearRangeFilter.tsx <==
-// features/filters/ui/YearRangeFilter.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { IconCalendar } from '@/shared/ui/icons';
 import { YEAR_MIN, YEAR_MAX } from '../config/options';
 import styles from './year-range.module.css';
@@ -6027,10 +6209,24 @@ export default function YearRangeFilter({
   const [minYear, setMinYear] = useState(fromYear ?? YEAR_MIN);
   const [maxYear, setMaxYear] = useState(toYear ?? YEAR_MAX);
 
-  useEffect(() => {
+  // ─── Patrón React 19: ajustar estado durante render ───
+  // Usamos variables de estado (no refs) para trackear los valores
+  // previos de las props. Esto permite sincronizar el estado local
+  // con props cambiantes sin usar useEffect ni acceder a refs en render.
+  //
+  // React agrupa los setStates llamados durante el render con el render
+  // actual, por lo que no causa renders adicionales.
+  const [prevFromYear, setPrevFromYear] = useState(fromYear);
+  const [prevToYear, setPrevToYear] = useState(toYear);
+
+  if (prevFromYear !== fromYear) {
+    setPrevFromYear(fromYear);
     setMinYear(fromYear ?? YEAR_MIN);
+  }
+  if (prevToYear !== toYear) {
+    setPrevToYear(toYear);
     setMaxYear(toYear ?? YEAR_MAX);
-  }, [fromYear, toYear]);
+  }
 
   const apply = () => {
     onApply(minYear, maxYear);
@@ -6052,7 +6248,6 @@ export default function YearRangeFilter({
 
       <div className={`${styles.rangeSlider} w-56 sm:w-80 relative`}>
         <div className={styles.track} />
-
         <div
           className={styles.trackActive}
           style={{
@@ -6100,11 +6295,12 @@ export default function YearRangeFilter({
     </div>
   );
 }
+
 ==> ./features/filters/ui/FilterMenu.tsx <==
 // features/filters/ui/FilterMenu.tsx
 'use client';
 
-import { Category } from '@/types';
+import type { Category } from '@/entities/category';
 
 import { useMovieFilters } from '../model/useMovieFilters';
 import { useScrollCollapse } from '../model/useScrollCollapse';
@@ -6232,7 +6428,7 @@ export default function FilterMenu({
 // features/filters/ui/ActiveFiltersBar.tsx
 'use client';
 
-import { Category } from '@/types';
+import type { Category } from '@/entities/category';
 import {
   IconCalendar,
   IconClose,
@@ -6347,8 +6543,8 @@ export default function ActiveFiltersBar({
 
       <button
         onClick={onClearAll}
-        aria-label="Limpiar todos los filtros"
-        title="Limpiar todos los filtros"
+        aria-label="Limpiar filtros activos"
+        title="Limpiar filtros activos"
         className="flex items-center gap-1.5 ml-auto bg-red-950/40 border border-red-800/30 text-red-400 hover:bg-red-600/80 hover:text-white hover:border-red-500/30 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-150"
       >
         <IconTrash />
@@ -6482,7 +6678,6 @@ export function useScrollCollapse(options?: UseScrollCollapseOptions): boolean {
   return isCollapsed;
 }
 ==> ./features/filters/model/useMovieFilters.ts <==
-// features/filters/model/useMovieFilters.ts
 'use client';
 
 import { useCallback, useMemo } from 'react';
@@ -6491,17 +6686,14 @@ import {
   useSearchParams,
   usePathname,
 } from 'next/navigation';
-
 import { YEAR_MIN, YEAR_MAX } from '../config/options';
 import { buildFiltersUrl } from '../lib/filterUrlSerializer';
-
 import {
   DEFAULT_MOVIE_SORT,
   MOVIE_FILTER_PARAM_KEYS,
   type MovieFilterParamKey,
   type MovieSort,
 } from '@/entities/movie';
-
 import { parseMovieFiltersForUI } from '@/lib/url/movieFilters';
 
 export interface UseMovieFiltersResult {
@@ -6513,21 +6705,15 @@ export interface UseMovieFiltersResult {
   toYear: number | null;
   hasYearFilter: boolean;
   filterCount: number;
-
   toggleGenre: (slug: string) => void;
   removeGenre: (slug: string) => void;
-
   setRating: (value: string | null) => void;
   removeRating: () => void;
-
   setCountry: (value: string | null) => void;
   removeCountry: () => void;
-
   setSort: (value: MovieSort) => void;
-
   applyYearRange: (fromYear: number, toYear: number) => void;
   removeYear: () => void;
-
   clearFilters: () => void;
 }
 
@@ -6536,12 +6722,6 @@ export function useMovieFilters(): UseMovieFiltersResult {
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  /**
-   * La URL se interpreta en una sola capa.
-   *
-   * Antes este hook volvía a parsear manualmente los mismos
-   * query params que ya parseaba lib/url/movieFilters.ts.
-   */
   const uiState = useMemo(
     () => parseMovieFiltersForUI(searchParams),
     [searchParams]
@@ -6584,7 +6764,6 @@ export function useMovieFilters(): UseMovieFiltersResult {
       replaceParams((params) => {
         const genreKey = MOVIE_FILTER_PARAM_KEYS.genres;
         const currentGenres = params.getAll(genreKey);
-
         params.delete(genreKey);
 
         if (currentGenres.includes(slug)) {
@@ -6669,6 +6848,14 @@ export function useMovieFilters(): UseMovieFiltersResult {
     });
   }, [replaceParams]);
 
+  /**
+   * Limpia todos los filtros, incluido el ordenamiento.
+   *
+   * Semántica:
+   * "Limpiar filtros" lleva al usuario al estado inicial
+   * del catálogo, sin ningún filtro ni orden personalizado.
+   * El sort vuelve a su valor por defecto (latest).
+   */
   const clearFilters = useCallback(() => {
     replaceParams((params) => {
       params.delete(MOVIE_FILTER_PARAM_KEYS.genres);
@@ -6676,6 +6863,7 @@ export function useMovieFilters(): UseMovieFiltersResult {
       params.delete(MOVIE_FILTER_PARAM_KEYS.fromYear);
       params.delete(MOVIE_FILTER_PARAM_KEYS.toYear);
       params.delete(MOVIE_FILTER_PARAM_KEYS.country);
+      params.delete(MOVIE_FILTER_PARAM_KEYS.sort);
     });
   }, [replaceParams]);
 
@@ -6688,24 +6876,19 @@ export function useMovieFilters(): UseMovieFiltersResult {
     toYear,
     hasYearFilter,
     filterCount,
-
     toggleGenre,
     removeGenre,
-
     setRating,
     removeRating,
-
     setCountry,
     removeCountry,
-
     setSort,
-
     applyYearRange,
     removeYear,
-
     clearFilters,
   };
 }
+
 ==> ./features/filters/index.ts <==
 // features/filters/index.ts
 
@@ -6844,50 +7027,42 @@ export default function MoviesEmptyState() {
   );
 }
 ==> ./features/movies-page/ui/MoviesPage.tsx <==
-// features/movies-page/ui/MoviesPage.tsx
-
 import { Suspense, type ReactNode } from 'react';
-import { FilterMenu } from '@/features/filters';
 import type { MoviesPageData } from '../types';
-
 import MoviesHeader from './MoviesHeader';
 import MoviesResults from './MoviesResults';
-import FilterMenuSkeleton from './FilterMenuSkeleton';
 
 interface MoviesPageProps {
   data: MoviesPageData;
+  filtersSlot: ReactNode;
+  filtersFallback: ReactNode;
   catalogSlot: ReactNode;
   sidebarSlot?: ReactNode;
 }
 
 export default function MoviesPage({
   data,
+  filtersSlot,
+  filtersFallback,
   catalogSlot,
   sidebarSlot,
 }: MoviesPageProps) {
   return (
     <main className="min-h-screen px-4 md:px-8 pb-12 pt-6">
       <div className="flex gap-8 max-w-[1800px] mx-auto">
-        {/* ─── Columna izquierda: contenido principal ─── */}
         <div className="flex-1 min-w-0">
           <MoviesHeader hasResults={data.hasResults} />
-
-          <Suspense fallback={<FilterMenuSkeleton />}>
-            <FilterMenu
-              categories={data.categories}
-              countries={data.countries}
-            />
+          <Suspense fallback={filtersFallback}>
+            {filtersSlot}
           </Suspense>
-
           <MoviesResults data={data} catalogSlot={catalogSlot} />
         </div>
-
-        {/* ─── Columna derecha: slot de composición ─── */}
         {sidebarSlot}
       </div>
     </main>
   );
 }
+
 ==> ./features/movies-page/ui/FilterMenuSkeleton.tsx <==
 // features/movies-page/ui/FilterMenuSkeleton.tsx
 
@@ -6908,7 +7083,8 @@ export default function FilterMenuSkeleton() {
 ==> ./features/movies-page/types.ts <==
 // features/movies-page/types.ts
 
-import type { Category, Movie } from '@/types';
+import type { Category } from '@/entities/category';
+import type { Movie } from '@/entities/movie';
 import type { MovieFilters } from '@/entities/movie/types/filters';
 
 export interface MoviesPageData {
@@ -6920,11 +7096,11 @@ export interface MoviesPageData {
   hasResults: boolean;
 }
 ==> ./features/movies-page/index.ts <==
-// features/movies-page/index.ts
-
 export { default as MoviesPage } from './ui/MoviesPage';
+export { default as FilterMenuSkeleton } from './ui/FilterMenuSkeleton';
 export { getMoviesPageData } from './services/getMoviesPageData';
 export { buildMoviesPageMetadata } from './lib/moviesPageMetadata';
+
 ==> ./app/api/movies/route.ts <==
 // app/api/movies/route.ts
 import { NextRequest, NextResponse } from 'next/server';
@@ -6984,13 +7160,13 @@ export async function GET(request: NextRequest) {
   }
 }
 ==> ./app/movie/[slug]/page.tsx <==
-// app/movie/[slug]/page.tsx
 import { notFound } from 'next/navigation';
 import {
   MovieDetailPage,
   getMovieDetailPage,
   buildMovieMetadata,
 } from '@/features/movie-detail';
+import { MoviePlayerSection } from '@/widgets/composition/movie-player';
 import { AdBanner } from '@/features/ads';
 
 interface MovieDetailRouteParams {
@@ -7018,25 +7194,30 @@ export default async function MovieDetailRoute({
   return (
     <MovieDetailPage
       viewModel={viewModel}
+      playerSlot={
+        <MoviePlayerSection
+          movieSlug={viewModel.slug}
+          tmdbId={viewModel.tmdbId}
+          servers={viewModel.servers}
+        />
+      }
       afterPlayerSlot={<AdBanner format="horizontal" />}
     />
   );
 }
+
 ==> ./app/providers/ScrollToTop.tsx <==
-// components/ScrollToTop.tsx
 'use client';
 
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { isScrollRestoreDeferred } from '@/lib/scroll/defer';
+import { isScrollRestoreDeferredFor } from '@/lib/scroll/defer';
 
 export default function ScrollToTop() {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Si alguna feature marcó que quiere controlar el scroll,
-    // no intervenimos.
-    if (isScrollRestoreDeferred()) {
+    if (isScrollRestoreDeferredFor(pathname)) {
       return;
     }
 
@@ -7045,6 +7226,7 @@ export default function ScrollToTop() {
 
   return null;
 }
+
 ==> ./app/error.tsx <==
 // app/error.tsx
 'use client';
@@ -7091,16 +7273,17 @@ export default function Error({
   );
 }
 ==> ./app/movies/page.tsx <==
-// app/movies/page.tsx
-
-import type { MovieFiltersQuery } from '@/entities/movie/types/filters';
+import type { MovieFiltersQuery } from '@/entities/movie';
 import {
   MoviesPage,
   getMoviesPageData,
   buildMoviesPageMetadata,
 } from '@/features/movies-page';
+import { FilterMenu } from '@/features/filters';
 import { parseMovieFiltersFromRecord } from '@/lib/url/movieFilters';
-import { AdBanner, MovieGridWithAds } from '@/features/ads';
+import { AdBanner } from '@/features/ads';
+import { CatalogGridWithAds } from '@/widgets/composition/catalog-grid-with-ads';
+import FilterMenuSkeleton from '@/features/movies-page/ui/FilterMenuSkeleton';
 
 export const metadata = buildMoviesPageMetadata();
 
@@ -7118,8 +7301,15 @@ export default async function MoviesRoute({
   return (
     <MoviesPage
       data={pageData}
+      filtersSlot={
+        <FilterMenu
+          categories={pageData.categories}
+          countries={pageData.countries}
+        />
+      }
+      filtersFallback={<FilterMenuSkeleton />}
       catalogSlot={
-        <MovieGridWithAds
+        <CatalogGridWithAds
           initialMovies={pageData.initialMovies}
           initialHasMore={pageData.initialHasMore}
           filters={pageData.filters}
@@ -7135,6 +7325,7 @@ export default async function MoviesRoute({
     />
   );
 }
+
 ==> ./app/movies/loading.tsx <==
 // app/movies/loading.tsx
 
@@ -7340,32 +7531,20 @@ export default function robots(): MetadataRoute.Robots {
   };
 }
 ==> ./app/page.tsx <==
-// app/page.tsx
-import { getHomeMovies } from '@/lib/queries/movies';
+import { HomePage, getHomePageData } from '@/features/home';
 import { AdBanner } from '@/features/ads';
-import { getMovieKey } from '@/entities/movie';
-import AppMovieCard from '@/widgets/MovieCard/AppMovieCard';
 
 export default async function Home() {
-  const movies = await getHomeMovies();
+  const data = await getHomePageData();
 
   return (
-    <main className="min-h-screen p-8">
-      <h2 className="text-2xl font-bold mb-6 text-white">
-        Trending Now
-      </h2>
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-        {movies.map((movie) => (
-          <AppMovieCard
-            key={getMovieKey(movie)}
-            movie={movie}
-          />
-        ))}
-      </div>
-      <AdBanner format="horizontal" />
-    </main>
+    <HomePage
+      movies={data.movies}
+      afterTrendingSlot={<AdBanner format="horizontal" />}
+    />
   );
 }
+
 ==> ./app/not-found.tsx <==
 // app/not-found.tsx
 
@@ -7518,118 +7697,162 @@ Este proyecto sigue una arquitectura basada en capas con separación de responsa
 
 ## Capas
 
-### `entities/`
+### entities/
+
 Contiene reglas y modelos de negocio puros.
 
 Ejemplos:
-- `Movie`
-- `Category`
-- `Person`
+
+- Movie
+- Category
+- Person
 - filtros de películas
 - sorting de películas
 - reglas de año
 - identidad de una película
 
 Reglas:
+
 - No conoce rutas de la app.
 - No conoce Strapi.
 - No conoce React Query, cache, fetch ni UI.
+- No conoce React ni Next.js.
 - Puede exponer view models simples si pertenecen a la entidad.
 
 ---
 
-### `features/`
-Contienen casos de uso concretos.
+### shared/
 
-Ejemplos:
-- `catalog`
-- `filters`
-- `search`
-- `player`
-- `ads`
-- `movie-detail`
-- `actor-detail`
-- `movies-page`
-
-Reglas:
-- Una feature no debe depender directamente de otra feature.
-- La composición entre features se hace mediante slots, props o páginas.
-- Cada feature contiene su UI, modelo, configuración y lógica específica.
-
----
-
-### `widgets/`
-Composiciones reutilizables de más alto nivel.
-
-Ejemplos:
-- `Header`
-- `AppMovieCard`
-
-Reglas:
-- Pueden combinar entidades y features.
-- No deben contener reglas de negocio profundas.
-
----
-
-### `shared/`
 Componentes y utilidades genéricas reutilizables.
 
 Ejemplos:
+
 - iconos
 - botones genéricos
+- PosterGrid
 - helpers de UI
 
 Reglas:
+
 - No conoce entidades.
 - No conoce features.
+- No conoce rutas.
 - No contiene lógica de negocio.
 
 ---
 
-### `app/`
+### widgets/
+
+Composiciones reutilizables de UI.
+
+Se dividen conceptualmente en:
+
+#### Widgets presentacionales
+
+Ejemplos:
+
+- widgets/movie-card
+
+Reglas:
+
+- Pueden depender de entities, shared y lib/routes.
+- No deben depender de features.
+- Pueden ser usados por features.
+
+#### Widgets de composición
+
+Ejemplos:
+
+- widgets/Header
+- widgets/composition/catalog-grid-with-ads
+
+Reglas:
+
+- Pueden combinar features.
+- Solo deben ser consumidos por app/ o capas de composición superiores.
+- No deben ser importados por features.
+
+---
+
+### features/
+
+Contienen casos de uso concretos.
+
+Ejemplos:
+
+- catalog
+- filters
+- search
+- player
+- ads
+- movie-detail
+- actor-detail
+- movies-page
+- home
+
+Reglas:
+
+- Una feature no debe depender de app.
+- Una feature no debe importar widgets de composición.
+- La composición fuerte entre features debe hacerse mediante slots, props, páginas o widgets de composición.
+- Cada feature contiene su UI, modelo, configuración y lógica específica.
+
+---
+
+### app/
+
 Capa de rutas de Next.js.
 
 Reglas:
+
 - Las rutas deben ser delgadas.
-- Deben componer features/services.
+- Deben componer features/services/widgets.
 - No deben contener lógica de negocio.
 - Pueden usar metadata, layouts, sitemap, robots y BFF.
 
 ---
 
-### `lib/api/repositories/`
+### lib/api/repositories/
+
 Capa de acceso a datos externos.
 
 Responsabilidad:
+
 - Hablar con Strapi.
 - Normalizar respuestas.
 - Paginación técnica.
 - No conoce UI.
 
 Reglas:
+
 - No debe ser usada directamente por server components de página.
-- Para server components, usar `lib/queries/`.
+- Para server components, usar lib/queries/.
 - Puede ser usada por route handlers/BFF.
 
 ---
 
-### `lib/queries/`
+### lib/queries/
+
 Capa de consultas cacheadas para server components.
 
 Responsabilidad:
-- Envolver repositories con `cache()` de React.
+
+- Envolver repositories con cache() de React.
 - Ser el punto de entrada de datos para páginas server-side.
 
 Reglas:
-- Las páginas y servicios de feature deben preferir `lib/queries`.
+
+- Las páginas y servicios de feature deben preferir lib/queries.
 - No debe contener lógica de Strapi.
 
 ---
 
-### `lib/api/strapi/`
+### lib/api/strapi/
+
 Adaptador específico de Strapi.
 
 Responsabilidad:
+
 - Schemas.
 - Normalización.
 - Parámetros de Strapi.
@@ -7637,21 +7860,66 @@ Responsabilidad:
 - Paginación de Strapi.
 
 Reglas:
+
 - No conoce features.
 - No conoce UI.
 - Solo adapta el CMS externo.
 
 ---
 
+### lib/url/
+
+Responsabilidad:
+
+- Parseo y serialización canónica de query params.
+- Conversión entre URL y dominio.
+
+---
+
+## Composición de ads
+
+La feature ads es responsable de:
+
+- reglas de colocación,
+- banners,
+- slots publicitarios.
+
+No debe conocer catálogo.
+
+La combinación de catálogo + ads se realiza en:
+
+widgets/composition/catalog-grid-with-ads
+
+---
+
+## Scroll restore
+
+El scroll restore está scopado por ruta.
+
+- lib/scroll/defer.ts maneja señales por ruta.
+- ScrollToTop solo delega si la ruta actual coincide con la señal pendiente.
+- Catalog solo controla scroll cuando se regresa a /movies.
+
+---
+
 ## Flujo recomendado
 
-```txt
-app route
-  → feature service
-    → lib/queries
-      → lib/api/repositories
-        → lib/api/strapi
-          → fetchApi
+    app route
+    -> feature service
+    -> lib/queries
+    -> lib/api/repositories
+    -> lib/api/strapi
+    -> fetchApi
+
+Para catálogo en cliente:
+
+    MovieGrid
+    -> useInfiniteMovies
+    -> fetchMoviesFromApi
+    -> /api/movies
+    -> fetchMoviesWithFilters
+    -> Strapi
+
 ==> ./scripts/apply-so-refactor.sh <==
 #!/usr/bin/env bash
 set -euo pipefail
@@ -7763,6 +8031,7 @@ if (!TMDB_API_KEY || !STRAPI_API_TOKEN) {
 const TMDB_BASE = 'https://api.themoviedb.org/3';
 const TMDB_IMG_BASE = 'https://image.tmdb.org/t/p/original';
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { slugify } = require('./lib/slug');
 
 // Alias para no tocar todos los llamados existentes.
@@ -8036,14 +8305,148 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  // Override default ignores of eslint-config-next.
+
   globalIgnores([
-    // Default ignores of eslint-config-next:
     ".next/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
   ]),
+
+  {
+    files: ["**/entities/**/*.ts", "**/entities/**/*.tsx"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "react",
+              message: "Entities must be UI/framework agnostic.",
+            },
+            {
+              name: "react-dom",
+              message: "Entities must be UI/framework agnostic.",
+            },
+            {
+              name: "next",
+              message: "Entities must not depend on Next.js.",
+            },
+            {
+              name: "next/navigation",
+              message: "Entities must not depend on Next.js navigation.",
+            },
+            {
+              name: "next/link",
+              message: "Entities must not depend on Next.js Link.",
+            },
+            {
+              name: "next/image",
+              message: "Entities must not depend on Next.js Image.",
+            },
+          ],
+          patterns: [
+            "@/app/*",
+            "@/features/*",
+            "@/widgets/*",
+            "@/lib/api/*",
+            "@/lib/queries/*",
+            "@/lib/routes",
+          ],
+        },
+      ],
+    },
+  },
+
+  {
+    files: ["**/shared/**/*.ts", "**/shared/**/*.tsx"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            "@/entities/*",
+            "@/features/*",
+            "@/widgets/*",
+            "@/app/*",
+            "@/lib/api/*",
+            "@/lib/queries/*",
+            "@/lib/routes",
+            "@/lib/url/*",
+          ],
+        },
+      ],
+    },
+  },
+
+  {
+    files: ["**/features/**/*.ts", "**/features/**/*.tsx"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            "@/app/*",
+            "@/widgets/composition/*",
+            "@/widgets/Header/*",
+          ],
+        },
+      ],
+    },
+  },
+
+  {
+    files: [
+      "**/widgets/movie-card/**/*.ts",
+      "**/widgets/movie-card/**/*.tsx",
+    ],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            "@/features/*",
+            "@/app/*",
+            "@/widgets/composition/*",
+            "@/widgets/Header/*",
+          ],
+        },
+      ],
+    },
+  },
+
+  {
+    files: ["**/lib/api/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            "@/app/*",
+            "@/features/*",
+            "@/widgets/*",
+          ],
+        },
+      ],
+    },
+  },
+
+  {
+    files: ["**/lib/queries/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            "@/app/*",
+            "@/features/*",
+            "@/widgets/*",
+            "@/lib/api/strapi/*",
+          ],
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;

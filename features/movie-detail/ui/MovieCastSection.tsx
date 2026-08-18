@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-import type { Actor } from '@/types';
+import type { Actor } from '@/entities/person';
 import { IconUserPlaceholder } from '@/shared/ui/icons';
 import { routes } from '@/lib/routes';
 

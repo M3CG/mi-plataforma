@@ -16,6 +16,7 @@ if (!TMDB_API_KEY || !STRAPI_API_TOKEN) {
 const TMDB_BASE = 'https://api.themoviedb.org/3';
 const TMDB_IMG_BASE = 'https://image.tmdb.org/t/p/original';
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { slugify } = require('./lib/slug');
 
 // Alias para no tocar todos los llamados existentes.
