@@ -1,5 +1,5 @@
 import type { Category } from '@/entities/category';
-import type { Movie } from '../types/movie';
+import type { Movie } from '@/entities/movie';
 import { formatRuntime } from '@/lib/utils/format';
 
 export interface MovieCardViewModel {

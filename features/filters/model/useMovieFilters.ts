@@ -10,11 +10,13 @@ import { YEAR_MIN, YEAR_MAX } from '../config/options';
 import { buildFiltersUrl } from '../lib/filterUrlSerializer';
 import {
   DEFAULT_MOVIE_SORT,
-  MOVIE_FILTER_PARAM_KEYS,
-  type MovieFilterParamKey,
   type MovieSort,
 } from '@/entities/movie';
-import { parseMovieFiltersForUI } from '@/lib/url/movieFilters';
+import {
+  MOVIE_FILTER_PARAM_KEYS,
+  type MovieFilterParamKey,
+} from '@/lib/url/movieFilterParams';
+import { parseMovieFiltersForUI } from '../lib/parseFiltersForUI';
 
 export interface UseMovieFiltersResult {
   activeGenres: string[];

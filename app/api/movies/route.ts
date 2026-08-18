@@ -7,7 +7,7 @@ import { parseMovieFiltersFromSearchParams } from '@/lib/url/movieFilters';
 
 import {
   MOVIE_PAGINATION_PARAM_KEYS,
-} from '@/entities/movie/config/filterParams';
+} from '@/lib/url/movieFilterParams';
 
 import { logger } from '@/lib/utils/logger';
 

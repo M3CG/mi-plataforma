@@ -3,9 +3,9 @@ import { SEARCH_PAGE_SIZE } from '@/lib/api/pagination/config';
 import { normalizeSearchTerm } from '../domain/normalize';
 import { mergeSearchResults } from '../domain/mergeSearchResults';
 import {
-  strapiMovieSearchRepository,
+  movieSearchQueries,
   type MovieSearchRepository,
-} from '../infrastructure/strapiMovieSearchRepository';
+} from '@/lib/queries/search';
 import { logger } from '@/lib/utils/logger';
 
 /**
@@ -19,7 +19,7 @@ import { logger } from '@/lib/utils/logger';
 export async function searchMovies(
   query: string,
   limit: number = SEARCH_PAGE_SIZE * 4,
-  repository: MovieSearchRepository = strapiMovieSearchRepository
+  repository: MovieSearchRepository = movieSearchQueries
 ): Promise<Movie[]> {
   const safeQuery = query.trim();
 

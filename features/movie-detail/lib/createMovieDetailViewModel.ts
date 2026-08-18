@@ -1,12 +1,8 @@
 // features/movie-detail/lib/createMovieDetailViewModel.ts
 
-import type {
-  Actor,
-  Category,
-  Director,
-  Movie,
-  Server,
-} from '@/types';
+import type { Movie, Server } from '@/entities/movie';
+import type { Category } from '@/entities/category';
+import type { Actor, Director } from '@/entities/person';
 import { formatRuntime } from '@/lib/utils/format';
 
 export interface MovieDetailViewModel {

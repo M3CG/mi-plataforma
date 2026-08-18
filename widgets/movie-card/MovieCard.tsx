@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { MouseEvent } from 'react';
 import type { Movie } from '@/entities/movie';
-import { createMovieCardViewModel } from '@/entities/movie';
+import { createMovieCardViewModel } from './lib/createMovieCardViewModel';
 import { IconImagePlaceholder, IconStar } from '@/shared/ui/icons';
 import MovieCardCategoryLink from './MovieCardCategoryLink';
 

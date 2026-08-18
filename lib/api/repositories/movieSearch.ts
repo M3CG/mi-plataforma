@@ -1,16 +1,20 @@
-// features/search/infrastructure/strapiMovieSearchRepository.ts
 import type { Movie } from '@/entities/movie';
 import type { StrapiListResponse } from '@/lib/api/strapi/types';
-
 import { fetchApi } from '@/lib/api/http/client';
 import { normalizeMovieList } from '@/lib/api/strapi/normalizers';
-
 import {
   buildPopulateParams,
   MOVIE_DETAIL_POPULATE,
 } from '@/lib/api/strapi/populate';
 
 const SEARCH_POPULATE = buildPopulateParams(MOVIE_DETAIL_POPULATE);
+
+export interface MovieSearchRepository {
+  byTitle(query: string, limit: number): Promise<Movie[]>;
+  byActor(query: string, limit: number): Promise<Movie[]>;
+  byDirector(query: string, limit: number): Promise<Movie[]>;
+  byCategory(query: string, limit: number): Promise<Movie[]>;
+}
 
 async function runMovieSearch(
   params: Record<string, string>,
@@ -32,14 +36,7 @@ async function runMovieSearch(
   return normalizeMovieList(json);
 }
 
-export interface MovieSearchRepository {
-  byTitle(query: string, limit: number): Promise<Movie[]>;
-  byActor(query: string, limit: number): Promise<Movie[]>;
-  byDirector(query: string, limit: number): Promise<Movie[]>;
-  byCategory(query: string, limit: number): Promise<Movie[]>;
-}
-
-export const strapiMovieSearchRepository: MovieSearchRepository = {
+export const movieSearchRepository: MovieSearchRepository = {
   async byTitle(query: string, limit: number): Promise<Movie[]> {
     let json = await fetchApi<StrapiListResponse<unknown>>(
       '/movies',
