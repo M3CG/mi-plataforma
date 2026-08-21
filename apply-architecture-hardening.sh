@@ -1,0 +1,24 @@
+find . -type f \( \
+  -path "./app/*" -o \
+  -path "./entities/*" -o \
+  -path "./features/*" -o \
+  -path "./lib/*" -o \
+  -path "./scripts/*" -o \
+  -path "./shared/*" -o \
+  -path "./types/*" -o \
+  -path "./widgets/*" -o \
+  -path "./ARCHITECTURE.md" -o \
+  -path "./README.md" -o \
+  -path "./package.json" -o \
+  -path "./tsconfig.json" -o \
+  -path "./next.config.ts" -o \
+  -path "./postcss.config.mjs" -o \
+  -path "./eslint.config.mjs" \
+\) -not -name "*.png" \
+  -not -name "*.jpg" \
+  -not -name "*.jpeg" \
+  -not -name "*.webp" \
+  -not -name "*.ico" \
+  -not -name "*.log" \
+  -not -name "*.tsbuildinfo" \
+  -exec tail -n +1 {} + > proyectoV4.txt

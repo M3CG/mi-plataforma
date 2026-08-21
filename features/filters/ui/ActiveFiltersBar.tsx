@@ -1,16 +1,22 @@
 // features/filters/ui/ActiveFiltersBar.tsx
 'use client';
-
 import type { Category } from '@/entities/category';
 import {
   IconCalendar,
+  IconClock,
   IconClose,
   IconFilm,
   IconGlobe,
   IconStar,
   IconTrash,
 } from '@/shared/ui/icons';
-import { RATING_OPTIONS, YEAR_MIN, YEAR_MAX } from '../config/options';
+import {
+  RATING_OPTIONS,
+  YEAR_MIN,
+  YEAR_MAX,
+  RUNTIME_MIN,
+  RUNTIME_MAX,
+} from '../config/options';
 
 interface ActiveFiltersBarProps {
   categories: Category[];
@@ -20,12 +26,15 @@ interface ActiveFiltersBarProps {
   fromYear: number | null;
   toYear: number | null;
   hasYearFilter: boolean;
+  fromRuntime: number | null;
+  toRuntime: number | null;
+  hasRuntimeFilter: boolean;
   filterCount: number;
-
   onRemoveGenre: (slug: string) => void;
   onRemoveRating: () => void;
   onRemoveCountry: () => void;
   onRemoveYear: () => void;
+  onRemoveRuntime: () => void;
   onClearAll: () => void;
 }
 
@@ -37,11 +46,15 @@ export default function ActiveFiltersBar({
   fromYear,
   toYear,
   hasYearFilter,
+  fromRuntime,
+  toRuntime,
+  hasRuntimeFilter,
   filterCount,
   onRemoveGenre,
   onRemoveRating,
   onRemoveCountry,
   onRemoveYear,
+  onRemoveRuntime,
   onClearAll,
 }: ActiveFiltersBarProps) {
   if (filterCount === 0) return null;
@@ -53,13 +66,14 @@ export default function ActiveFiltersBar({
   const displayFromYear = fromYear ?? YEAR_MIN;
   const displayToYear = toYear ?? YEAR_MAX;
 
+  const displayFromRuntime = fromRuntime ?? RUNTIME_MIN;
+  const displayToRuntime = toRuntime ?? RUNTIME_MAX;
+
   return (
     <div className="flex flex-wrap items-center gap-2 px-5 py-3 border-t border-white/5">
       {activeGenres.map((slug) => {
         const category = categories.find((item) => item.slug === slug);
-
         if (!category) return null;
-
         return (
           <button
             key={slug}
@@ -110,6 +124,19 @@ export default function ActiveFiltersBar({
         >
           <IconCalendar className="w-3 h-3 opacity-60" />
           {displayFromYear} - {displayToYear}
+          <IconClose className="w-2.5 h-2.5 opacity-60" />
+        </button>
+      )}
+
+      {hasRuntimeFilter && (
+        <button
+          onClick={onRemoveRuntime}
+          aria-label="Quitar filtro de duración"
+          title={`Quitar ${displayFromRuntime} - ${displayToRuntime} min`}
+          className="flex items-center gap-1.5 bg-white/5 border border-white/10 hover:bg-red-600/20 hover:border-red-500/30 text-gray-300 hover:text-white text-xs px-3 py-1.5 rounded-full transition-all duration-150"
+        >
+          <IconClock className="w-3 h-3 opacity-60" />
+          {displayFromRuntime} - {displayToRuntime} min
           <IconClose className="w-2.5 h-2.5 opacity-60" />
         </button>
       )}

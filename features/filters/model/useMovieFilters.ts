@@ -1,22 +1,24 @@
 'use client';
-
 import { useCallback, useMemo } from 'react';
 import {
   useRouter,
   useSearchParams,
   usePathname,
 } from 'next/navigation';
-import { YEAR_MIN, YEAR_MAX } from '../config/options';
+import {
+  YEAR_MIN,
+  YEAR_MAX,
+  RUNTIME_MIN,
+  RUNTIME_MAX,
+} from '../config/options';
 import { buildFiltersUrl } from '../lib/filterUrlSerializer';
 import {
   DEFAULT_MOVIE_SORT,
-  type MovieSort,
-} from '@/entities/movie';
-import {
   MOVIE_FILTER_PARAM_KEYS,
   type MovieFilterParamKey,
-} from '@/lib/url/movieFilterParams';
-import { parseMovieFiltersForUI } from '../lib/parseFiltersForUI';
+  type MovieSort,
+} from '@/entities/movie';
+import { parseMovieFiltersForUI } from '@/lib/url/movieFilters';
 
 export interface UseMovieFiltersResult {
   activeGenres: string[];
@@ -26,6 +28,9 @@ export interface UseMovieFiltersResult {
   fromYear: number | null;
   toYear: number | null;
   hasYearFilter: boolean;
+  fromRuntime: number | null;
+  toRuntime: number | null;
+  hasRuntimeFilter: boolean;
   filterCount: number;
   toggleGenre: (slug: string) => void;
   removeGenre: (slug: string) => void;
@@ -36,6 +41,8 @@ export interface UseMovieFiltersResult {
   setSort: (value: MovieSort) => void;
   applyYearRange: (fromYear: number, toYear: number) => void;
   removeYear: () => void;
+  applyRuntimeRange: (fromRuntime: number, toRuntime: number) => void;
+  removeRuntime: () => void;
   clearFilters: () => void;
 }
 
@@ -57,6 +64,9 @@ export function useMovieFilters(): UseMovieFiltersResult {
     fromYear,
     toYear,
     hasYearFilter,
+    fromRuntime,
+    toRuntime,
+    hasRuntimeFilter,
     filterCount,
   } = uiState;
 
@@ -87,7 +97,6 @@ export function useMovieFilters(): UseMovieFiltersResult {
         const genreKey = MOVIE_FILTER_PARAM_KEYS.genres;
         const currentGenres = params.getAll(genreKey);
         params.delete(genreKey);
-
         if (currentGenres.includes(slug)) {
           currentGenres
             .filter((genre) => genre !== slug)
@@ -149,7 +158,6 @@ export function useMovieFilters(): UseMovieFiltersResult {
         } else {
           params.delete(MOVIE_FILTER_PARAM_KEYS.fromYear);
         }
-
         if (nextToYear < YEAR_MAX) {
           params.set(
             MOVIE_FILTER_PARAM_KEYS.toYear,
@@ -170,20 +178,48 @@ export function useMovieFilters(): UseMovieFiltersResult {
     });
   }, [replaceParams]);
 
+  const applyRuntimeRange = useCallback(
+    (nextFromRuntime: number, nextToRuntime: number) => {
+      replaceParams((params) => {
+        if (nextFromRuntime > RUNTIME_MIN) {
+          params.set(
+            MOVIE_FILTER_PARAM_KEYS.fromRuntime,
+            String(nextFromRuntime)
+          );
+        } else {
+          params.delete(MOVIE_FILTER_PARAM_KEYS.fromRuntime);
+        }
+        if (nextToRuntime < RUNTIME_MAX) {
+          params.set(
+            MOVIE_FILTER_PARAM_KEYS.toRuntime,
+            String(nextToRuntime)
+          );
+        } else {
+          params.delete(MOVIE_FILTER_PARAM_KEYS.toRuntime);
+        }
+      });
+    },
+    [replaceParams]
+  );
+
+  const removeRuntime = useCallback(() => {
+    replaceParams((params) => {
+      params.delete(MOVIE_FILTER_PARAM_KEYS.fromRuntime);
+      params.delete(MOVIE_FILTER_PARAM_KEYS.toRuntime);
+    });
+  }, [replaceParams]);
+
   /**
-   * Limpia todos los filtros, incluido el ordenamiento.
-   *
-   * Semántica:
-   * "Limpiar filtros" lleva al usuario al estado inicial
-   * del catálogo, sin ningún filtro ni orden personalizado.
-   * El sort vuelve a su valor por defecto (latest).
-   */
+  * Limpia todos los filtros, incluido el ordenamiento.
+  */
   const clearFilters = useCallback(() => {
     replaceParams((params) => {
       params.delete(MOVIE_FILTER_PARAM_KEYS.genres);
       params.delete(MOVIE_FILTER_PARAM_KEYS.minRating);
       params.delete(MOVIE_FILTER_PARAM_KEYS.fromYear);
       params.delete(MOVIE_FILTER_PARAM_KEYS.toYear);
+      params.delete(MOVIE_FILTER_PARAM_KEYS.fromRuntime);
+      params.delete(MOVIE_FILTER_PARAM_KEYS.toRuntime);
       params.delete(MOVIE_FILTER_PARAM_KEYS.country);
       params.delete(MOVIE_FILTER_PARAM_KEYS.sort);
     });
@@ -197,6 +233,9 @@ export function useMovieFilters(): UseMovieFiltersResult {
     fromYear,
     toYear,
     hasYearFilter,
+    fromRuntime,
+    toRuntime,
+    hasRuntimeFilter,
     filterCount,
     toggleGenre,
     removeGenre,
@@ -207,6 +246,8 @@ export function useMovieFilters(): UseMovieFiltersResult {
     setSort,
     applyYearRange,
     removeYear,
+    applyRuntimeRange,
+    removeRuntime,
     clearFilters,
   };
 }

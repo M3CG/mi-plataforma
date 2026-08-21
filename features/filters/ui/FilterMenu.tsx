@@ -1,16 +1,14 @@
 // features/filters/ui/FilterMenu.tsx
 'use client';
-
 import type { Category } from '@/entities/category';
-
 import { useMovieFilters } from '../model/useMovieFilters';
 import { useScrollCollapse } from '../model/useScrollCollapse';
 import { useStickySentinel } from '../model/useStickySentinel';
-
 import GenreFilter from './GenreFilter';
 import RatingFilter from './RatingFilter';
 import CountryFilter from './CountryFilter';
 import YearRangeFilter from './YearRangeFilter';
+import RuntimeRangeFilter from './RuntimeRangeFilter';
 import SortFilter from './SortFilter';
 import ActiveFiltersBar from './ActiveFiltersBar';
 
@@ -31,22 +29,21 @@ export default function FilterMenu({
     fromYear,
     toYear,
     hasYearFilter,
+    fromRuntime,
+    toRuntime,
+    hasRuntimeFilter,
     filterCount,
-
     toggleGenre,
     removeGenre,
-
     setRating,
     removeRating,
-
     setCountry,
     removeCountry,
-
     setSort,
-
     applyYearRange,
     removeYear,
-
+    applyRuntimeRange,
+    removeRuntime,
     clearFilters,
   } = useMovieFilters();
 
@@ -76,30 +73,30 @@ export default function FilterMenu({
               pointerEvents: isCollapsed ? 'none' : 'auto',
             }}
           >
-            <div className="flex flex-wrap items-center gap-3 px-5 pt-5 pb-4">
+            <div className="flex flex-wrap items-center gap-2 px-4 pt-4 pb-3">
               <GenreFilter
                 categories={categories}
                 activeGenres={activeGenres}
                 onToggleGenre={toggleGenre}
               />
-
               <RatingFilter value={minRating} onChange={setRating} />
-
               <CountryFilter
                 countries={countries}
                 value={country}
                 onChange={setCountry}
               />
-
               <YearRangeFilter
                 fromYear={fromYear}
                 toYear={toYear}
                 onApply={applyYearRange}
               />
-
-              {/* Spacer */}
-              <div className="flex-1" />
-
+              <RuntimeRangeFilter
+                fromRuntime={fromRuntime}
+                toRuntime={toRuntime}
+                onApply={applyRuntimeRange}
+              />
+              {/* Spacer flexible que empuja SortFilter a la derecha */}
+              <div className="flex-1 min-w-4" />
               <SortFilter value={sort} onChange={setSort} />
             </div>
           </div>
@@ -113,11 +110,15 @@ export default function FilterMenu({
             fromYear={fromYear}
             toYear={toYear}
             hasYearFilter={hasYearFilter}
+            fromRuntime={fromRuntime}
+            toRuntime={toRuntime}
+            hasRuntimeFilter={hasRuntimeFilter}
             filterCount={filterCount}
             onRemoveGenre={removeGenre}
             onRemoveRating={removeRating}
             onRemoveCountry={removeCountry}
             onRemoveYear={removeYear}
+            onRemoveRuntime={removeRuntime}
             onClearAll={clearFilters}
           />
         </div>

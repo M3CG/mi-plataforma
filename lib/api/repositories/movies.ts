@@ -1,31 +1,99 @@
 // lib/api/repositories/movies.ts
-import type { Movie } from '@/entities/movie';
-import type { MovieFilters } from '@/entities/movie/types/filters';
+import {
+  type Movie,
+  type MovieFilters,
+  MOVIE_FILTER_PARAM_KEYS,
+  MOVIE_PAGINATION_PARAM_KEYS,
+  shouldUseGenreMatchRanking,
+} from '@/entities/movie';
 import type { PaginatedResult } from '../pagination/types';
 import type { StrapiListResponse } from '../strapi/types';
-
 import {
   DEFAULT_PAGE_SIZE,
   HOME_PAGE_SIZE,
 } from '../pagination/config';
-
 import { fetchApi } from '../http/client';
 import { getHasMore } from '../strapi/pagination';
-
 import {
   normalizeMovie,
   normalizeMovieList,
 } from '../strapi/normalizers';
-
 import { buildMovieListParams } from '../strapi/movieParams';
-
 import {
   buildPopulateParams,
   MOVIE_DETAIL_POPULATE,
 } from '../strapi/populate';
-
 import { isValidSlug } from '@/lib/utils/slugify';
 import { logger } from '@/lib/utils/logger';
+
+async function fetchGenreRankedMovies(
+  queryParams: MovieFilters,
+  page: number,
+  pageSize: number
+): Promise<PaginatedResult<Movie> | null> {
+  const genres = (queryParams.genres ?? []).filter(Boolean);
+
+  const params: Record<string, string | string[] | undefined> = {
+    [MOVIE_FILTER_PARAM_KEYS.genres]: genres,
+    [MOVIE_PAGINATION_PARAM_KEYS.page]: String(page),
+    [MOVIE_PAGINATION_PARAM_KEYS.pageSize]: String(pageSize),
+  };
+
+  if (queryParams.sort) {
+    params[MOVIE_FILTER_PARAM_KEYS.sort] = queryParams.sort;
+  }
+
+  if (
+    typeof queryParams.minRating === 'number' &&
+    Number.isFinite(queryParams.minRating)
+  ) {
+    params[MOVIE_FILTER_PARAM_KEYS.minRating] = String(
+      queryParams.minRating
+    );
+  }
+
+  if (
+    typeof queryParams.fromYear === 'number' &&
+    Number.isFinite(queryParams.fromYear)
+  ) {
+    params[MOVIE_FILTER_PARAM_KEYS.fromYear] = String(
+      queryParams.fromYear
+    );
+  }
+
+  if (
+    typeof queryParams.toYear === 'number' &&
+    Number.isFinite(queryParams.toYear)
+  ) {
+    params[MOVIE_FILTER_PARAM_KEYS.toYear] = String(queryParams.toYear);
+  }
+
+  if (queryParams.country) {
+    params[MOVIE_FILTER_PARAM_KEYS.country] = queryParams.country;
+  }
+
+  const json = await fetchApi<StrapiListResponse<unknown>>(
+    '/movies/genre-ranked',
+    params,
+    {
+      next: {
+        revalidate: 60,
+        tags: ['movies', 'movies:list', 'movies:genre-ranked'],
+      },
+    }
+  );
+
+  if (!json) {
+    return null;
+  }
+
+  return {
+    data: normalizeMovieList(json),
+    hasMore: getHasMore(json, page, pageSize),
+    page,
+    pageSize,
+  };
+}
 
 export async function fetchMoviesWithFilters(
   queryParams: MovieFilters = {},
@@ -33,11 +101,31 @@ export async function fetchMoviesWithFilters(
   pageSize = DEFAULT_PAGE_SIZE
 ): Promise<PaginatedResult<Movie>> {
   const safePage = Math.max(1, Math.floor(Number(page) || 1));
-
   const safePageSize = Math.max(
     1,
     Math.floor(Number(pageSize) || DEFAULT_PAGE_SIZE)
   );
+
+  if (shouldUseGenreMatchRanking(queryParams.genres)) {
+    const rankedResult = await fetchGenreRankedMovies(
+      queryParams,
+      safePage,
+      safePageSize
+    );
+
+    if (rankedResult) {
+      return rankedResult;
+    }
+
+    logger.warn(
+      'Genre ranked endpoint failed. Falling back to standard movie list query.',
+      {
+        component: 'MoviesRepository',
+        action: 'fetchMoviesWithFilters',
+        genres: queryParams.genres,
+      }
+    );
+  }
 
   const params = buildMovieListParams(
     queryParams,
@@ -94,7 +182,6 @@ export async function fetchMovieBySlug(
       action: 'fetchMovieBySlug',
       slug,
     });
-
     return null;
   }
 

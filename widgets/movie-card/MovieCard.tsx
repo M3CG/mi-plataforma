@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { MouseEvent } from 'react';
 import type { Movie } from '@/entities/movie';
-import { createMovieCardViewModel } from './lib/createMovieCardViewModel';
+import { createMovieCardViewModel } from '@/entities/movie';
 import { IconImagePlaceholder, IconStar } from '@/shared/ui/icons';
 import MovieCardCategoryLink from './MovieCardCategoryLink';
 
@@ -13,6 +13,7 @@ export interface MovieCardProps {
   href: string;
   getCategoryHref?: (categorySlug: string) => string;
   onPrimaryLinkClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
+  highlightedCategorySlugs?: string[];
 }
 
 export default function MovieCard({
@@ -20,6 +21,7 @@ export default function MovieCard({
   href,
   getCategoryHref,
   onPrimaryLinkClick,
+  highlightedCategorySlugs,
 }: MovieCardProps) {
   const viewModel = createMovieCardViewModel(movie);
 
@@ -134,7 +136,9 @@ export default function MovieCard({
           {viewModel.runtimeLabel && (
             <>
               <span className="text-gray-600">·</span>
-              <span className="text-gray-400">{viewModel.runtimeLabel}</span>
+              <span className="text-gray-400">
+                {viewModel.runtimeLabel}
+              </span>
             </>
           )}
 
@@ -159,6 +163,10 @@ export default function MovieCard({
                 key={category.id}
                 category={category}
                 href={getCategoryHref?.(category.slug)}
+                highlighted={
+                  highlightedCategorySlugs?.includes(category.slug) ??
+                  false
+                }
               />
             ))}
           </div>

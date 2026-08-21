@@ -34,6 +34,61 @@
   "exclude": ["node_modules"]
 }
 
+==> ./widgets/movie-card/lib/createMovieCardViewModel.ts <==
+import type { Category } from '@/entities/category';
+import type { Movie } from '@/entities/movie';
+import { formatRuntime } from '@/lib/utils/format';
+
+export interface MovieCardViewModel {
+  title: string;
+  year: number;
+  rating: number;
+  ageRating?: string;
+  posterUrl?: string;
+  runtimeLabel?: string;
+  languages: string[];
+  primaryQuality?: string;
+  hasSubtitles: boolean;
+  categories: Category[];
+}
+
+export function createMovieCardViewModel(
+  movie: Movie
+): MovieCardViewModel {
+  const servers = movie.servers ?? [];
+
+  const languages = Array.from(
+    new Set(
+      servers
+        .map((server) => server.language)
+        .filter((language): language is string => Boolean(language))
+    )
+  );
+
+  const qualities = Array.from(
+    new Set(
+      servers
+        .map((server) => server.quality)
+        .filter((quality): quality is string => Boolean(quality))
+    )
+  );
+
+  const hasSubtitles = servers.some((server) => server.subtitles === true);
+
+  return {
+    title: movie.title,
+    year: movie.year,
+    rating: movie.rating,
+    ageRating: movie.age_rating ?? undefined,
+    posterUrl: movie.poster_url,
+    runtimeLabel: formatRuntime(movie.runtime) ?? undefined,
+    languages,
+    primaryQuality: qualities[0],
+    hasSubtitles,
+    categories: movie.categories ?? [],
+  };
+}
+
 ==> ./widgets/movie-card/AppMovieCard.tsx <==
 'use client';
 
@@ -45,18 +100,23 @@ import { routes } from '@/lib/routes';
 interface AppMovieCardProps {
   movie: Movie;
   onPrimaryLinkClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
+  highlightedCategorySlugs?: string[];
 }
 
 export default function AppMovieCard({
   movie,
   onPrimaryLinkClick,
+  highlightedCategorySlugs,
 }: AppMovieCardProps) {
   return (
     <MovieCard
       movie={movie}
       href={routes.movie(movie.slug)}
-      getCategoryHref={(categorySlug) => routes.moviesByGenre(categorySlug)}
+      getCategoryHref={(categorySlug) =>
+        routes.moviesByGenre(categorySlug)
+      }
       onPrimaryLinkClick={onPrimaryLinkClick}
+      highlightedCategorySlugs={highlightedCategorySlugs}
     />
   );
 }
@@ -91,6 +151,7 @@ export interface MovieCardProps {
   href: string;
   getCategoryHref?: (categorySlug: string) => string;
   onPrimaryLinkClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
+  highlightedCategorySlugs?: string[];
 }
 
 export default function MovieCard({
@@ -98,6 +159,7 @@ export default function MovieCard({
   href,
   getCategoryHref,
   onPrimaryLinkClick,
+  highlightedCategorySlugs,
 }: MovieCardProps) {
   const viewModel = createMovieCardViewModel(movie);
 
@@ -212,7 +274,9 @@ export default function MovieCard({
           {viewModel.runtimeLabel && (
             <>
               <span className="text-gray-600">·</span>
-              <span className="text-gray-400">{viewModel.runtimeLabel}</span>
+              <span className="text-gray-400">
+                {viewModel.runtimeLabel}
+              </span>
             </>
           )}
 
@@ -237,6 +301,10 @@ export default function MovieCard({
                 key={category.id}
                 category={category}
                 href={getCategoryHref?.(category.slug)}
+                highlighted={
+                  highlightedCategorySlugs?.includes(category.slug) ??
+                  false
+                }
               />
             ))}
           </div>
@@ -260,34 +328,55 @@ import type { Category } from '@/entities/category';
 interface MovieCardCategoryLinkProps {
   category: Category;
   href?: string;
+  highlighted?: boolean;
 }
 
 export default function MovieCardCategoryLink({
   category,
   href,
+  highlighted = false,
 }: MovieCardCategoryLinkProps) {
   const baseClasses = `
     relative z-20
     text-[10px] font-medium
-    bg-white/5 border border-white/5
-    text-gray-400
     px-2 py-0.5 rounded-full
     transition-all duration-150
   `;
 
+  const stateClasses = highlighted
+    ? `
+      bg-red-600/20 border border-red-500/40
+      text-red-200
+      hover:bg-red-600/30 hover:border-red-500/60 hover:text-white
+    `
+    : `
+      bg-white/5 border border-white/5
+      text-gray-400
+      hover:text-white hover:bg-white/10 hover:border-white/10
+    `;
+
   if (!href) {
-    return <span className={baseClasses}>{category.name}</span>;
+    return (
+      <span className={`${baseClasses} ${stateClasses}`}>
+        {category.name}
+      </span>
+    );
   }
 
   return (
     <Link
       href={href}
-      title={`Filtrar películas por ${category.name}`}
-      aria-label={`Filtrar películas por ${category.name}`}
-      className={`
-        ${baseClasses}
-        hover:text-white hover:bg-white/10 hover:border-white/10
-      `}
+      title={
+        highlighted
+          ? `Coincide con tu filtro: ${category.name}`
+          : `Filtrar películas por ${category.name}`
+      }
+      aria-label={
+        highlighted
+          ? `Coincide con tu filtro: ${category.name}`
+          : `Filtrar películas por ${category.name}`
+      }
+      className={`${baseClasses} ${stateClasses}`}
     >
       {category.name}
     </Link>
@@ -349,12 +438,24 @@ export default function CatalogGridWithAds({
   initialHasMore,
   filters,
 }: CatalogGridWithAdsProps) {
+  const activeGenres = Array.from(
+    new Set((filters.genres ?? []).filter(Boolean))
+  );
+
+  const highlightedGenres =
+    activeGenres.length >= 2 ? activeGenres : undefined;
+
   return (
     <MovieGrid
       initialMovies={initialMovies}
       initialHasMore={initialHasMore}
       filters={filters}
-      renderMovie={(movie) => <CatalogMovieCard movie={movie} />}
+      renderMovie={(movie) => (
+        <CatalogMovieCard
+          movie={movie}
+          highlightedGenres={highlightedGenres}
+        />
+      )}
       renderAfterMovie={(index) => <MovieGridAdSlot index={index} />}
     />
   );
@@ -402,6 +503,24 @@ export default function Header() {
     </header>
   );
 }
+==> ./entities/movie/lib/runtime.ts <==
+// entities/movie/lib/runtime.ts
+/**
+* Límites canónicos de duración de película (en minutos).
+*
+* - Mínimo 0: permite incluir cualquier duración.
+* - Máximo 240 (4 horas): cubre incluso películas muy largas.
+*/
+export const MOVIE_RUNTIME_MIN = 0;
+export const MOVIE_RUNTIME_MAX = 240;
+
+export function clampMovieRuntime(runtime: number): number {
+  return Math.min(
+    Math.max(Math.floor(runtime), MOVIE_RUNTIME_MIN),
+    MOVIE_RUNTIME_MAX
+  );
+}
+
 ==> ./entities/movie/lib/year.ts <==
 // entities/movie/lib/year.ts
 
@@ -447,10 +566,106 @@ export function dedupeMovies(
   );
 }
 
+==> ./entities/movie/lib/genreMatch.ts <==
+import type { Movie } from '../types/movie';
+
+/**
+* La relevancia por coincidencia de géneros solo se usa
+* cuando hay 2 o más géneros seleccionados.
+*/
+export function shouldUseGenreMatchRanking(
+  genres?: string[]
+): boolean {
+  const normalizedGenres = Array.from(
+    new Set((genres ?? []).map((genre) => genre.trim()).filter(Boolean))
+  );
+
+  return normalizedGenres.length >= 2;
+}
+
+/**
+* Devuelve cuántos géneros seleccionados tiene una película.
+*/
+export function getMovieGenreMatchCount(
+  movie: Pick<Movie, 'categories'>,
+  selectedGenres: string[]
+): number {
+  const selected = new Set(
+    selectedGenres.map((genre) => genre.trim()).filter(Boolean)
+  );
+
+  if (selected.size === 0) {
+    return 0;
+  }
+
+  const movieGenres = new Set(
+    (movie.categories ?? []).map((category) => category.slug)
+  );
+
+  let count = 0;
+
+  selected.forEach((genreSlug) => {
+    if (movieGenres.has(genreSlug)) {
+      count += 1;
+    }
+  });
+
+  return count;
+}
+
+/**
+* Ordena películas por coincidencia de géneros seleccionados.
+*
+* Esto se deja como helper de dominio, aunque el orden principal
+* ahora debe venir desde Strapi.
+*/
+export function rankMoviesByGenreMatch(
+  movies: Movie[],
+  selectedGenres: string[]
+): Movie[] {
+  const selected = selectedGenres
+    .map((genre) => genre.trim())
+    .filter(Boolean);
+
+  if (selected.length < 2) {
+    return movies;
+  }
+
+  return movies
+    .map((movie, index) => ({
+      movie,
+      index,
+      score: getMovieGenreMatchCount(movie, selected),
+    }))
+    .sort((a, b) => {
+      if (b.score !== a.score) {
+        return b.score - a.score;
+      }
+
+      return a.index - b.index;
+    })
+    .map((entry) => entry.movie);
+}
+
+==> ./entities/movie/lib/format.ts <==
+// entities/movie/lib/format.ts
+/**
+* Formatea minutos de duración a un string legible.
+*
+* Esta lógica pertenece al dominio de películas,
+* no a utilidades genéricas.
+*/
+export function formatRuntime(minutes?: number | null): string | null {
+  if (!minutes || minutes <= 0) return null;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
+
 ==> ./entities/movie/lib/createMovieCardViewModel.ts <==
 import type { Category } from '@/entities/category';
 import type { Movie } from '../types/movie';
-import { formatRuntime } from '@/lib/utils/format';
+import { formatRuntime } from './format';
 
 export interface MovieCardViewModel {
   title: string;
@@ -504,25 +719,16 @@ export function createMovieCardViewModel(
 
 ==> ./entities/movie/config/filterParams.ts <==
 // entities/movie/config/filterParams.ts
-
 /**
- * Fuente canónica de los query params de filtros de películas.
- *
- * Esto evita tener strings hardcodeados como:
- * - 'genres'
- * - 'minRating'
- * - 'fromYear'
- * - 'toYear'
- * - 'country'
- * - 'sort'
- *
- * en múltiples capas.
- */
+* Fuente canónica de los query params de filtros de películas.
+*/
 export const MOVIE_FILTER_PARAM_KEYS = {
   genres: 'genres',
   minRating: 'minRating',
   fromYear: 'fromYear',
   toYear: 'toYear',
+  fromRuntime: 'fromRuntime',
+  toRuntime: 'toRuntime',
   country: 'country',
   sort: 'sort',
 } as const;
@@ -531,21 +737,21 @@ export type MovieFilterParamKey =
   (typeof MOVIE_FILTER_PARAM_KEYS)[keyof typeof MOVIE_FILTER_PARAM_KEYS];
 
 /**
- * Query params de paginación usados por el BFF y clientes de catálogo.
- */
+* Query params de paginación usados por el BFF y clientes de catálogo.
+*/
 export const MOVIE_PAGINATION_PARAM_KEYS = {
   page: 'page',
   pageSize: 'pageSize',
 } as const;
+
 ==> ./entities/movie/config/sort.ts <==
 // entities/movie/config/sort.ts
-
 import type { MovieSort } from '../types/filters';
 
 /**
- * Valores válidos de sorting.
- * Fuente canónica para validación.
- */
+* Valores válidos de sorting.
+* Fuente canónica para validación.
+*/
 export const MOVIE_SORT_VALUES: readonly MovieSort[] = [
   'latest',
   'oldest',
@@ -556,13 +762,13 @@ export const MOVIE_SORT_VALUES: readonly MovieSort[] = [
 ];
 
 /**
- * Sorting por defecto.
- */
+* Sorting por defecto.
+*/
 export const DEFAULT_MOVIE_SORT: MovieSort = 'latest';
 
 /**
- * Type guard para saber si un valor es un sort válido.
- */
+* Type guard para saber si un valor es un sort válido.
+*/
 export function isMovieSort(value: unknown): value is MovieSort {
   return (
     typeof value === 'string' &&
@@ -571,10 +777,10 @@ export function isMovieSort(value: unknown): value is MovieSort {
 }
 
 /**
- * Opciones visibles de sorting.
- *
- * La UI debe consumir esto en lugar de definir sus propios valores.
- */
+* Opciones visibles de sorting.
+*
+* La UI debe consumir esto en lugar de definir sus propios valores.
+*/
 export interface MovieSortOption {
   value: MovieSort;
   label: string;
@@ -588,6 +794,7 @@ export const MOVIE_SORT_OPTIONS: readonly MovieSortOption[] = [
   { value: 'rating', label: 'Mejor Puntuadas' },
   { value: 'rating-asc', label: 'Peor Puntuadas' },
 ];
+
 ==> ./entities/movie/types/movie.ts <==
 // entities/movie/types/movie.ts
 import type { Category } from '@/entities/category/types';
@@ -629,15 +836,9 @@ export interface Movie {
 }
 ==> ./entities/movie/types/filters.ts <==
 // entities/movie/types/filters.ts
-
 /**
- * Valores canónicos de ordenamiento para películas.
- *
- * Esta es la fuente de verdad para:
- * - UI de filtros
- * - serialización URL
- * - presets de consulta
- */
+* Valores canónicos de ordenamiento para películas.
+*/
 export type MovieSort =
   | 'latest'
   | 'oldest'
@@ -647,65 +848,65 @@ export type MovieSort =
   | 'rating-asc';
 
 /**
- * Modelo de dominio de filtros de películas.
- *
- * IMPORTANTE:
- * En la Etapa 2A todavía no reemplazamos el MovieFilters viejo de lib/api.
- * Este tipo es el modelo objetivo que vamos a adoptar en la Etapa 2B.
- */
+* Modelo de dominio de filtros de películas.
+*/
 export interface MovieFilters {
   genres?: string[];
   minRating?: number;
   fromYear?: number;
   toYear?: number;
+  fromRuntime?: number;
+  toRuntime?: number;
   country?: string;
   sort?: MovieSort;
 }
 
 /**
- * Representación cruda de query params, compatible con searchParams.
- *
- * Útil para la capa URL/BFF antes de parsear a dominio.
- */
+* Representación cruda de query params, compatible con searchParams.
+*/
 export type MovieFiltersQuery = Record<
   string,
   string | string[] | undefined
 >;
+
 ==> ./entities/movie/index.ts <==
 export type { Movie, Server } from './types/movie';
-
 export { createMovieCardViewModel } from './lib/createMovieCardViewModel';
 export type { MovieCardViewModel } from './lib/createMovieCardViewModel';
-
 export { getMovieKey, dedupeMovies } from './lib/movieKey';
-
 export type {
   MovieFilters,
   MovieFiltersQuery,
   MovieSort,
 } from './types/filters';
-
 export {
   MOVIE_SORT_VALUES,
   DEFAULT_MOVIE_SORT,
   MOVIE_SORT_OPTIONS,
   isMovieSort,
 } from './config/sort';
-
 export type { MovieSortOption } from './config/sort';
-
 export {
   MOVIE_YEAR_MIN,
   getMovieYearMax,
   clampMovieYear,
 } from './lib/year';
-
+export {
+  MOVIE_RUNTIME_MIN,
+  MOVIE_RUNTIME_MAX,
+  clampMovieRuntime,
+} from './lib/runtime';
 export {
   MOVIE_FILTER_PARAM_KEYS,
   MOVIE_PAGINATION_PARAM_KEYS,
 } from './config/filterParams';
-
 export type { MovieFilterParamKey } from './config/filterParams';
+export {
+  shouldUseGenreMatchRanking,
+  getMovieGenreMatchCount,
+  rankMoviesByGenreMatch,
+} from './lib/genreMatch';
+export { formatRuntime } from './lib/format';
 
 ==> ./entities/person/types.ts <==
 // entities/person/types.ts
@@ -751,7 +952,9 @@ export type { Category } from './types';
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "check": "npm run lint && tsc --noEmit",
+    "check:fix": "eslint . --fix && tsc --noEmit"
   },
   "dependencies": {
     "next": "16.3.0",
@@ -910,6 +1113,12 @@ export const IconRefresh = ({ className = "w-4 h-4" }: IconProps) => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182M20.985 4.356v4.992" />
   </svg>
 );
+export const IconClock = ({ className = "w-4 h-4" }: IconProps) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
+
 ==> ./shared/ui/BackButton.tsx <==
 'use client';
 
@@ -950,6 +1159,65 @@ export default function BackButton({ fallbackHref }: BackButtonProps) {
     </button>
   );
 }
+
+==> ./lib/validation/moviePayloadSchemas.ts <==
+import { z } from 'zod';
+
+export const ServerPayloadSchema = z.object({
+  id: z.union([z.number(), z.string()]),
+  name: z.string(),
+  url: z.string(),
+  language: z.string().optional(),
+  quality: z.string().optional(),
+  subtitles: z.boolean().optional(),
+});
+
+export const CategoryPayloadSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  slug: z.string(),
+});
+
+export const PersonPayloadSchema = z.object({
+  id: z.number(),
+  documentId: z.string(),
+  name: z.string(),
+  slug: z.string(),
+  profile_image_url: z.string().optional(),
+});
+
+export const MoviePayloadSchema = z.object({
+  id: z.number(),
+  documentId: z.string(),
+  title: z.string(),
+  english_title: z.string().optional(),
+  spanish_title: z.string().optional(),
+  slug: z.string(),
+  synopsis: z.string(),
+  year: z.number(),
+  rating: z.number(),
+  country: z.string(),
+  tmdb_id: z.number(),
+  views: z.number().optional(),
+  featured_this_week: z.boolean().optional(),
+  poster_url: z.string().optional(),
+  backdrop_url: z.string().optional(),
+  trailer_url: z.string().optional(),
+  runtime: z.number().optional(),
+  age_rating: z.string().optional(),
+  original_language: z.string().optional(),
+  servers: z.array(ServerPayloadSchema).optional(),
+  categories: z.array(CategoryPayloadSchema).optional(),
+  actors: z.array(PersonPayloadSchema).optional(),
+  directors: z.array(PersonPayloadSchema).optional(),
+});
+
+export const PaginatedMoviesSchema = z.object({
+  data: z.array(MoviePayloadSchema),
+  hasMore: z.boolean(),
+  page: z.number(),
+  pageSize: z.number(),
+});
 
 ==> ./lib/api/http/url.ts <==
 // lib/api/http/url.ts
@@ -1100,21 +1368,18 @@ export type PaginatedResult<T> = {
 import {
   DEFAULT_MOVIE_SORT,
   clampMovieYear,
+  clampMovieRuntime,
   type MovieFilters,
   type MovieSort,
 } from '@/entities/movie';
-
 import {
   buildPopulateParams,
   MOVIE_LIST_POPULATE,
 } from './populate';
 
 /**
- * Presets de sorting traducidos a sintaxis de Strapi.
- *
- * Esta capa no define qué sorts existen:
- * solo traduce el modelo canónico a parámetros de Strapi.
- */
+* Presets de sorting traducidos a sintaxis de Strapi.
+*/
 const MOVIE_SORT_PRESETS: Record<MovieSort, string[]> = {
   latest: ['year:desc', 'rating:desc', 'id:desc'],
   oldest: ['year:asc', 'rating:desc', 'id:desc'],
@@ -1129,11 +1394,8 @@ function getMovieSortPreset(sort?: MovieSort): string[] {
 }
 
 /**
- * Construye parámetros de consulta para Strapi.
- *
- * Responsabilidad única:
- * - traducir MovieFilters de dominio a query params de Strapi
- */
+* Construye parámetros de consulta para Strapi.
+*/
 export function buildMovieListParams(
   filters: MovieFilters,
   page: number,
@@ -1146,13 +1408,11 @@ export function buildMovieListParams(
   };
 
   const sortPreset = getMovieSortPreset(filters.sort);
-
   sortPreset.forEach((sortValue, index) => {
     params[`sort[${index}]`] = sortValue;
   });
 
   const genres = filters.genres ?? [];
-
   genres.forEach((genre, index) => {
     params[`filters[categories][slug][$in][${index}]`] = genre;
   });
@@ -1171,11 +1431,9 @@ export function buildMovieListParams(
   if (fromYear !== undefined) {
     fromYear = clampMovieYear(fromYear);
   }
-
   if (toYear !== undefined) {
     toYear = clampMovieYear(toYear);
   }
-
   if (
     fromYear !== undefined &&
     toYear !== undefined &&
@@ -1183,23 +1441,44 @@ export function buildMovieListParams(
   ) {
     [fromYear, toYear] = [toYear, fromYear];
   }
-
   if (fromYear !== undefined) {
     params['filters[year][$gte]'] = String(fromYear);
   }
-
   if (toYear !== undefined) {
     params['filters[year][$lte]'] = String(toYear);
   }
 
-  const country = filters.country?.trim();
+  let fromRuntime = filters.fromRuntime;
+  let toRuntime = filters.toRuntime;
 
+  if (fromRuntime !== undefined) {
+    fromRuntime = clampMovieRuntime(fromRuntime);
+  }
+  if (toRuntime !== undefined) {
+    toRuntime = clampMovieRuntime(toRuntime);
+  }
+  if (
+    fromRuntime !== undefined &&
+    toRuntime !== undefined &&
+    fromRuntime > toRuntime
+  ) {
+    [fromRuntime, toRuntime] = [toRuntime, fromRuntime];
+  }
+  if (fromRuntime !== undefined) {
+    params['filters[runtime][$gte]'] = String(fromRuntime);
+  }
+  if (toRuntime !== undefined) {
+    params['filters[runtime][$lte]'] = String(toRuntime);
+  }
+
+  const country = filters.country?.trim();
   if (country) {
     params['filters[country][$eq]'] = country;
   }
 
   return params;
 }
+
 ==> ./lib/api/strapi/schemas.ts <==
 // lib/api/strapi/schemas.ts
 import { z } from 'zod';
@@ -1268,13 +1547,9 @@ export const StrapiMovieSchema = z.object({
 }).passthrough();
 ==> ./lib/api/strapi/normalizers.ts <==
 // lib/api/strapi/normalizers.ts
-import type {
-  Actor,
-  Category,
-  Director,
-  Movie,
-  Server,
-} from '@/types';
+import type { Movie, Server } from '@/entities/movie';
+import type { Category } from '@/entities/category';
+import type { Actor, Director } from '@/entities/person';
 
 import {
   StrapiCategorySchema,
@@ -1760,6 +2035,110 @@ export async function fetchMoviesByActor(
     hasMore: getHasMore(json, page, pageSize),
   };
 }
+==> ./lib/api/repositories/movieSearch.ts <==
+import type { Movie } from '@/entities/movie';
+import type { StrapiListResponse } from '@/lib/api/strapi/types';
+import { fetchApi } from '@/lib/api/http/client';
+import { normalizeMovieList } from '@/lib/api/strapi/normalizers';
+import {
+  buildPopulateParams,
+  MOVIE_DETAIL_POPULATE,
+} from '@/lib/api/strapi/populate';
+
+const SEARCH_POPULATE = buildPopulateParams(MOVIE_DETAIL_POPULATE);
+
+export interface MovieSearchRepository {
+  byTitle(query: string, limit: number): Promise<Movie[]>;
+  byActor(query: string, limit: number): Promise<Movie[]>;
+  byDirector(query: string, limit: number): Promise<Movie[]>;
+  byCategory(query: string, limit: number): Promise<Movie[]>;
+}
+
+async function runMovieSearch(
+  params: Record<string, string>,
+  limit: number
+): Promise<Movie[]> {
+  const json = await fetchApi<StrapiListResponse<unknown>>(
+    '/movies',
+    {
+      ...SEARCH_POPULATE,
+      'pagination[page]': '1',
+      'pagination[pageSize]': String(limit),
+      ...params,
+    },
+    {
+      cache: 'no-store',
+    }
+  );
+
+  return normalizeMovieList(json);
+}
+
+export const movieSearchRepository: MovieSearchRepository = {
+  async byTitle(query: string, limit: number): Promise<Movie[]> {
+    let json = await fetchApi<StrapiListResponse<unknown>>(
+      '/movies',
+      {
+        ...SEARCH_POPULATE,
+        'pagination[page]': '1',
+        'pagination[pageSize]': String(limit),
+        'filters[$or][0][title][$containsi]': query,
+        'filters[$or][1][english_title][$containsi]': query,
+        'filters[$or][2][spanish_title][$containsi]': query,
+      },
+      {
+        cache: 'no-store',
+      }
+    );
+
+    if (json !== null) {
+      return normalizeMovieList(json);
+    }
+
+    json = await fetchApi<StrapiListResponse<unknown>>(
+      '/movies',
+      {
+        ...SEARCH_POPULATE,
+        'pagination[page]': '1',
+        'pagination[pageSize]': String(limit),
+        'filters[title][$containsi]': query,
+      },
+      {
+        cache: 'no-store',
+      }
+    );
+
+    return normalizeMovieList(json);
+  },
+
+  async byActor(query: string, limit: number): Promise<Movie[]> {
+    return runMovieSearch(
+      {
+        'filters[actors][name][$containsi]': query,
+      },
+      limit
+    );
+  },
+
+  async byDirector(query: string, limit: number): Promise<Movie[]> {
+    return runMovieSearch(
+      {
+        'filters[directors][name][$containsi]': query,
+      },
+      limit
+    );
+  },
+
+  async byCategory(query: string, limit: number): Promise<Movie[]> {
+    return runMovieSearch(
+      {
+        'filters[categories][name][$containsi]': query,
+      },
+      limit
+    );
+  },
+};
+
 ==> ./lib/api/repositories/categories.ts <==
 // lib/api/resources/categories.ts
 import type { Category } from '@/entities/category';
@@ -1793,33 +2172,101 @@ export async function fetchCategories(): Promise<Category[]> {
 }
 ==> ./lib/api/repositories/movies.ts <==
 // lib/api/repositories/movies.ts
-import type { Movie } from '@/entities/movie';
-import type { MovieFilters } from '@/entities/movie/types/filters';
+import {
+  type Movie,
+  type MovieFilters,
+  MOVIE_FILTER_PARAM_KEYS,
+  MOVIE_PAGINATION_PARAM_KEYS,
+  shouldUseGenreMatchRanking,
+} from '@/entities/movie';
 import type { PaginatedResult } from '../pagination/types';
 import type { StrapiListResponse } from '../strapi/types';
-
 import {
   DEFAULT_PAGE_SIZE,
   HOME_PAGE_SIZE,
 } from '../pagination/config';
-
 import { fetchApi } from '../http/client';
 import { getHasMore } from '../strapi/pagination';
-
 import {
   normalizeMovie,
   normalizeMovieList,
 } from '../strapi/normalizers';
-
 import { buildMovieListParams } from '../strapi/movieParams';
-
 import {
   buildPopulateParams,
   MOVIE_DETAIL_POPULATE,
 } from '../strapi/populate';
-
 import { isValidSlug } from '@/lib/utils/slugify';
 import { logger } from '@/lib/utils/logger';
+
+async function fetchGenreRankedMovies(
+  queryParams: MovieFilters,
+  page: number,
+  pageSize: number
+): Promise<PaginatedResult<Movie> | null> {
+  const genres = (queryParams.genres ?? []).filter(Boolean);
+
+  const params: Record<string, string | string[] | undefined> = {
+    [MOVIE_FILTER_PARAM_KEYS.genres]: genres,
+    [MOVIE_PAGINATION_PARAM_KEYS.page]: String(page),
+    [MOVIE_PAGINATION_PARAM_KEYS.pageSize]: String(pageSize),
+  };
+
+  if (queryParams.sort) {
+    params[MOVIE_FILTER_PARAM_KEYS.sort] = queryParams.sort;
+  }
+
+  if (
+    typeof queryParams.minRating === 'number' &&
+    Number.isFinite(queryParams.minRating)
+  ) {
+    params[MOVIE_FILTER_PARAM_KEYS.minRating] = String(
+      queryParams.minRating
+    );
+  }
+
+  if (
+    typeof queryParams.fromYear === 'number' &&
+    Number.isFinite(queryParams.fromYear)
+  ) {
+    params[MOVIE_FILTER_PARAM_KEYS.fromYear] = String(
+      queryParams.fromYear
+    );
+  }
+
+  if (
+    typeof queryParams.toYear === 'number' &&
+    Number.isFinite(queryParams.toYear)
+  ) {
+    params[MOVIE_FILTER_PARAM_KEYS.toYear] = String(queryParams.toYear);
+  }
+
+  if (queryParams.country) {
+    params[MOVIE_FILTER_PARAM_KEYS.country] = queryParams.country;
+  }
+
+  const json = await fetchApi<StrapiListResponse<unknown>>(
+    '/movies/genre-ranked',
+    params,
+    {
+      next: {
+        revalidate: 60,
+        tags: ['movies', 'movies:list', 'movies:genre-ranked'],
+      },
+    }
+  );
+
+  if (!json) {
+    return null;
+  }
+
+  return {
+    data: normalizeMovieList(json),
+    hasMore: getHasMore(json, page, pageSize),
+    page,
+    pageSize,
+  };
+}
 
 export async function fetchMoviesWithFilters(
   queryParams: MovieFilters = {},
@@ -1827,11 +2274,31 @@ export async function fetchMoviesWithFilters(
   pageSize = DEFAULT_PAGE_SIZE
 ): Promise<PaginatedResult<Movie>> {
   const safePage = Math.max(1, Math.floor(Number(page) || 1));
-
   const safePageSize = Math.max(
     1,
     Math.floor(Number(pageSize) || DEFAULT_PAGE_SIZE)
   );
+
+  if (shouldUseGenreMatchRanking(queryParams.genres)) {
+    const rankedResult = await fetchGenreRankedMovies(
+      queryParams,
+      safePage,
+      safePageSize
+    );
+
+    if (rankedResult) {
+      return rankedResult;
+    }
+
+    logger.warn(
+      'Genre ranked endpoint failed. Falling back to standard movie list query.',
+      {
+        component: 'MoviesRepository',
+        action: 'fetchMoviesWithFilters',
+        genres: queryParams.genres,
+      }
+    );
+  }
 
   const params = buildMovieListParams(
     queryParams,
@@ -1888,7 +2355,6 @@ export async function fetchMovieBySlug(
       action: 'fetchMovieBySlug',
       slug,
     });
-
     return null;
   }
 
@@ -1917,6 +2383,7 @@ export async function fetchMovieBySlug(
 
   return normalizeMovie(firstItem);
 }
+
 ==> ./lib/config/site.ts <==
 // lib/config/site.ts
 
@@ -1940,6 +2407,7 @@ import {
   DEFAULT_MOVIE_SORT,
   isMovieSort,
   clampMovieYear,
+  clampMovieRuntime,
   MOVIE_FILTER_PARAM_KEYS,
   type MovieFilters,
   type MovieFiltersQuery,
@@ -1950,15 +2418,11 @@ function parseStringArray(
   value: string | string[] | undefined
 ): string[] {
   if (!value) return [];
-
   const values = Array.isArray(value) ? value : [value];
-
   const flattened = values.flatMap((item) => item.split(','));
-
   const cleaned = flattened
     .map((item) => item.trim())
     .filter(Boolean);
-
   return Array.from(new Set(cleaned));
 }
 
@@ -1966,23 +2430,16 @@ function parseNumber(
   value: string | string[] | undefined
 ): number | undefined {
   const first = Array.isArray(value) ? value[0] : value;
-
   if (first === undefined || first === null || first === '') {
     return undefined;
   }
-
   const parsed = Number(first);
-
   return Number.isFinite(parsed) ? parsed : undefined;
 }
 
 /**
- * Parsea filtros de dominio desde URLSearchParams.
- *
- * Responsabilidad:
- * - convertir query params crudos a MovieFilters tipado
- * - sanear valores inválidos
- */
+* Parsea filtros de dominio desde URLSearchParams.
+*/
 export function parseMovieFiltersFromSearchParams(
   searchParams: URLSearchParams
 ): MovieFilters {
@@ -1993,7 +2450,6 @@ export function parseMovieFiltersFromSearchParams(
   const minRatingRaw = parseNumber(
     searchParams.get(MOVIE_FILTER_PARAM_KEYS.minRating) ?? undefined
   );
-
   const minRating =
     minRatingRaw === undefined
       ? undefined
@@ -2002,19 +2458,15 @@ export function parseMovieFiltersFromSearchParams(
   let fromYear = parseNumber(
     searchParams.get(MOVIE_FILTER_PARAM_KEYS.fromYear) ?? undefined
   );
-
   let toYear = parseNumber(
     searchParams.get(MOVIE_FILTER_PARAM_KEYS.toYear) ?? undefined
   );
-
   if (fromYear !== undefined) {
     fromYear = clampMovieYear(fromYear);
   }
-
   if (toYear !== undefined) {
     toYear = clampMovieYear(toYear);
   }
-
   if (
     fromYear !== undefined &&
     toYear !== undefined &&
@@ -2023,14 +2475,32 @@ export function parseMovieFiltersFromSearchParams(
     [fromYear, toYear] = [toYear, fromYear];
   }
 
+  let fromRuntime = parseNumber(
+    searchParams.get(MOVIE_FILTER_PARAM_KEYS.fromRuntime) ?? undefined
+  );
+  let toRuntime = parseNumber(
+    searchParams.get(MOVIE_FILTER_PARAM_KEYS.toRuntime) ?? undefined
+  );
+  if (fromRuntime !== undefined) {
+    fromRuntime = clampMovieRuntime(fromRuntime);
+  }
+  if (toRuntime !== undefined) {
+    toRuntime = clampMovieRuntime(toRuntime);
+  }
+  if (
+    fromRuntime !== undefined &&
+    toRuntime !== undefined &&
+    fromRuntime > toRuntime
+  ) {
+    [fromRuntime, toRuntime] = [toRuntime, fromRuntime];
+  }
+
   const countryRaw =
     searchParams.get(MOVIE_FILTER_PARAM_KEYS.country) ?? undefined;
-
   const country = countryRaw?.trim() || undefined;
 
   const sortParam =
     searchParams.get(MOVIE_FILTER_PARAM_KEYS.sort) ?? undefined;
-
   const sort = isMovieSort(sortParam) ? sortParam : undefined;
 
   return {
@@ -2038,27 +2508,24 @@ export function parseMovieFiltersFromSearchParams(
     minRating,
     fromYear,
     toYear,
+    fromRuntime,
+    toRuntime,
     country,
     sort,
   };
 }
 
 /**
- * Parsea filtros desde el objeto searchParams de Next.js.
- *
- * Este parser existe porque en server components recibimos
- * un objeto plano, no una instancia de URLSearchParams.
- */
+* Parsea filtros desde el objeto searchParams de Next.js.
+*/
 export function parseMovieFiltersFromRecord(
   record: MovieFiltersQuery
 ): MovieFilters {
   const params = new URLSearchParams();
-
   Object.entries(record).forEach(([key, value]) => {
     if (value === undefined || value === null || value === '') {
       return;
     }
-
     if (Array.isArray(value)) {
       value.forEach((item) => {
         if (item) params.append(key, item);
@@ -2067,16 +2534,12 @@ export function parseMovieFiltersFromRecord(
       params.set(key, value);
     }
   });
-
   return parseMovieFiltersFromSearchParams(params);
 }
 
 /**
- * Serializa filtros de dominio a query params.
- *
- * Responsabilidad:
- * - convertir MovieFilters tipado a URLSearchParams
- */
+* Serializa filtros de dominio a query params.
+*/
 export function serializeMovieFiltersToSearchParams(
   filters: MovieFilters
 ): URLSearchParams {
@@ -2105,7 +2568,6 @@ export function serializeMovieFiltersToSearchParams(
       String(filters.fromYear)
     );
   }
-
   if (
     typeof filters.toYear === 'number' &&
     Number.isFinite(filters.toYear)
@@ -2116,10 +2578,28 @@ export function serializeMovieFiltersToSearchParams(
     );
   }
 
+  if (
+    typeof filters.fromRuntime === 'number' &&
+    Number.isFinite(filters.fromRuntime)
+  ) {
+    params.set(
+      MOVIE_FILTER_PARAM_KEYS.fromRuntime,
+      String(filters.fromRuntime)
+    );
+  }
+  if (
+    typeof filters.toRuntime === 'number' &&
+    Number.isFinite(filters.toRuntime)
+  ) {
+    params.set(
+      MOVIE_FILTER_PARAM_KEYS.toRuntime,
+      String(filters.toRuntime)
+    );
+  }
+
   if (filters.country) {
     params.set(MOVIE_FILTER_PARAM_KEYS.country, filters.country);
   }
-
   if (filters.sort && filters.sort !== DEFAULT_MOVIE_SORT) {
     params.set(MOVIE_FILTER_PARAM_KEYS.sort, filters.sort);
   }
@@ -2128,8 +2608,8 @@ export function serializeMovieFiltersToSearchParams(
 }
 
 /**
- * Estado de filtros listo para ser consumido por la UI.
- */
+* Estado de filtros listo para ser consumido por la UI.
+*/
 export interface MovieFiltersUIState {
   activeGenres: string[];
   minRating: string | null;
@@ -2138,15 +2618,15 @@ export interface MovieFiltersUIState {
   fromYear: number | null;
   toYear: number | null;
   hasYearFilter: boolean;
+  fromRuntime: number | null;
+  toRuntime: number | null;
+  hasRuntimeFilter: boolean;
   filterCount: number;
 }
 
 /**
- * Parsea la URL y devuelve un estado listo para la UI.
- *
- * Esto elimina la duplicación que existía en useMovieFilters,
- * donde se volvían a leer manualmente los mismos query params.
- */
+* Parsea la URL y devuelve un estado listo para la UI.
+*/
 export function parseMovieFiltersForUI(
   searchParams: URLSearchParams
 ): MovieFiltersUIState {
@@ -2160,20 +2640,25 @@ export function parseMovieFiltersForUI(
       : null;
 
   const country = domainFilters.country ?? null;
-
   const sort = domainFilters.sort ?? DEFAULT_MOVIE_SORT;
 
   const fromYear = domainFilters.fromYear ?? null;
   const toYear = domainFilters.toYear ?? null;
-
   const hasYearFilter =
     searchParams.has(MOVIE_FILTER_PARAM_KEYS.fromYear) ||
     searchParams.has(MOVIE_FILTER_PARAM_KEYS.toYear);
+
+  const fromRuntime = domainFilters.fromRuntime ?? null;
+  const toRuntime = domainFilters.toRuntime ?? null;
+  const hasRuntimeFilter =
+    searchParams.has(MOVIE_FILTER_PARAM_KEYS.fromRuntime) ||
+    searchParams.has(MOVIE_FILTER_PARAM_KEYS.toRuntime);
 
   const filterCount =
     activeGenres.length +
     (minRating ? 1 : 0) +
     (hasYearFilter ? 1 : 0) +
+    (hasRuntimeFilter ? 1 : 0) +
     (country ? 1 : 0);
 
   return {
@@ -2184,9 +2669,47 @@ export function parseMovieFiltersForUI(
     fromYear,
     toYear,
     hasYearFilter,
+    fromRuntime,
+    toRuntime,
+    hasRuntimeFilter,
     filterCount,
   };
 }
+
+==> ./lib/url/movieFilterParams.ts <==
+/**
+* Fuente canónica de los query params de filtros de películas.
+*
+* Esto evita tener strings hardcodeados como:
+* - 'genres'
+* - 'minRating'
+* - 'fromYear'
+* - 'toYear'
+* - 'country'
+* - 'sort'
+*
+* en múltiples capas.
+*/
+export const MOVIE_FILTER_PARAM_KEYS = {
+  genres: 'genres',
+  minRating: 'minRating',
+  fromYear: 'fromYear',
+  toYear: 'toYear',
+  country: 'country',
+  sort: 'sort',
+} as const;
+
+export type MovieFilterParamKey =
+  (typeof MOVIE_FILTER_PARAM_KEYS)[keyof typeof MOVIE_FILTER_PARAM_KEYS];
+
+/**
+* Query params de paginación usados por el BFF y clientes de catálogo.
+*/
+export const MOVIE_PAGINATION_PARAM_KEYS = {
+  page: 'page',
+  pageSize: 'pageSize',
+} as const;
+
 ==> ./lib/queries/countries.ts <==
 // lib/queries/countries.ts
 import { cache } from 'react';
@@ -2212,6 +2735,38 @@ import { cache } from 'react';
 import { fetchCategories } from '@/lib/api/repositories/categories';
 
 export const getCategories = cache(fetchCategories);
+==> ./lib/queries/search.ts <==
+import { cache } from 'react';
+import {
+  movieSearchRepository,
+  type MovieSearchRepository,
+} from '@/lib/api/repositories/movieSearch';
+
+const byTitle = cache(async (query: string, limit: number) =>
+  movieSearchRepository.byTitle(query, limit)
+);
+
+const byActor = cache(async (query: string, limit: number) =>
+  movieSearchRepository.byActor(query, limit)
+);
+
+const byDirector = cache(async (query: string, limit: number) =>
+  movieSearchRepository.byDirector(query, limit)
+);
+
+const byCategory = cache(async (query: string, limit: number) =>
+  movieSearchRepository.byCategory(query, limit)
+);
+
+export const movieSearchQueries: MovieSearchRepository = {
+  byTitle,
+  byActor,
+  byDirector,
+  byCategory,
+};
+
+export type { MovieSearchRepository };
+
 ==> ./lib/queries/movies.ts <==
 // lib/queries/movies.ts
 import { cache } from 'react';
@@ -2452,21 +3007,6 @@ export function consumeScrollRestoreSignal(pathname: string): boolean {
   return true;
 }
 
-==> ./types/index.ts <==
-/**
- * @deprecated
- *
- * Este archivo existe solo como capa de compatibilidad temporal.
- *
- * Los tipos de dominio deben importarse desde sus entidades:
- * - @/entities/movie
- * - @/entities/category
- * - @/entities/person
- */
-export type { Movie, Server } from '@/entities/movie/types/movie';
-export type { Category } from '@/entities/category/types';
-export type { Actor, Director, Person } from '@/entities/person/types';
-
 ==> ./README.md <==
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
@@ -2506,69 +3046,13 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
 ==> ./features/catalog/infrastructure/moviesClient.ts <==
-import { z } from 'zod';
 import type { Movie, MovieFilters } from '@/entities/movie';
 import type { PaginatedResult } from '@/lib/api/pagination/types';
 import { DEFAULT_PAGE_SIZE } from '@/lib/api/pagination/config';
 import { serializeMovieFiltersToSearchParams } from '@/lib/url/movieFilters';
-import { MOVIE_PAGINATION_PARAM_KEYS } from '@/entities/movie/config/filterParams';
+import { MOVIE_PAGINATION_PARAM_KEYS } from '@/lib/url/movieFilterParams';
+import { PaginatedMoviesSchema } from '@/lib/validation/moviePayloadSchemas';
 import { logger } from '@/lib/utils/logger';
-
-const ServerSchema = z.object({
-  id: z.union([z.number(), z.string()]),
-  name: z.string(),
-  url: z.string(),
-  language: z.string().optional(),
-  quality: z.string().optional(),
-  subtitles: z.boolean().optional(),
-});
-
-const CategorySchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  slug: z.string(),
-});
-
-const PersonSchema = z.object({
-  id: z.number(),
-  documentId: z.string(),
-  name: z.string(),
-  slug: z.string(),
-  profile_image_url: z.string().optional(),
-});
-
-const MovieSchema = z.object({
-  id: z.number(),
-  documentId: z.string(),
-  title: z.string(),
-  english_title: z.string().optional(),
-  spanish_title: z.string().optional(),
-  slug: z.string(),
-  synopsis: z.string(),
-  year: z.number(),
-  rating: z.number(),
-  country: z.string(),
-  tmdb_id: z.number(),
-  views: z.number().optional(),
-  featured_this_week: z.boolean().optional(),
-  poster_url: z.string().optional(),
-  backdrop_url: z.string().optional(),
-  trailer_url: z.string().optional(),
-  runtime: z.number().optional(),
-  age_rating: z.string().optional(),
-  original_language: z.string().optional(),
-  servers: z.array(ServerSchema).optional(),
-  categories: z.array(CategorySchema).optional(),
-  actors: z.array(PersonSchema).optional(),
-  directors: z.array(PersonSchema).optional(),
-});
-
-const PaginatedMoviesSchema = z.object({
-  data: z.array(MovieSchema),
-  hasMore: z.boolean(),
-  page: z.number(),
-  pageSize: z.number(),
-});
 
 export async function fetchMoviesFromApi(
   filters: MovieFilters,
@@ -2577,6 +3061,7 @@ export async function fetchMoviesFromApi(
 ): Promise<PaginatedResult<Movie>> {
   try {
     const params = serializeMovieFiltersToSearchParams(filters);
+
     params.set(MOVIE_PAGINATION_PARAM_KEYS.page, String(page));
     params.set(MOVIE_PAGINATION_PARAM_KEYS.pageSize, String(pageSize));
 
@@ -2815,10 +3300,12 @@ import { routes } from '@/lib/routes';
 
 interface CatalogMovieCardProps {
   movie: Movie;
+  highlightedGenres?: string[];
 }
 
 export default function CatalogMovieCard({
   movie,
+  highlightedGenres,
 }: CatalogMovieCardProps) {
   const handlePrimaryLinkClick = (
     event: MouseEvent<HTMLAnchorElement>
@@ -2841,6 +3328,7 @@ export default function CatalogMovieCard({
     <AppMovieCard
       movie={movie}
       onPrimaryLinkClick={handlePrimaryLinkClick}
+      highlightedCategorySlugs={highlightedGenres}
     />
   );
 }
@@ -4136,13 +4624,9 @@ export async function getMovieDetailPage(
 ==> ./features/movie-detail/lib/createMovieDetailViewModel.ts <==
 // features/movie-detail/lib/createMovieDetailViewModel.ts
 
-import type {
-  Actor,
-  Category,
-  Director,
-  Movie,
-  Server,
-} from '@/types';
+import type { Movie, Server } from '@/entities/movie';
+import type { Category } from '@/entities/category';
+import type { Actor, Director } from '@/entities/person';
 import { formatRuntime } from '@/lib/utils/format';
 
 export interface MovieDetailViewModel {
@@ -5172,112 +5656,6 @@ export async function getSearchPageData(
   };
 }
 
-==> ./features/search/infrastructure/strapiMovieSearchRepository.ts <==
-// features/search/infrastructure/strapiMovieSearchRepository.ts
-import type { Movie } from '@/entities/movie';
-import type { StrapiListResponse } from '@/lib/api/strapi/types';
-
-import { fetchApi } from '@/lib/api/http/client';
-import { normalizeMovieList } from '@/lib/api/strapi/normalizers';
-
-import {
-  buildPopulateParams,
-  MOVIE_DETAIL_POPULATE,
-} from '@/lib/api/strapi/populate';
-
-const SEARCH_POPULATE = buildPopulateParams(MOVIE_DETAIL_POPULATE);
-
-async function runMovieSearch(
-  params: Record<string, string>,
-  limit: number
-): Promise<Movie[]> {
-  const json = await fetchApi<StrapiListResponse<unknown>>(
-    '/movies',
-    {
-      ...SEARCH_POPULATE,
-      'pagination[page]': '1',
-      'pagination[pageSize]': String(limit),
-      ...params,
-    },
-    {
-      cache: 'no-store',
-    }
-  );
-
-  return normalizeMovieList(json);
-}
-
-export interface MovieSearchRepository {
-  byTitle(query: string, limit: number): Promise<Movie[]>;
-  byActor(query: string, limit: number): Promise<Movie[]>;
-  byDirector(query: string, limit: number): Promise<Movie[]>;
-  byCategory(query: string, limit: number): Promise<Movie[]>;
-}
-
-export const strapiMovieSearchRepository: MovieSearchRepository = {
-  async byTitle(query: string, limit: number): Promise<Movie[]> {
-    let json = await fetchApi<StrapiListResponse<unknown>>(
-      '/movies',
-      {
-        ...SEARCH_POPULATE,
-        'pagination[page]': '1',
-        'pagination[pageSize]': String(limit),
-        'filters[$or][0][title][$containsi]': query,
-        'filters[$or][1][english_title][$containsi]': query,
-        'filters[$or][2][spanish_title][$containsi]': query,
-      },
-      {
-        cache: 'no-store',
-      }
-    );
-
-    if (json !== null) {
-      return normalizeMovieList(json);
-    }
-
-    json = await fetchApi<StrapiListResponse<unknown>>(
-      '/movies',
-      {
-        ...SEARCH_POPULATE,
-        'pagination[page]': '1',
-        'pagination[pageSize]': String(limit),
-        'filters[title][$containsi]': query,
-      },
-      {
-        cache: 'no-store',
-      }
-    );
-
-    return normalizeMovieList(json);
-  },
-
-  async byActor(query: string, limit: number): Promise<Movie[]> {
-    return runMovieSearch(
-      {
-        'filters[actors][name][$containsi]': query,
-      },
-      limit
-    );
-  },
-
-  async byDirector(query: string, limit: number): Promise<Movie[]> {
-    return runMovieSearch(
-      {
-        'filters[directors][name][$containsi]': query,
-      },
-      limit
-    );
-  },
-
-  async byCategory(query: string, limit: number): Promise<Movie[]> {
-    return runMovieSearch(
-      {
-        'filters[categories][name][$containsi]': query,
-      },
-      limit
-    );
-  },
-};
 ==> ./features/search/lib/normalizeSearchQuery.ts <==
 // features/search/lib/normalizeSearchQuery.ts
 
@@ -5754,9 +6132,9 @@ import { SEARCH_PAGE_SIZE } from '@/lib/api/pagination/config';
 import { normalizeSearchTerm } from '../domain/normalize';
 import { mergeSearchResults } from '../domain/mergeSearchResults';
 import {
-  strapiMovieSearchRepository,
+  movieSearchQueries,
   type MovieSearchRepository,
-} from '../infrastructure/strapiMovieSearchRepository';
+} from '@/lib/queries/search';
 import { logger } from '@/lib/utils/logger';
 
 /**
@@ -5770,7 +6148,7 @@ import { logger } from '@/lib/utils/logger';
 export async function searchMovies(
   query: string,
   limit: number = SEARCH_PAGE_SIZE * 4,
-  repository: MovieSearchRepository = strapiMovieSearchRepository
+  repository: MovieSearchRepository = movieSearchQueries
 ): Promise<Movie[]> {
   const safeQuery = query.trim();
 
@@ -5815,6 +6193,73 @@ export async function searchMovies(
   return mergedMovies.slice(0, limit);
 }
 
+==> ./features/filters/lib/parseFiltersForUI.ts <==
+import {
+  DEFAULT_MOVIE_SORT,
+  type MovieSort,
+} from '@/entities/movie';
+import { parseMovieFiltersFromSearchParams } from '@/lib/url/movieFilters';
+import { MOVIE_FILTER_PARAM_KEYS } from '@/lib/url/movieFilterParams';
+
+/**
+* Estado de filtros listo para ser consumido por la UI.
+*/
+export interface MovieFiltersUIState {
+  activeGenres: string[];
+  minRating: string | null;
+  country: string | null;
+  sort: MovieSort;
+  fromYear: number | null;
+  toYear: number | null;
+  hasYearFilter: boolean;
+  filterCount: number;
+}
+
+/**
+* Parsea la URL y devuelve un estado listo para la UI.
+*
+* Esto elimina la duplicación que existía en useMovieFilters,
+* donde se volvían a leer manualmente los mismos query params.
+*/
+export function parseMovieFiltersForUI(
+  searchParams: URLSearchParams
+): MovieFiltersUIState {
+  const domainFilters = parseMovieFiltersFromSearchParams(searchParams);
+
+  const activeGenres = domainFilters.genres ?? [];
+
+  const minRating =
+    domainFilters.minRating !== undefined
+      ? String(domainFilters.minRating)
+      : null;
+
+  const country = domainFilters.country ?? null;
+  const sort = domainFilters.sort ?? DEFAULT_MOVIE_SORT;
+  const fromYear = domainFilters.fromYear ?? null;
+  const toYear = domainFilters.toYear ?? null;
+
+  const hasYearFilter =
+    searchParams.has(MOVIE_FILTER_PARAM_KEYS.fromYear) ||
+    searchParams.has(MOVIE_FILTER_PARAM_KEYS.toYear);
+
+  const filterCount =
+    activeGenres.length +
+    (minRating ? 1 : 0) +
+    (hasYearFilter ? 1 : 0) +
+    (country ? 1 : 0);
+
+  return {
+    activeGenres,
+    minRating,
+    country,
+    sort,
+    fromYear,
+    toYear,
+    hasYearFilter,
+    filterCount,
+  };
+}
+
 ==> ./features/filters/lib/filterUrlSerializer.ts <==
 // features/filters/lib/filterUrlSerializer.ts
 
@@ -5833,16 +6278,20 @@ export function buildFiltersUrl(
 }
 ==> ./features/filters/config/options.ts <==
 // features/filters/config/options.ts
-
 import {
   MOVIE_SORT_OPTIONS,
   MOVIE_YEAR_MIN,
   getMovieYearMax,
+  MOVIE_RUNTIME_MIN,
+  MOVIE_RUNTIME_MAX,
   type MovieSort,
 } from '@/entities/movie';
 
 export const YEAR_MIN = MOVIE_YEAR_MIN;
 export const YEAR_MAX = getMovieYearMax();
+
+export const RUNTIME_MIN = MOVIE_RUNTIME_MIN;
+export const RUNTIME_MAX = MOVIE_RUNTIME_MAX;
 
 export const RATING_OPTIONS = [
   { value: 'all', label: 'Todas' },
@@ -5853,15 +6302,35 @@ export const RATING_OPTIONS = [
   { value: '9', label: '9.0+' },
 ] as const;
 
-/**
- * Las opciones de sorting salen de la entidad movie.
- */
 export const SORT_OPTIONS = MOVIE_SORT_OPTIONS;
 
 export type RatingOptionValue =
   (typeof RATING_OPTIONS)[number]['value'];
 
 export type SortOptionValue = MovieSort;
+
+==> ./features/filters/config/sortOptions.ts <==
+import type { MovieSort } from '@/entities/movie';
+
+/**
+* Opciones visibles de sorting.
+*
+* La UI debe consumir esto en lugar de definir sus propios valores.
+*/
+export interface MovieSortOption {
+  value: MovieSort;
+  label: string;
+}
+
+export const MOVIE_SORT_OPTIONS: readonly MovieSortOption[] = [
+  { value: 'latest', label: 'Recientes' },
+  { value: 'oldest', label: 'Antiguas' },
+  { value: 'title', label: 'A - Z' },
+  { value: 'title-desc', label: 'Z - A' },
+  { value: 'rating', label: 'Mejor Puntuadas' },
+  { value: 'rating-asc', label: 'Peor Puntuadas' },
+];
+
 ==> ./features/filters/ui/DropdownMenu.tsx <==
 // features/filters/ui/DropdownMenu.tsx
 'use client';
@@ -6141,6 +6610,104 @@ export default function GenreFilter({
     </DropdownMenu>
   );
 }
+==> ./features/filters/ui/RuntimeRangeFilter.tsx <==
+'use client';
+import { useState } from 'react';
+import { IconClock } from '@/shared/ui/icons';
+import { RUNTIME_MIN, RUNTIME_MAX } from '../config/options';
+import styles from './year-range.module.css';
+
+interface RuntimeRangeFilterProps {
+  fromRuntime: number | null;
+  toRuntime: number | null;
+  onApply: (fromRuntime: number, toRuntime: number) => void;
+}
+
+export default function RuntimeRangeFilter({
+  fromRuntime,
+  toRuntime,
+  onApply,
+}: RuntimeRangeFilterProps) {
+  const [minRuntime, setMinRuntime] = useState(fromRuntime ?? RUNTIME_MIN);
+  const [maxRuntime, setMaxRuntime] = useState(toRuntime ?? RUNTIME_MAX);
+
+  const [prevFromRuntime, setPrevFromRuntime] = useState(fromRuntime);
+  const [prevToRuntime, setPrevToRuntime] = useState(toRuntime);
+
+  if (prevFromRuntime !== fromRuntime) {
+    setPrevFromRuntime(fromRuntime);
+    setMinRuntime(fromRuntime ?? RUNTIME_MIN);
+  }
+  if (prevToRuntime !== toRuntime) {
+    setPrevToRuntime(toRuntime);
+    setMaxRuntime(toRuntime ?? RUNTIME_MAX);
+  }
+
+  const apply = () => {
+    onApply(minRuntime, maxRuntime);
+  };
+
+  const range = RUNTIME_MAX - RUNTIME_MIN;
+  const left = ((minRuntime - RUNTIME_MIN) / range) * 100;
+  const right = 100 - ((maxRuntime - RUNTIME_MIN) / range) * 100;
+
+  return (
+    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+      <span className="text-gray-500 flex-shrink-0">
+        <IconClock className="w-3.5 h-3.5" />
+      </span>
+      <span className="text-xs font-medium text-gray-300 w-8 text-right tabular-nums flex-shrink-0">
+        {minRuntime}
+      </span>
+      <div className={`${styles.rangeSlider} w-32 lg:w-44 xl:w-56 relative flex-shrink-0`}>
+        <div className={styles.track} />
+        <div
+          className={styles.trackActive}
+          style={{
+            left: `${left}%`,
+            right: `${right}%`,
+          }}
+        />
+        <input
+          type="range"
+          min={RUNTIME_MIN}
+          max={RUNTIME_MAX}
+          step={5}
+          value={minRuntime}
+          onChange={(event) =>
+            setMinRuntime(Math.min(Number(event.target.value), maxRuntime - 5))
+          }
+          onMouseUp={apply}
+          onTouchEnd={apply}
+          onKeyUp={apply}
+          onBlur={apply}
+          aria-label="Duración mínima (minutos)"
+          className={styles.rangeInput}
+        />
+        <input
+          type="range"
+          min={RUNTIME_MIN}
+          max={RUNTIME_MAX}
+          step={5}
+          value={maxRuntime}
+          onChange={(event) =>
+            setMaxRuntime(Math.max(Number(event.target.value), minRuntime + 5))
+          }
+          onMouseUp={apply}
+          onTouchEnd={apply}
+          onKeyUp={apply}
+          onBlur={apply}
+          aria-label="Duración máxima (minutos)"
+          className={styles.rangeInput}
+        />
+      </div>
+      <span className="text-xs font-medium text-gray-300 w-8 tabular-nums flex-shrink-0">
+        {maxRuntime}
+      </span>
+    </div>
+  );
+}
+
 ==> ./features/filters/ui/RatingFilter.tsx <==
 // features/filters/ui/RatingFilter.tsx
 'use client';
@@ -6189,7 +6756,6 @@ export default function RatingFilter({ value, onChange }: RatingFilterProps) {
 }
 ==> ./features/filters/ui/YearRangeFilter.tsx <==
 'use client';
-
 import { useState } from 'react';
 import { IconCalendar } from '@/shared/ui/icons';
 import { YEAR_MIN, YEAR_MAX } from '../config/options';
@@ -6209,13 +6775,6 @@ export default function YearRangeFilter({
   const [minYear, setMinYear] = useState(fromYear ?? YEAR_MIN);
   const [maxYear, setMaxYear] = useState(toYear ?? YEAR_MAX);
 
-  // ─── Patrón React 19: ajustar estado durante render ───
-  // Usamos variables de estado (no refs) para trackear los valores
-  // previos de las props. Esto permite sincronizar el estado local
-  // con props cambiantes sin usar useEffect ni acceder a refs en render.
-  //
-  // React agrupa los setStates llamados durante el render con el render
-  // actual, por lo que no causa renders adicionales.
   const [prevFromYear, setPrevFromYear] = useState(fromYear);
   const [prevToYear, setPrevToYear] = useState(toYear);
 
@@ -6237,16 +6796,14 @@ export default function YearRangeFilter({
   const right = 100 - ((maxYear - YEAR_MIN) / range) * 100;
 
   return (
-    <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10">
-      <span className="text-gray-500">
-        <IconCalendar />
+    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+      <span className="text-gray-500 flex-shrink-0">
+        <IconCalendar className="w-3.5 h-3.5" />
       </span>
-
-      <span className="text-sm font-medium text-gray-300 w-10 text-right tabular-nums">
+      <span className="text-xs font-medium text-gray-300 w-8 text-right tabular-nums flex-shrink-0">
         {minYear}
       </span>
-
-      <div className={`${styles.rangeSlider} w-56 sm:w-80 relative`}>
+      <div className={`${styles.rangeSlider} w-32 lg:w-44 xl:w-56 relative flex-shrink-0`}>
         <div className={styles.track} />
         <div
           className={styles.trackActive}
@@ -6255,7 +6812,6 @@ export default function YearRangeFilter({
             right: `${right}%`,
           }}
         />
-
         <input
           type="range"
           min={String(YEAR_MIN)}
@@ -6271,7 +6827,6 @@ export default function YearRangeFilter({
           aria-label="Año mínimo"
           className={styles.rangeInput}
         />
-
         <input
           type="range"
           min={String(YEAR_MIN)}
@@ -6288,8 +6843,7 @@ export default function YearRangeFilter({
           className={styles.rangeInput}
         />
       </div>
-
-      <span className="text-sm font-medium text-gray-300 w-10 tabular-nums">
+      <span className="text-xs font-medium text-gray-300 w-8 tabular-nums flex-shrink-0">
         {maxYear}
       </span>
     </div>
@@ -6299,17 +6853,15 @@ export default function YearRangeFilter({
 ==> ./features/filters/ui/FilterMenu.tsx <==
 // features/filters/ui/FilterMenu.tsx
 'use client';
-
 import type { Category } from '@/entities/category';
-
 import { useMovieFilters } from '../model/useMovieFilters';
 import { useScrollCollapse } from '../model/useScrollCollapse';
 import { useStickySentinel } from '../model/useStickySentinel';
-
 import GenreFilter from './GenreFilter';
 import RatingFilter from './RatingFilter';
 import CountryFilter from './CountryFilter';
 import YearRangeFilter from './YearRangeFilter';
+import RuntimeRangeFilter from './RuntimeRangeFilter';
 import SortFilter from './SortFilter';
 import ActiveFiltersBar from './ActiveFiltersBar';
 
@@ -6330,22 +6882,21 @@ export default function FilterMenu({
     fromYear,
     toYear,
     hasYearFilter,
+    fromRuntime,
+    toRuntime,
+    hasRuntimeFilter,
     filterCount,
-
     toggleGenre,
     removeGenre,
-
     setRating,
     removeRating,
-
     setCountry,
     removeCountry,
-
     setSort,
-
     applyYearRange,
     removeYear,
-
+    applyRuntimeRange,
+    removeRuntime,
     clearFilters,
   } = useMovieFilters();
 
@@ -6375,30 +6926,30 @@ export default function FilterMenu({
               pointerEvents: isCollapsed ? 'none' : 'auto',
             }}
           >
-            <div className="flex flex-wrap items-center gap-3 px-5 pt-5 pb-4">
+            <div className="flex flex-wrap items-center gap-2 px-4 pt-4 pb-3">
               <GenreFilter
                 categories={categories}
                 activeGenres={activeGenres}
                 onToggleGenre={toggleGenre}
               />
-
               <RatingFilter value={minRating} onChange={setRating} />
-
               <CountryFilter
                 countries={countries}
                 value={country}
                 onChange={setCountry}
               />
-
               <YearRangeFilter
                 fromYear={fromYear}
                 toYear={toYear}
                 onApply={applyYearRange}
               />
-
-              {/* Spacer */}
-              <div className="flex-1" />
-
+              <RuntimeRangeFilter
+                fromRuntime={fromRuntime}
+                toRuntime={toRuntime}
+                onApply={applyRuntimeRange}
+              />
+              {/* Spacer flexible que empuja SortFilter a la derecha */}
+              <div className="flex-1 min-w-4" />
               <SortFilter value={sort} onChange={setSort} />
             </div>
           </div>
@@ -6412,11 +6963,15 @@ export default function FilterMenu({
             fromYear={fromYear}
             toYear={toYear}
             hasYearFilter={hasYearFilter}
+            fromRuntime={fromRuntime}
+            toRuntime={toRuntime}
+            hasRuntimeFilter={hasRuntimeFilter}
             filterCount={filterCount}
             onRemoveGenre={removeGenre}
             onRemoveRating={removeRating}
             onRemoveCountry={removeCountry}
             onRemoveYear={removeYear}
+            onRemoveRuntime={removeRuntime}
             onClearAll={clearFilters}
           />
         </div>
@@ -6424,20 +6979,27 @@ export default function FilterMenu({
     </>
   );
 }
+
 ==> ./features/filters/ui/ActiveFiltersBar.tsx <==
 // features/filters/ui/ActiveFiltersBar.tsx
 'use client';
-
 import type { Category } from '@/entities/category';
 import {
   IconCalendar,
+  IconClock,
   IconClose,
   IconFilm,
   IconGlobe,
   IconStar,
   IconTrash,
 } from '@/shared/ui/icons';
-import { RATING_OPTIONS, YEAR_MIN, YEAR_MAX } from '../config/options';
+import {
+  RATING_OPTIONS,
+  YEAR_MIN,
+  YEAR_MAX,
+  RUNTIME_MIN,
+  RUNTIME_MAX,
+} from '../config/options';
 
 interface ActiveFiltersBarProps {
   categories: Category[];
@@ -6447,12 +7009,15 @@ interface ActiveFiltersBarProps {
   fromYear: number | null;
   toYear: number | null;
   hasYearFilter: boolean;
+  fromRuntime: number | null;
+  toRuntime: number | null;
+  hasRuntimeFilter: boolean;
   filterCount: number;
-
   onRemoveGenre: (slug: string) => void;
   onRemoveRating: () => void;
   onRemoveCountry: () => void;
   onRemoveYear: () => void;
+  onRemoveRuntime: () => void;
   onClearAll: () => void;
 }
 
@@ -6464,11 +7029,15 @@ export default function ActiveFiltersBar({
   fromYear,
   toYear,
   hasYearFilter,
+  fromRuntime,
+  toRuntime,
+  hasRuntimeFilter,
   filterCount,
   onRemoveGenre,
   onRemoveRating,
   onRemoveCountry,
   onRemoveYear,
+  onRemoveRuntime,
   onClearAll,
 }: ActiveFiltersBarProps) {
   if (filterCount === 0) return null;
@@ -6480,13 +7049,14 @@ export default function ActiveFiltersBar({
   const displayFromYear = fromYear ?? YEAR_MIN;
   const displayToYear = toYear ?? YEAR_MAX;
 
+  const displayFromRuntime = fromRuntime ?? RUNTIME_MIN;
+  const displayToRuntime = toRuntime ?? RUNTIME_MAX;
+
   return (
     <div className="flex flex-wrap items-center gap-2 px-5 py-3 border-t border-white/5">
       {activeGenres.map((slug) => {
         const category = categories.find((item) => item.slug === slug);
-
         if (!category) return null;
-
         return (
           <button
             key={slug}
@@ -6541,6 +7111,19 @@ export default function ActiveFiltersBar({
         </button>
       )}
 
+      {hasRuntimeFilter && (
+        <button
+          onClick={onRemoveRuntime}
+          aria-label="Quitar filtro de duración"
+          title={`Quitar ${displayFromRuntime} - ${displayToRuntime} min`}
+          className="flex items-center gap-1.5 bg-white/5 border border-white/10 hover:bg-red-600/20 hover:border-red-500/30 text-gray-300 hover:text-white text-xs px-3 py-1.5 rounded-full transition-all duration-150"
+        >
+          <IconClock className="w-3 h-3 opacity-60" />
+          {displayFromRuntime} - {displayToRuntime} min
+          <IconClose className="w-2.5 h-2.5 opacity-60" />
+        </button>
+      )}
+
       <button
         onClick={onClearAll}
         aria-label="Limpiar filtros activos"
@@ -6553,6 +7136,7 @@ export default function ActiveFiltersBar({
     </div>
   );
 }
+
 ==> ./features/filters/ui/SortFilter.tsx <==
 // features/filters/ui/SortFilter.tsx
 'use client';
@@ -6679,14 +7263,18 @@ export function useScrollCollapse(options?: UseScrollCollapseOptions): boolean {
 }
 ==> ./features/filters/model/useMovieFilters.ts <==
 'use client';
-
 import { useCallback, useMemo } from 'react';
 import {
   useRouter,
   useSearchParams,
   usePathname,
 } from 'next/navigation';
-import { YEAR_MIN, YEAR_MAX } from '../config/options';
+import {
+  YEAR_MIN,
+  YEAR_MAX,
+  RUNTIME_MIN,
+  RUNTIME_MAX,
+} from '../config/options';
 import { buildFiltersUrl } from '../lib/filterUrlSerializer';
 import {
   DEFAULT_MOVIE_SORT,
@@ -6704,6 +7292,9 @@ export interface UseMovieFiltersResult {
   fromYear: number | null;
   toYear: number | null;
   hasYearFilter: boolean;
+  fromRuntime: number | null;
+  toRuntime: number | null;
+  hasRuntimeFilter: boolean;
   filterCount: number;
   toggleGenre: (slug: string) => void;
   removeGenre: (slug: string) => void;
@@ -6714,6 +7305,8 @@ export interface UseMovieFiltersResult {
   setSort: (value: MovieSort) => void;
   applyYearRange: (fromYear: number, toYear: number) => void;
   removeYear: () => void;
+  applyRuntimeRange: (fromRuntime: number, toRuntime: number) => void;
+  removeRuntime: () => void;
   clearFilters: () => void;
 }
 
@@ -6735,6 +7328,9 @@ export function useMovieFilters(): UseMovieFiltersResult {
     fromYear,
     toYear,
     hasYearFilter,
+    fromRuntime,
+    toRuntime,
+    hasRuntimeFilter,
     filterCount,
   } = uiState;
 
@@ -6765,7 +7361,6 @@ export function useMovieFilters(): UseMovieFiltersResult {
         const genreKey = MOVIE_FILTER_PARAM_KEYS.genres;
         const currentGenres = params.getAll(genreKey);
         params.delete(genreKey);
-
         if (currentGenres.includes(slug)) {
           currentGenres
             .filter((genre) => genre !== slug)
@@ -6827,7 +7422,6 @@ export function useMovieFilters(): UseMovieFiltersResult {
         } else {
           params.delete(MOVIE_FILTER_PARAM_KEYS.fromYear);
         }
-
         if (nextToYear < YEAR_MAX) {
           params.set(
             MOVIE_FILTER_PARAM_KEYS.toYear,
@@ -6848,20 +7442,48 @@ export function useMovieFilters(): UseMovieFiltersResult {
     });
   }, [replaceParams]);
 
+  const applyRuntimeRange = useCallback(
+    (nextFromRuntime: number, nextToRuntime: number) => {
+      replaceParams((params) => {
+        if (nextFromRuntime > RUNTIME_MIN) {
+          params.set(
+            MOVIE_FILTER_PARAM_KEYS.fromRuntime,
+            String(nextFromRuntime)
+          );
+        } else {
+          params.delete(MOVIE_FILTER_PARAM_KEYS.fromRuntime);
+        }
+        if (nextToRuntime < RUNTIME_MAX) {
+          params.set(
+            MOVIE_FILTER_PARAM_KEYS.toRuntime,
+            String(nextToRuntime)
+          );
+        } else {
+          params.delete(MOVIE_FILTER_PARAM_KEYS.toRuntime);
+        }
+      });
+    },
+    [replaceParams]
+  );
+
+  const removeRuntime = useCallback(() => {
+    replaceParams((params) => {
+      params.delete(MOVIE_FILTER_PARAM_KEYS.fromRuntime);
+      params.delete(MOVIE_FILTER_PARAM_KEYS.toRuntime);
+    });
+  }, [replaceParams]);
+
   /**
-   * Limpia todos los filtros, incluido el ordenamiento.
-   *
-   * Semántica:
-   * "Limpiar filtros" lleva al usuario al estado inicial
-   * del catálogo, sin ningún filtro ni orden personalizado.
-   * El sort vuelve a su valor por defecto (latest).
-   */
+  * Limpia todos los filtros, incluido el ordenamiento.
+  */
   const clearFilters = useCallback(() => {
     replaceParams((params) => {
       params.delete(MOVIE_FILTER_PARAM_KEYS.genres);
       params.delete(MOVIE_FILTER_PARAM_KEYS.minRating);
       params.delete(MOVIE_FILTER_PARAM_KEYS.fromYear);
       params.delete(MOVIE_FILTER_PARAM_KEYS.toYear);
+      params.delete(MOVIE_FILTER_PARAM_KEYS.fromRuntime);
+      params.delete(MOVIE_FILTER_PARAM_KEYS.toRuntime);
       params.delete(MOVIE_FILTER_PARAM_KEYS.country);
       params.delete(MOVIE_FILTER_PARAM_KEYS.sort);
     });
@@ -6875,6 +7497,9 @@ export function useMovieFilters(): UseMovieFiltersResult {
     fromYear,
     toYear,
     hasYearFilter,
+    fromRuntime,
+    toRuntime,
+    hasRuntimeFilter,
     filterCount,
     toggleGenre,
     removeGenre,
@@ -6885,6 +7510,8 @@ export function useMovieFilters(): UseMovieFiltersResult {
     setSort,
     applyYearRange,
     removeYear,
+    applyRuntimeRange,
+    removeRuntime,
     clearFilters,
   };
 }
@@ -7111,7 +7738,7 @@ import { parseMovieFiltersFromSearchParams } from '@/lib/url/movieFilters';
 
 import {
   MOVIE_PAGINATION_PARAM_KEYS,
-} from '@/entities/movie/config/filterParams';
+} from '@/lib/url/movieFilterParams';
 
 import { logger } from '@/lib/utils/logger';
 
@@ -7693,7 +8320,23 @@ export default function Loading() {
 ==> ./ARCHITECTURE.md <==
 # Arquitectura del proyecto
 
-Este proyecto sigue una arquitectura basada en capas con separación de responsabilidades.
+Este proyecto sigue una arquitectura basada en capas con separación estricta de responsabilidades.
+
+El objetivo es que cada capa tenga una responsabilidad clara, testeable y estable en el tiempo.
+
+---
+
+## Principios generales
+
+- Cada capa tiene una responsabilidad única.
+- El dominio no conoce UI, URL, CMS, fetch, cache ni framework.
+- La UI no habla directamente con Strapi.
+- La composición fuerte entre features ocurre en `app/` o en `widgets/composition/`.
+- Los contratos de datos se validan en la capa adecuada.
+- Los query params, labels y estados de UI no pertenecen a las entidades.
+- Las features no deben poseer infraestructura de acceso a datos si ya existe una capa canónica para eso.
+
+---
 
 ## Capas
 
@@ -7703,21 +8346,37 @@ Contiene reglas y modelos de negocio puros.
 
 Ejemplos:
 
-- Movie
-- Category
-- Person
-- filtros de películas
-- sorting de películas
+- `Movie`
+- `Category`
+- `Person`
+- filtros de dominio
+- valores válidos de sorting
 - reglas de año
 - identidad de una película
+- deduplicación por identidad
 
 Reglas:
 
-- No conoce rutas de la app.
+- No conoce React.
+- No conoce Next.js.
+- No conoce rutas.
+- No conoce query params de URL.
 - No conoce Strapi.
-- No conoce React Query, cache, fetch ni UI.
-- No conoce React ni Next.js.
-- Puede exponer view models simples si pertenecen a la entidad.
+- No conoce fetch, cache ni repositories.
+- No conoce widgets, features, app ni shared.
+- No conoce `lib/url`, `lib/api`, `lib/queries`, `lib/validation`, `lib/config`, `lib/scroll` ni `lib/utils`.
+- No expone view models de presentación.
+- No define labels de UI.
+- No define opciones de dropdown, botones o textos visibles.
+
+Responsabilidades correctas:
+
+- Tipos de dominio.
+- Reglas de negocio.
+- Validaciones de dominio.
+- Identidad de entidades.
+- Valores canónicos de sorting.
+- Reglas de rango de año.
 
 ---
 
@@ -7729,14 +8388,17 @@ Ejemplos:
 
 - iconos
 - botones genéricos
-- PosterGrid
-- helpers de UI
+- `PosterGrid`
+- helpers de UI genéricos
 
 Reglas:
 
 - No conoce entidades.
 - No conoce features.
 - No conoce rutas.
+- No conoce API.
+- No conoce queries.
+- No conoce validación de payloads.
 - No contiene lógica de negocio.
 
 ---
@@ -7745,32 +8407,53 @@ Reglas:
 
 Composiciones reutilizables de UI.
 
-Se dividen conceptualmente en:
+Se dividen en dos tipos conceptuales.
 
 #### Widgets presentacionales
 
-Ejemplos:
+Ejemplo:
 
-- widgets/movie-card
+- `widgets/movie-card`
 
 Reglas:
 
-- Pueden depender de entities, shared y lib/routes.
+- Pueden depender de `entities`.
+- Pueden depender de `shared`.
+- Pueden depender de `lib/routes`.
+- Pueden usar utilidades puras permitidas.
 - No deben depender de features.
-- Pueden ser usados por features.
+- No deben depender de app.
+- No deben depender de API.
+- No deben depender de queries.
+- No deben depender de URL params.
+- No deben depender de validación de payloads.
+
+Ubicación correcta de view models de tarjeta:
+
+- `widgets/movie-card/lib/createMovieCardViewModel.ts`
+
+Motivo:
+
+El `MovieCardViewModel` no pertenece a la entidad `Movie`, porque es una transformación específica para una tarjeta de UI.
+
+---
 
 #### Widgets de composición
 
 Ejemplos:
 
-- widgets/Header
-- widgets/composition/catalog-grid-with-ads
+- `widgets/Header`
+- `widgets/composition/catalog-grid-with-ads`
+- `widgets/composition/movie-player`
 
 Reglas:
 
 - Pueden combinar features.
-- Solo deben ser consumidos por app/ o capas de composición superiores.
+- Solo deben ser consumidos por `app/` o capas superiores de composición.
 - No deben ser importados por features.
+- No deben hablar directamente con repositories.
+- No deben hablar directamente con Strapi.
+- No deben usar queries directamente si su responsabilidad es solo componer UI.
 
 ---
 
@@ -7780,22 +8463,38 @@ Contienen casos de uso concretos.
 
 Ejemplos:
 
-- catalog
-- filters
-- search
-- player
-- ads
-- movie-detail
-- actor-detail
-- movies-page
-- home
+- `catalog`
+- `filters`
+- `search`
+- `player`
+- `ads`
+- `movie-detail`
+- `actor-detail`
+- `movies-page`
+- `home`
+- `navigation`
 
 Reglas:
 
-- Una feature no debe depender de app.
+- Una feature no debe depender de `app`.
 - Una feature no debe importar widgets de composición.
+- Una feature no debe hablar directamente con Strapi.
+- Una feature no debe importar `lib/api/http`.
+- Una feature no debe importar `lib/api/strapi`.
+- Una feature no debe importar `lib/api/repositories` para flujos server-side.
+- Para flujos server-side, debe usar `lib/queries`.
+- Para flujos client-side, debe consumir el BFF mediante `fetch`, no Strapi directamente.
 - La composición fuerte entre features debe hacerse mediante slots, props, páginas o widgets de composición.
-- Cada feature contiene su UI, modelo, configuración y lógica específica.
+
+Responsabilidades correctas:
+
+- UI de la feature.
+- hooks de la feature.
+- servicios de página.
+- casos de uso de aplicación.
+- configuración específica de la feature.
+- estado de UI específico de la feature.
+- labels y opciones de UI.
 
 ---
 
@@ -7806,9 +8505,78 @@ Capa de rutas de Next.js.
 Reglas:
 
 - Las rutas deben ser delgadas.
-- Deben componer features/services/widgets.
+- Deben componer features, services y widgets.
 - No deben contener lógica de negocio.
+- Las páginas no deben importar repositories.
+- Las páginas no deben importar `lib/api/http`.
+- Las páginas no deben importar `lib/api/strapi`.
+- Las páginas deben preferir feature services y `lib/queries`.
+- Los route handlers/BFF sí pueden usar repositories.
 - Pueden usar metadata, layouts, sitemap, robots y BFF.
+
+---
+
+### lib/url/
+
+Capa canónica de URL y query params.
+
+Responsabilidad:
+
+- Parseo y serialización de query params.
+- Conversión entre URL y dominio.
+- Definir los nombres canónicos de query params.
+
+Archivos canónicos:
+
+- `lib/url/movieFilterParams.ts`
+- `lib/url/movieFilters.ts`
+
+Reglas:
+
+- No contiene estado de UI.
+- No contiene lógica de React.
+- No contiene labels.
+- No conoce features.
+- No conoce widgets.
+- No conoce API.
+- No conoce Strapi.
+- Puede conocer entidades porque convierte URL a dominio.
+
+Ubicación correcta de params:
+
+- `MOVIE_FILTER_PARAM_KEYS` vive en `lib/url/movieFilterParams.ts`.
+- `MOVIE_PAGINATION_PARAM_KEYS` vive en `lib/url/movieFilterParams.ts`.
+
+Ubicación correcta de parsing/serialización:
+
+- `parseMovieFiltersFromSearchParams`
+- `parseMovieFiltersFromRecord`
+- `serializeMovieFiltersToSearchParams`
+
+---
+
+### features/filters/
+
+Feature responsable de la UI de filtros.
+
+Responsabilidades correctas:
+
+- labels de sorting
+- labels de rating
+- estado de UI de filtros
+- parseo de filtros para la UI
+- interacciones de dropdowns
+- filtros activos
+
+Ubicación correcta:
+
+- `features/filters/config/sortOptions.ts`
+- `features/filters/config/options.ts`
+- `features/filters/lib/parseFiltersForUI.ts`
+
+Motivo:
+
+Los labels como `Recientes`, `Antiguas`, `Mejor Puntuadas` pertenecen a la UI, no al dominio.
 
 ---
 
@@ -7820,14 +8588,26 @@ Responsabilidad:
 
 - Hablar con Strapi.
 - Normalizar respuestas.
-- Paginación técnica.
-- No conoce UI.
+- Manejar paginación técnica.
+- Exponer datos listos para queries o BFF.
 
 Reglas:
 
+- No conoce UI.
+- No conoce features.
+- No conoce widgets.
+- No conoce app.
 - No debe ser usada directamente por server components de página.
-- Para server components, usar lib/queries/.
 - Puede ser usada por route handlers/BFF.
+- Para server components, usar `lib/queries`.
+
+Archivos canónicos:
+
+- `movies.ts`
+- `categories.ts`
+- `actors.ts`
+- `countries.ts`
+- `movieSearch.ts`
 
 ---
 
@@ -7837,13 +8617,26 @@ Capa de consultas cacheadas para server components.
 
 Responsabilidad:
 
-- Envolver repositories con cache() de React.
+- Envolver repositories con `cache()` de React.
 - Ser el punto de entrada de datos para páginas server-side.
 
 Reglas:
 
-- Las páginas y servicios de feature deben preferir lib/queries.
+- Las páginas y servicios de feature deben preferir `lib/queries`.
 - No debe contener lógica de Strapi.
+- No debe contener lógica de UI.
+- No debe importar features.
+- No debe importar widgets.
+- No debe importar `lib/api/http`.
+- No debe importar `lib/api/strapi`.
+
+Archivos canónicos:
+
+- `movies.ts`
+- `categories.ts`
+- `actors.ts`
+- `countries.ts`
+- `search.ts`
 
 ---
 
@@ -7853,8 +8646,8 @@ Adaptador específico de Strapi.
 
 Responsabilidad:
 
-- Schemas.
-- Normalización.
+- Schemas de Strapi.
+- Normalización de respuestas de Strapi.
 - Parámetros de Strapi.
 - Populate.
 - Paginación de Strapi.
@@ -7863,22 +8656,108 @@ Reglas:
 
 - No conoce features.
 - No conoce UI.
+- No conoce widgets.
+- No conoce app.
 - Solo adapta el CMS externo.
 
 ---
 
-### lib/url/
+### lib/validation/
+
+Capa de validación de payloads de API/BFF.
 
 Responsabilidad:
 
-- Parseo y serialización canónica de query params.
-- Conversión entre URL y dominio.
+- Definir schemas Zod para respuestas normalizadas del BFF.
+- Validar contratos de entrada/salida del cliente de catálogo.
+
+Archivo canónico:
+
+- `moviePayloadSchemas.ts`
+
+Reglas:
+
+- No conoce features.
+- No conoce widgets.
+- No conoce UI.
+- No conoce entidades si el schema es autosuficiente.
+- No conoce Strapi.
+
+---
+
+## Ubicaciones canónicas actuales
+
+| Concepto | Ubicación correcta |
+|---|---|
+| Modelo `Movie` | `entities/movie/types/movie.ts` |
+| Modelo `Category` | `entities/category/types.ts` |
+| Modelo `Person`, `Actor`, `Director` | `entities/person/types.ts` |
+| Identidad de película | `entities/movie/lib/movieKey.ts` |
+| Reglas de año | `entities/movie/lib/year.ts` |
+| Valores de sorting | `entities/movie/config/sort.ts` |
+| Query params de filtros | `lib/url/movieFilterParams.ts` |
+| Parsing/serialización de filtros | `lib/url/movieFilters.ts` |
+| Estado de filtros para UI | `features/filters/lib/parseFiltersForUI.ts` |
+| Opciones de sorting con labels | `features/filters/config/sortOptions.ts` |
+| MovieCardViewModel | `widgets/movie-card/lib/createMovieCardViewModel.ts` |
+| Repositorio de búsqueda | `lib/api/repositories/movieSearch.ts` |
+| Queries de búsqueda | `lib/queries/search.ts` |
+| Schemas de payload del catálogo | `lib/validation/moviePayloadSchemas.ts` |
+
+---
+
+## Flujo recomendado para páginas server-side
+
+Para páginas server-side:
+
+`app route`
+→ `feature service`
+→ `lib/queries`
+→ `lib/api/repositories`
+→ `lib/api/strapi`
+→ `fetchApi`
+
+Ejemplo:
+
+`app/movies/page.tsx`
+→ `getMoviesPageData`
+→ `getMoviesWithFilters`
+→ `fetchMoviesWithFilters`
+→ Strapi
+
+---
+
+## Flujo recomendado para catálogo en cliente
+
+Para catálogo en cliente:
+
+`MovieGrid`
+→ `useInfiniteMovies`
+→ `fetchMoviesFromApi`
+→ `/api/movies`
+→ `fetchMoviesWithFilters`
+→ Strapi
+
+El cliente nunca habla directamente con Strapi.
+
+---
+
+## Flujo recomendado para búsqueda server-side
+
+`app/search/page.tsx`
+→ `getSearchPageData`
+→ `searchMovies`
+→ `lib/queries/search`
+→ `lib/api/repositories/movieSearch`
+→ Strapi
+
+La feature `search` orquesta el caso de uso, pero no posee infraestructura directa de Strapi.
 
 ---
 
 ## Composición de ads
 
-La feature ads es responsable de:
+La feature `ads` es responsable de:
 
 - reglas de colocación,
 - banners,
@@ -7888,7 +8767,7 @@ No debe conocer catálogo.
 
 La combinación de catálogo + ads se realiza en:
 
-widgets/composition/catalog-grid-with-ads
+`widgets/composition/catalog-grid-with-ads`
 
 ---
 
@@ -7896,29 +8775,34 @@ widgets/composition/catalog-grid-with-ads
 
 El scroll restore está scopado por ruta.
 
-- lib/scroll/defer.ts maneja señales por ruta.
-- ScrollToTop solo delega si la ruta actual coincide con la señal pendiente.
-- Catalog solo controla scroll cuando se regresa a /movies.
+- `lib/scroll/defer.ts` maneja señales por ruta.
+- `ScrollToTop` solo delega si la ruta actual coincide con la señal pendiente.
+- Catalog solo controla scroll cuando se regresa a `/movies`.
 
 ---
 
-## Flujo recomendado
+## Cambios prohibidos
 
-    app route
-    -> feature service
-    -> lib/queries
-    -> lib/api/repositories
-    -> lib/api/strapi
-    -> fetchApi
+No se debe:
 
-Para catálogo en cliente:
+- crear view models de UI dentro de `entities/`
+- definir labels de UI dentro de `entities/`
+- definir query params dentro de `entities/`
+- crear una capa `types/` deprecada
+- crear repositorios dentro de features
+- importar Strapi desde features
+- importar repositories desde features para flujos server-side
+- importar repositories desde páginas
+- poner estado de UI en `lib/url`
+- duplicar schemas Zod de payload dentro de features si ya existe `lib/validation`
 
-    MovieGrid
-    -> useInfiniteMovies
-    -> fetchMoviesFromApi
-    -> /api/movies
-    -> fetchMoviesWithFilters
-    -> Strapi
+---
+
+## Siguiente etapa
+
+La siguiente etapa está documentada en:
+
+`docs/REFACTORING_ROADMAP.md`
 
 ==> ./scripts/apply-so-refactor.sh <==
 #!/usr/bin/env bash
@@ -8302,10 +9186,53 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 
+const deprecatedImportPatterns = [
+  "@/types",
+  "@/entities/movie/config/filterParams",
+  "@/entities/movie/lib/createMovieCardViewModel",
+  "@/features/search/infrastructure/*",
+];
+
+function createNoRestrictedImportsRule({ paths = [], patterns = [] } = {}) {
+  return [
+    "error",
+    {
+      paths,
+      patterns: [...deprecatedImportPatterns, ...patterns],
+    },
+  ];
+}
+
+const frameworkAgnosticPaths = [
+  {
+    name: "react",
+    message: "Entities must be UI/framework agnostic.",
+  },
+  {
+    name: "react-dom",
+    message: "Entities must be UI/framework agnostic.",
+  },
+  {
+    name: "next",
+    message: "This layer must not depend on Next.js.",
+  },
+  {
+    name: "next/navigation",
+    message: "This layer must not depend on Next.js navigation.",
+  },
+  {
+    name: "next/link",
+    message: "This layer must not depend on Next.js Link.",
+  },
+  {
+    name: "next/image",
+    message: "This layer must not depend on Next.js Image.",
+  },
+];
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-
   globalIgnores([
     ".next/**",
     "out/**",
@@ -8313,138 +9240,234 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
   ]),
 
+  // Evitar regresiones globales a rutas deprecadas.
+  {
+    files: ["**/*.ts", "**/*.tsx"],
+    rules: {
+      "no-restricted-imports": createNoRestrictedImportsRule(),
+    },
+  },
+
+  // Entities: dominio puro.
   {
     files: ["**/entities/**/*.ts", "**/entities/**/*.tsx"],
     rules: {
-      "no-restricted-imports": [
-        "error",
-        {
-          paths: [
-            {
-              name: "react",
-              message: "Entities must be UI/framework agnostic.",
-            },
-            {
-              name: "react-dom",
-              message: "Entities must be UI/framework agnostic.",
-            },
-            {
-              name: "next",
-              message: "Entities must not depend on Next.js.",
-            },
-            {
-              name: "next/navigation",
-              message: "Entities must not depend on Next.js navigation.",
-            },
-            {
-              name: "next/link",
-              message: "Entities must not depend on Next.js Link.",
-            },
-            {
-              name: "next/image",
-              message: "Entities must not depend on Next.js Image.",
-            },
-          ],
-          patterns: [
-            "@/app/*",
-            "@/features/*",
-            "@/widgets/*",
-            "@/lib/api/*",
-            "@/lib/queries/*",
-            "@/lib/routes",
-          ],
-        },
-      ],
+      "no-restricted-imports": createNoRestrictedImportsRule({
+        paths: frameworkAgnosticPaths,
+        patterns: [
+          "@/app/*",
+          "@/features/*",
+          "@/widgets/*",
+          "@/shared/*",
+          "@/lib/api/*",
+          "@/lib/queries/*",
+          "@/lib/routes",
+          "@/lib/url/*",
+          "@/lib/config/*",
+          "@/lib/validation/*",
+          "@/lib/scroll/*",
+          "@/lib/utils/*",
+        ],
+      }),
     },
   },
 
+  // Shared: genérico, sin negocio.
   {
     files: ["**/shared/**/*.ts", "**/shared/**/*.tsx"],
     rules: {
-      "no-restricted-imports": [
-        "error",
-        {
-          patterns: [
-            "@/entities/*",
-            "@/features/*",
-            "@/widgets/*",
-            "@/app/*",
-            "@/lib/api/*",
-            "@/lib/queries/*",
-            "@/lib/routes",
-            "@/lib/url/*",
-          ],
-        },
-      ],
+      "no-restricted-imports": createNoRestrictedImportsRule({
+        patterns: [
+          "@/entities/*",
+          "@/features/*",
+          "@/widgets/*",
+          "@/app/*",
+          "@/lib/api/*",
+          "@/lib/queries/*",
+          "@/lib/routes",
+          "@/lib/url/*",
+          "@/lib/config/*",
+          "@/lib/validation/*",
+        ],
+      }),
     },
   },
 
+  // Features: casos de uso, no infraestructura directa.
   {
     files: ["**/features/**/*.ts", "**/features/**/*.tsx"],
     rules: {
-      "no-restricted-imports": [
-        "error",
-        {
-          patterns: [
-            "@/app/*",
-            "@/widgets/composition/*",
-            "@/widgets/Header/*",
-          ],
-        },
-      ],
+      "no-restricted-imports": createNoRestrictedImportsRule({
+        patterns: [
+          "@/app/*",
+          "@/widgets/composition/*",
+          "@/widgets/Header/*",
+          "@/lib/api/repositories/*",
+          "@/lib/api/http/*",
+          "@/lib/api/strapi/*",
+        ],
+      }),
     },
   },
 
+  // Widget presentacional movie-card.
   {
     files: [
       "**/widgets/movie-card/**/*.ts",
       "**/widgets/movie-card/**/*.tsx",
     ],
     rules: {
-      "no-restricted-imports": [
-        "error",
-        {
-          patterns: [
-            "@/features/*",
-            "@/app/*",
-            "@/widgets/composition/*",
-            "@/widgets/Header/*",
-          ],
-        },
-      ],
+      "no-restricted-imports": createNoRestrictedImportsRule({
+        patterns: [
+          "@/features/*",
+          "@/app/*",
+          "@/widgets/composition/*",
+          "@/widgets/Header/*",
+          "@/lib/api/*",
+          "@/lib/queries/*",
+          "@/lib/url/*",
+          "@/lib/validation/*",
+          "@/lib/config/*",
+          "@/lib/scroll/*",
+        ],
+      }),
     },
   },
 
+  // Widgets de composición.
+  {
+    files: [
+      "**/widgets/composition/**/*.ts",
+      "**/widgets/composition/**/*.tsx",
+    ],
+    rules: {
+      "no-restricted-imports": createNoRestrictedImportsRule({
+        patterns: [
+          "@/app/*",
+          "@/widgets/Header/*",
+          "@/lib/api/repositories/*",
+          "@/lib/api/http/*",
+          "@/lib/api/strapi/*",
+          "@/lib/queries/*",
+        ],
+      }),
+    },
+  },
+
+  // Header es composición, pero no debe depender de app ni de otros compositions.
+  {
+    files: ["**/widgets/Header/**/*.ts", "**/widgets/Header/**/*.tsx"],
+    rules: {
+      "no-restricted-imports": createNoRestrictedImportsRule({
+        patterns: [
+          "@/app/*",
+          "@/widgets/composition/*",
+          "@/lib/api/repositories/*",
+          "@/lib/api/http/*",
+          "@/lib/api/strapi/*",
+          "@/lib/queries/*",
+        ],
+      }),
+    },
+  },
+
+  // lib/api: acceso a datos, sin UI ni features.
   {
     files: ["**/lib/api/**/*.ts"],
     rules: {
-      "no-restricted-imports": [
-        "error",
-        {
-          patterns: [
-            "@/app/*",
-            "@/features/*",
-            "@/widgets/*",
-          ],
-        },
-      ],
+      "no-restricted-imports": createNoRestrictedImportsRule({
+        patterns: [
+          "@/app/*",
+          "@/features/*",
+          "@/widgets/*",
+          "@/shared/*",
+          "@/lib/url/*",
+          "@/lib/queries/*",
+        ],
+      }),
     },
   },
 
+  // lib/queries: cache para server components.
   {
     files: ["**/lib/queries/**/*.ts"],
     rules: {
-      "no-restricted-imports": [
-        "error",
-        {
-          patterns: [
-            "@/app/*",
-            "@/features/*",
-            "@/widgets/*",
-            "@/lib/api/strapi/*",
-          ],
-        },
-      ],
+      "no-restricted-imports": createNoRestrictedImportsRule({
+        patterns: [
+          "@/app/*",
+          "@/features/*",
+          "@/widgets/*",
+          "@/shared/*",
+          "@/lib/api/strapi/*",
+          "@/lib/api/http/*",
+          "@/lib/url/*",
+        ],
+      }),
+    },
+  },
+
+  // lib/url: URL y dominio, sin UI ni API.
+  {
+    files: ["**/lib/url/**/*.ts"],
+    rules: {
+      "no-restricted-imports": createNoRestrictedImportsRule({
+        patterns: [
+          "@/app/*",
+          "@/features/*",
+          "@/widgets/*",
+          "@/shared/*",
+          "@/lib/api/*",
+          "@/lib/queries/*",
+          "@/lib/validation/*",
+        ],
+      }),
+    },
+  },
+
+  // lib/validation: contratos de payload independientes.
+  {
+    files: ["**/lib/validation/**/*.ts"],
+    rules: {
+      "no-restricted-imports": createNoRestrictedImportsRule({
+        patterns: [
+          "@/app/*",
+          "@/features/*",
+          "@/widgets/*",
+          "@/shared/*",
+          "@/entities/*",
+          "@/lib/api/*",
+          "@/lib/queries/*",
+          "@/lib/url/*",
+        ],
+      }),
+    },
+  },
+
+  // BFF: no UI.
+  {
+    files: ["**/app/api/**/*.ts"],
+    rules: {
+      "no-restricted-imports": createNoRestrictedImportsRule({
+        patterns: [
+          "@/features/*",
+          "@/widgets/*",
+          "@/shared/*",
+        ],
+      }),
+    },
+  },
+
+  // Páginas: no acceso directo a datos crudos.
+  {
+    files: ["**/app/**/page.tsx"],
+    rules: {
+      "no-restricted-imports": createNoRestrictedImportsRule({
+        patterns: [
+          "@/lib/api/repositories/*",
+          "@/lib/api/http/*",
+          "@/lib/api/strapi/*",
+        ],
+      }),
     },
   },
 ]);

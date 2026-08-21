@@ -8,10 +8,12 @@ import { routes } from '@/lib/routes';
 
 interface CatalogMovieCardProps {
   movie: Movie;
+  highlightedGenres?: string[];
 }
 
 export default function CatalogMovieCard({
   movie,
+  highlightedGenres,
 }: CatalogMovieCardProps) {
   const handlePrimaryLinkClick = (
     event: MouseEvent<HTMLAnchorElement>
@@ -34,6 +36,7 @@ export default function CatalogMovieCard({
     <AppMovieCard
       movie={movie}
       onPrimaryLinkClick={handlePrimaryLinkClick}
+      highlightedCategorySlugs={highlightedGenres}
     />
   );
 }

@@ -8,18 +8,23 @@ import { routes } from '@/lib/routes';
 interface AppMovieCardProps {
   movie: Movie;
   onPrimaryLinkClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
+  highlightedCategorySlugs?: string[];
 }
 
 export default function AppMovieCard({
   movie,
   onPrimaryLinkClick,
+  highlightedCategorySlugs,
 }: AppMovieCardProps) {
   return (
     <MovieCard
       movie={movie}
       href={routes.movie(movie.slug)}
-      getCategoryHref={(categorySlug) => routes.moviesByGenre(categorySlug)}
+      getCategoryHref={(categorySlug) =>
+        routes.moviesByGenre(categorySlug)
+      }
       onPrimaryLinkClick={onPrimaryLinkClick}
+      highlightedCategorySlugs={highlightedCategorySlugs}
     />
   );
 }

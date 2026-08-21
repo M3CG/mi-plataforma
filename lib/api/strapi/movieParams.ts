@@ -2,21 +2,18 @@
 import {
   DEFAULT_MOVIE_SORT,
   clampMovieYear,
+  clampMovieRuntime,
   type MovieFilters,
   type MovieSort,
 } from '@/entities/movie';
-
 import {
   buildPopulateParams,
   MOVIE_LIST_POPULATE,
 } from './populate';
 
 /**
- * Presets de sorting traducidos a sintaxis de Strapi.
- *
- * Esta capa no define qué sorts existen:
- * solo traduce el modelo canónico a parámetros de Strapi.
- */
+* Presets de sorting traducidos a sintaxis de Strapi.
+*/
 const MOVIE_SORT_PRESETS: Record<MovieSort, string[]> = {
   latest: ['year:desc', 'rating:desc', 'id:desc'],
   oldest: ['year:asc', 'rating:desc', 'id:desc'],
@@ -31,11 +28,8 @@ function getMovieSortPreset(sort?: MovieSort): string[] {
 }
 
 /**
- * Construye parámetros de consulta para Strapi.
- *
- * Responsabilidad única:
- * - traducir MovieFilters de dominio a query params de Strapi
- */
+* Construye parámetros de consulta para Strapi.
+*/
 export function buildMovieListParams(
   filters: MovieFilters,
   page: number,
@@ -48,13 +42,11 @@ export function buildMovieListParams(
   };
 
   const sortPreset = getMovieSortPreset(filters.sort);
-
   sortPreset.forEach((sortValue, index) => {
     params[`sort[${index}]`] = sortValue;
   });
 
   const genres = filters.genres ?? [];
-
   genres.forEach((genre, index) => {
     params[`filters[categories][slug][$in][${index}]`] = genre;
   });
@@ -73,11 +65,9 @@ export function buildMovieListParams(
   if (fromYear !== undefined) {
     fromYear = clampMovieYear(fromYear);
   }
-
   if (toYear !== undefined) {
     toYear = clampMovieYear(toYear);
   }
-
   if (
     fromYear !== undefined &&
     toYear !== undefined &&
@@ -85,17 +75,37 @@ export function buildMovieListParams(
   ) {
     [fromYear, toYear] = [toYear, fromYear];
   }
-
   if (fromYear !== undefined) {
     params['filters[year][$gte]'] = String(fromYear);
   }
-
   if (toYear !== undefined) {
     params['filters[year][$lte]'] = String(toYear);
   }
 
-  const country = filters.country?.trim();
+  let fromRuntime = filters.fromRuntime;
+  let toRuntime = filters.toRuntime;
 
+  if (fromRuntime !== undefined) {
+    fromRuntime = clampMovieRuntime(fromRuntime);
+  }
+  if (toRuntime !== undefined) {
+    toRuntime = clampMovieRuntime(toRuntime);
+  }
+  if (
+    fromRuntime !== undefined &&
+    toRuntime !== undefined &&
+    fromRuntime > toRuntime
+  ) {
+    [fromRuntime, toRuntime] = [toRuntime, fromRuntime];
+  }
+  if (fromRuntime !== undefined) {
+    params['filters[runtime][$gte]'] = String(fromRuntime);
+  }
+  if (toRuntime !== undefined) {
+    params['filters[runtime][$lte]'] = String(toRuntime);
+  }
+
+  const country = filters.country?.trim();
   if (country) {
     params['filters[country][$eq]'] = country;
   }

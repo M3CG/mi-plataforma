@@ -1,13 +1,18 @@
 // features/filters/config/options.ts
 import {
+  MOVIE_SORT_OPTIONS,
   MOVIE_YEAR_MIN,
   getMovieYearMax,
+  MOVIE_RUNTIME_MIN,
+  MOVIE_RUNTIME_MAX,
   type MovieSort,
 } from '@/entities/movie';
-import { MOVIE_SORT_OPTIONS } from './sortOptions';
 
 export const YEAR_MIN = MOVIE_YEAR_MIN;
 export const YEAR_MAX = getMovieYearMax();
+
+export const RUNTIME_MIN = MOVIE_RUNTIME_MIN;
+export const RUNTIME_MAX = MOVIE_RUNTIME_MAX;
 
 export const RATING_OPTIONS = [
   { value: 'all', label: 'Todas' },
@@ -18,9 +23,6 @@ export const RATING_OPTIONS = [
   { value: '9', label: '9.0+' },
 ] as const;
 
-/**
-* Las opciones de sorting pertenecen a la UI de filters.
-*/
 export const SORT_OPTIONS = MOVIE_SORT_OPTIONS;
 
 export type RatingOptionValue =

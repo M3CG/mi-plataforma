@@ -1,5 +1,4 @@
 'use client';
-
 import { useState } from 'react';
 import { IconCalendar } from '@/shared/ui/icons';
 import { YEAR_MIN, YEAR_MAX } from '../config/options';
@@ -19,13 +18,6 @@ export default function YearRangeFilter({
   const [minYear, setMinYear] = useState(fromYear ?? YEAR_MIN);
   const [maxYear, setMaxYear] = useState(toYear ?? YEAR_MAX);
 
-  // ─── Patrón React 19: ajustar estado durante render ───
-  // Usamos variables de estado (no refs) para trackear los valores
-  // previos de las props. Esto permite sincronizar el estado local
-  // con props cambiantes sin usar useEffect ni acceder a refs en render.
-  //
-  // React agrupa los setStates llamados durante el render con el render
-  // actual, por lo que no causa renders adicionales.
   const [prevFromYear, setPrevFromYear] = useState(fromYear);
   const [prevToYear, setPrevToYear] = useState(toYear);
 
@@ -47,16 +39,14 @@ export default function YearRangeFilter({
   const right = 100 - ((maxYear - YEAR_MIN) / range) * 100;
 
   return (
-    <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10">
-      <span className="text-gray-500">
-        <IconCalendar />
+    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+      <span className="text-gray-500 flex-shrink-0">
+        <IconCalendar className="w-3.5 h-3.5" />
       </span>
-
-      <span className="text-sm font-medium text-gray-300 w-10 text-right tabular-nums">
+      <span className="text-xs font-medium text-gray-300 w-8 text-right tabular-nums flex-shrink-0">
         {minYear}
       </span>
-
-      <div className={`${styles.rangeSlider} w-56 sm:w-80 relative`}>
+      <div className={`${styles.rangeSlider} w-32 lg:w-44 xl:w-56 relative flex-shrink-0`}>
         <div className={styles.track} />
         <div
           className={styles.trackActive}
@@ -65,7 +55,6 @@ export default function YearRangeFilter({
             right: `${right}%`,
           }}
         />
-
         <input
           type="range"
           min={String(YEAR_MIN)}
@@ -81,7 +70,6 @@ export default function YearRangeFilter({
           aria-label="Año mínimo"
           className={styles.rangeInput}
         />
-
         <input
           type="range"
           min={String(YEAR_MIN)}
@@ -98,8 +86,7 @@ export default function YearRangeFilter({
           className={styles.rangeInput}
         />
       </div>
-
-      <span className="text-sm font-medium text-gray-300 w-10 tabular-nums">
+      <span className="text-xs font-medium text-gray-300 w-8 tabular-nums flex-shrink-0">
         {maxYear}
       </span>
     </div>

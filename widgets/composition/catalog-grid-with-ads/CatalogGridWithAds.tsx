@@ -15,12 +15,24 @@ export default function CatalogGridWithAds({
   initialHasMore,
   filters,
 }: CatalogGridWithAdsProps) {
+  const activeGenres = Array.from(
+    new Set((filters.genres ?? []).filter(Boolean))
+  );
+
+  const highlightedGenres =
+    activeGenres.length >= 2 ? activeGenres : undefined;
+
   return (
     <MovieGrid
       initialMovies={initialMovies}
       initialHasMore={initialHasMore}
       filters={filters}
-      renderMovie={(movie) => <CatalogMovieCard movie={movie} />}
+      renderMovie={(movie) => (
+        <CatalogMovieCard
+          movie={movie}
+          highlightedGenres={highlightedGenres}
+        />
+      )}
       renderAfterMovie={(index) => <MovieGridAdSlot index={index} />}
     />
   );
