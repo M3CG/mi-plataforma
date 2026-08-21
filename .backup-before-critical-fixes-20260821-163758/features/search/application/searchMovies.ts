@@ -33,25 +33,16 @@ export async function searchMovies(
   const otherLimit = Math.min(Math.max(Math.floor(limit / 2), 40), 100);
 
   const [
-    titleResult,
-    actorResult,
-    directorResult,
-    categoryResult,
-  ] = await Promise.allSettled([
+    titleMovies,
+    actorMovies,
+    directorMovies,
+    categoryMovies,
+  ] = await Promise.all([
     repository.byTitle(safeQuery, titleLimit),
     repository.byActor(safeQuery, otherLimit),
     repository.byDirector(safeQuery, otherLimit),
     repository.byCategory(safeQuery, otherLimit),
   ]);
-
-  const titleMovies =
-    titleResult.status === 'fulfilled' ? titleResult.value : [];
-  const actorMovies =
-    actorResult.status === 'fulfilled' ? actorResult.value : [];
-  const directorMovies =
-    directorResult.status === 'fulfilled' ? directorResult.value : [];
-  const categoryMovies =
-    categoryResult.status === 'fulfilled' ? categoryResult.value : [];
 
   const mergedMovies = mergeSearchResults(
     [

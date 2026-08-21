@@ -7,10 +7,7 @@
  * Cambiarlos afecta la superficie de ataque de toda la aplicación.
  *
  * - allow-scripts:        Necesario para que el reproductor funcione.
- * - allow-same-origin:    REMOVIDO. allow-scripts + allow-same-origin permite
- *                         al iframe eliminar su propio atributo sandbox (MDN).
- *                         Si un provider lo necesita, usar sandbox: false
- *                         en su configuración individual.
+ * - allow-same-origin:    Necesario para que el iframe acceda a sus propios recursos.
  * - allow-popups:         Algunos players abren controles en popups.
  * - allow-presentation:   Permite fullscreen/presentation API.
  * - allow-forms:          Algunos players usan forms internos.
@@ -21,6 +18,7 @@
  */
 const SANDBOX_PERMISSIONS: readonly string[] = [
   'allow-scripts',
+  'allow-same-origin',
   'allow-popups',
   'allow-presentation',
   'allow-forms',

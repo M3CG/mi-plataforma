@@ -33,15 +33,26 @@ export default function DropdownMenu({
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ─── Force close desde el padre ───
-  // Cuando la barra de filtros se colapsa (scroll down),
-  // todos los dropdowns se cierran automáticamente.
-  useEffect(() => {
+  // Patrón React 19: ajustar estado durante render usando useState.
+  // Ver: https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  //
+  // No usa useRef para trackear el valor anterior porque la regla
+  // react-hooks/refs de Next.js 16 prohíbe acceder a ref.current
+  // durante el render.
+  const [prevForceClose, setPrevForceClose] = useState(forceClose);
+  if (prevForceClose !== forceClose) {
     if (forceClose) {
       setIsOpen(false);
-      if (closeTimeoutRef.current) {
-        clearTimeout(closeTimeoutRef.current);
-        closeTimeoutRef.current = null;
-      }
+    }
+    setPrevForceClose(forceClose);
+  }
+
+  // Limpiar timeout de cierre diferido cuando forceClose se activa.
+  // Los effects pueden acceder a refs; el render no.
+  useEffect(() => {
+    if (forceClose && closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
     }
   }, [forceClose]);
 

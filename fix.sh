@@ -1,3 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+FILE="widgets/movie-card/MovieCard.tsx"
+
+echo "━━━ Fix: Sinopsis como overlay dentro del poster ━━━"
+
+cat > "$FILE" << 'EOF_MOVIE_CARD'
 'use client';
 
 import Image from 'next/image';
@@ -94,7 +105,11 @@ export default function MovieCard({
             "
             aria-hidden="true"
           >
-            <p className="text-s text-gray-300 leading-relaxed line-clamp-10 overflow-hidden">
+            <p className="text-xs font-semibold text-white mb-2 line-clamp-2">
+              {viewModel.title}
+              <span className="text-gray-400 font-normal"> ({viewModel.year})</span>
+            </p>
+            <p className="text-[11px] text-gray-300 leading-relaxed line-clamp-7 overflow-hidden">
               {viewModel.synopsis}
             </p>
           </div>
@@ -200,3 +215,10 @@ export default function MovieCard({
     </article>
   );
 }
+EOF_MOVIE_CARD
+
+echo "  ✓ MovieCard.tsx sobreescrito."
+echo ""
+echo "Verificando..."
+npx tsc --noEmit 2>&1 | tail -3 && echo "✓ TypeScript OK"
+npm run lint -- --quiet 2>&1 | tail -5

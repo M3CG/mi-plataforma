@@ -13,7 +13,6 @@ export interface MovieCardViewModel {
   primaryQuality?: string;
   hasSubtitles: boolean;
   categories: Category[];
-  synopsis: string;
 }
 
 export function createMovieCardViewModel(
@@ -50,6 +49,5 @@ export function createMovieCardViewModel(
     primaryQuality: qualities[0],
     hasSubtitles,
     categories: movie.categories ?? [],
-    synopsis: movie.synopsis,
   };
 }
