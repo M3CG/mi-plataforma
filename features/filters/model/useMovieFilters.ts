@@ -1,4 +1,5 @@
 'use client';
+
 import { useCallback, useMemo } from 'react';
 import {
   useRouter,
@@ -14,10 +15,12 @@ import {
 import { buildFiltersUrl } from '../lib/filterUrlSerializer';
 import {
   DEFAULT_MOVIE_SORT,
-  MOVIE_FILTER_PARAM_KEYS,
-  type MovieFilterParamKey,
   type MovieSort,
 } from '@/entities/movie';
+import {
+  MOVIE_FILTER_PARAM_KEYS,
+  type MovieFilterParamKey,
+} from '@/lib/url/movieFilterParams';
 import { parseMovieFiltersForUI } from '@/lib/url/movieFilters';
 
 export interface UseMovieFiltersResult {
@@ -97,6 +100,7 @@ export function useMovieFilters(): UseMovieFiltersResult {
         const genreKey = MOVIE_FILTER_PARAM_KEYS.genres;
         const currentGenres = params.getAll(genreKey);
         params.delete(genreKey);
+
         if (currentGenres.includes(slug)) {
           currentGenres
             .filter((genre) => genre !== slug)
@@ -158,6 +162,7 @@ export function useMovieFilters(): UseMovieFiltersResult {
         } else {
           params.delete(MOVIE_FILTER_PARAM_KEYS.fromYear);
         }
+
         if (nextToYear < YEAR_MAX) {
           params.set(
             MOVIE_FILTER_PARAM_KEYS.toYear,
@@ -189,6 +194,7 @@ export function useMovieFilters(): UseMovieFiltersResult {
         } else {
           params.delete(MOVIE_FILTER_PARAM_KEYS.fromRuntime);
         }
+
         if (nextToRuntime < RUNTIME_MAX) {
           params.set(
             MOVIE_FILTER_PARAM_KEYS.toRuntime,
@@ -210,8 +216,8 @@ export function useMovieFilters(): UseMovieFiltersResult {
   }, [replaceParams]);
 
   /**
-  * Limpia todos los filtros, incluido el ordenamiento.
-  */
+   * Limpia todos los filtros, incluido el ordenamiento.
+   */
   const clearFilters = useCallback(() => {
     replaceParams((params) => {
       params.delete(MOVIE_FILTER_PARAM_KEYS.genres);

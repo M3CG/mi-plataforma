@@ -1,11 +1,14 @@
 // lib/api/repositories/movies.ts
+
 import {
   type Movie,
   type MovieFilters,
-  MOVIE_FILTER_PARAM_KEYS,
-  MOVIE_PAGINATION_PARAM_KEYS,
   shouldUseGenreMatchRanking,
 } from '@/entities/movie';
+import {
+  GENRE_RANKED_PARAM_KEYS,
+  GENRE_RANKED_PAGINATION_KEYS,
+} from '../strapi/genreRankedParams';
 import type { PaginatedResult } from '../pagination/types';
 import type { StrapiListResponse } from '../strapi/types';
 import {
@@ -34,20 +37,20 @@ async function fetchGenreRankedMovies(
   const genres = (queryParams.genres ?? []).filter(Boolean);
 
   const params: Record<string, string | string[] | undefined> = {
-    [MOVIE_FILTER_PARAM_KEYS.genres]: genres,
-    [MOVIE_PAGINATION_PARAM_KEYS.page]: String(page),
-    [MOVIE_PAGINATION_PARAM_KEYS.pageSize]: String(pageSize),
+    [GENRE_RANKED_PARAM_KEYS.genres]: genres,
+    [GENRE_RANKED_PAGINATION_KEYS.page]: String(page),
+    [GENRE_RANKED_PAGINATION_KEYS.pageSize]: String(pageSize),
   };
 
   if (queryParams.sort) {
-    params[MOVIE_FILTER_PARAM_KEYS.sort] = queryParams.sort;
+    params[GENRE_RANKED_PARAM_KEYS.sort] = queryParams.sort;
   }
 
   if (
     typeof queryParams.minRating === 'number' &&
     Number.isFinite(queryParams.minRating)
   ) {
-    params[MOVIE_FILTER_PARAM_KEYS.minRating] = String(
+    params[GENRE_RANKED_PARAM_KEYS.minRating] = String(
       queryParams.minRating
     );
   }
@@ -56,7 +59,7 @@ async function fetchGenreRankedMovies(
     typeof queryParams.fromYear === 'number' &&
     Number.isFinite(queryParams.fromYear)
   ) {
-    params[MOVIE_FILTER_PARAM_KEYS.fromYear] = String(
+    params[GENRE_RANKED_PARAM_KEYS.fromYear] = String(
       queryParams.fromYear
     );
   }
@@ -65,11 +68,11 @@ async function fetchGenreRankedMovies(
     typeof queryParams.toYear === 'number' &&
     Number.isFinite(queryParams.toYear)
   ) {
-    params[MOVIE_FILTER_PARAM_KEYS.toYear] = String(queryParams.toYear);
+    params[GENRE_RANKED_PARAM_KEYS.toYear] = String(queryParams.toYear);
   }
 
   if (queryParams.country) {
-    params[MOVIE_FILTER_PARAM_KEYS.country] = queryParams.country;
+    params[GENRE_RANKED_PARAM_KEYS.country] = queryParams.country;
   }
 
   const json = await fetchApi<StrapiListResponse<unknown>>(
@@ -207,6 +210,5 @@ export async function fetchMovieBySlug(
     : undefined;
 
   if (!firstItem) return null;
-
   return normalizeMovie(firstItem);
 }

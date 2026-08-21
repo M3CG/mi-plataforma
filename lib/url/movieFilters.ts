@@ -1,14 +1,15 @@
 // lib/url/movieFilters.ts
+
 import {
   DEFAULT_MOVIE_SORT,
   isMovieSort,
   clampMovieYear,
   clampMovieRuntime,
-  MOVIE_FILTER_PARAM_KEYS,
   type MovieFilters,
   type MovieFiltersQuery,
   type MovieSort,
 } from '@/entities/movie';
+import { MOVIE_FILTER_PARAM_KEYS } from './movieFilterParams';
 
 function parseStringArray(
   value: string | string[] | undefined
@@ -34,8 +35,8 @@ function parseNumber(
 }
 
 /**
-* Parsea filtros de dominio desde URLSearchParams.
-*/
+ * Parsea filtros de dominio desde URLSearchParams.
+ */
 export function parseMovieFiltersFromSearchParams(
   searchParams: URLSearchParams
 ): MovieFilters {
@@ -57,6 +58,7 @@ export function parseMovieFiltersFromSearchParams(
   let toYear = parseNumber(
     searchParams.get(MOVIE_FILTER_PARAM_KEYS.toYear) ?? undefined
   );
+
   if (fromYear !== undefined) {
     fromYear = clampMovieYear(fromYear);
   }
@@ -77,6 +79,7 @@ export function parseMovieFiltersFromSearchParams(
   let toRuntime = parseNumber(
     searchParams.get(MOVIE_FILTER_PARAM_KEYS.toRuntime) ?? undefined
   );
+
   if (fromRuntime !== undefined) {
     fromRuntime = clampMovieRuntime(fromRuntime);
   }
@@ -112,12 +115,13 @@ export function parseMovieFiltersFromSearchParams(
 }
 
 /**
-* Parsea filtros desde el objeto searchParams de Next.js.
-*/
+ * Parsea filtros desde el objeto searchParams de Next.js.
+ */
 export function parseMovieFiltersFromRecord(
   record: MovieFiltersQuery
 ): MovieFilters {
   const params = new URLSearchParams();
+
   Object.entries(record).forEach(([key, value]) => {
     if (value === undefined || value === null || value === '') {
       return;
@@ -130,12 +134,13 @@ export function parseMovieFiltersFromRecord(
       params.set(key, value);
     }
   });
+
   return parseMovieFiltersFromSearchParams(params);
 }
 
 /**
-* Serializa filtros de dominio a query params.
-*/
+ * Serializa filtros de dominio a query params.
+ */
 export function serializeMovieFiltersToSearchParams(
   filters: MovieFilters
 ): URLSearchParams {
@@ -164,6 +169,7 @@ export function serializeMovieFiltersToSearchParams(
       String(filters.fromYear)
     );
   }
+
   if (
     typeof filters.toYear === 'number' &&
     Number.isFinite(filters.toYear)
@@ -183,6 +189,7 @@ export function serializeMovieFiltersToSearchParams(
       String(filters.fromRuntime)
     );
   }
+
   if (
     typeof filters.toRuntime === 'number' &&
     Number.isFinite(filters.toRuntime)
@@ -196,6 +203,7 @@ export function serializeMovieFiltersToSearchParams(
   if (filters.country) {
     params.set(MOVIE_FILTER_PARAM_KEYS.country, filters.country);
   }
+
   if (filters.sort && filters.sort !== DEFAULT_MOVIE_SORT) {
     params.set(MOVIE_FILTER_PARAM_KEYS.sort, filters.sort);
   }
@@ -204,8 +212,8 @@ export function serializeMovieFiltersToSearchParams(
 }
 
 /**
-* Estado de filtros listo para ser consumido por la UI.
-*/
+ * Estado de filtros listo para ser consumido por la UI.
+ */
 export interface MovieFiltersUIState {
   activeGenres: string[];
   minRating: string | null;
@@ -221,29 +229,25 @@ export interface MovieFiltersUIState {
 }
 
 /**
-* Parsea la URL y devuelve un estado listo para la UI.
-*/
+ * Parsea la URL y devuelve un estado listo para la UI.
+ */
 export function parseMovieFiltersForUI(
   searchParams: URLSearchParams
 ): MovieFiltersUIState {
   const domainFilters = parseMovieFiltersFromSearchParams(searchParams);
 
   const activeGenres = domainFilters.genres ?? [];
-
   const minRating =
     domainFilters.minRating !== undefined
       ? String(domainFilters.minRating)
       : null;
-
   const country = domainFilters.country ?? null;
   const sort = domainFilters.sort ?? DEFAULT_MOVIE_SORT;
-
   const fromYear = domainFilters.fromYear ?? null;
   const toYear = domainFilters.toYear ?? null;
   const hasYearFilter =
     searchParams.has(MOVIE_FILTER_PARAM_KEYS.fromYear) ||
     searchParams.has(MOVIE_FILTER_PARAM_KEYS.toYear);
-
   const fromRuntime = domainFilters.fromRuntime ?? null;
   const toRuntime = domainFilters.toRuntime ?? null;
   const hasRuntimeFilter =

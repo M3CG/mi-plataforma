@@ -3,8 +3,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { MouseEvent } from 'react';
+
 import type { Movie } from '@/entities/movie';
-import { createMovieCardViewModel } from '@/entities/movie';
+import { createMovieCardViewModel } from './lib/createMovieCardViewModel';
 import { IconImagePlaceholder, IconStar } from '@/shared/ui/icons';
 import MovieCardCategoryLink from './MovieCardCategoryLink';
 
@@ -24,6 +25,8 @@ export default function MovieCard({
   highlightedCategorySlugs,
 }: MovieCardProps) {
   const viewModel = createMovieCardViewModel(movie);
+  const hasSynopsis =
+    Boolean(viewModel.synopsis) && viewModel.synopsis.trim().length > 0;
 
   return (
     <article
@@ -44,6 +47,37 @@ export default function MovieCard({
         title={`Ver detalle de ${viewModel.title}`}
         className="absolute inset-0 z-10"
       />
+
+      {/* ─── Tooltip de sinopsis (solo desktop) ─── */}
+      {/* Aparece con 500ms de delay al hacer hover,
+          desaparece instantáneamente al quitar el mouse.
+          pointer-events-none para no interferir con el Link. */}
+      {hasSynopsis && (
+        <div
+          className="
+            synopsis-tooltip
+            absolute bottom-full left-1/2 -translate-x-1/2 mb-3
+            w-72 z-50
+            hidden lg:block
+          "
+          aria-hidden="true"
+        >
+          <div className="bg-gray-950/95 backdrop-blur-sm border border-white/10 rounded-xl shadow-2xl shadow-black/50 p-3">
+            <p className="text-xs text-gray-300 leading-relaxed line-clamp-4">
+              {viewModel.synopsis}
+            </p>
+          </div>
+          {/* Flecha */}
+          <div
+            className="
+              absolute left-1/2 -translate-x-1/2 -bottom-1.5
+              w-3 h-3
+              bg-gray-950/95 border-r border-b border-white/10
+              rotate-45
+            "
+          />
+        </div>
+      )}
 
       {/* Imagen */}
       <div className="relative aspect-[2/3] overflow-hidden">
@@ -87,7 +121,6 @@ export default function MovieCard({
               {viewModel.primaryQuality}
             </span>
           )}
-
           {viewModel.hasSubtitles && (
             <span
               className="
@@ -132,7 +165,6 @@ export default function MovieCard({
 
         <div className="flex items-center gap-2 mt-1.5 text-xs">
           <span className="text-gray-400">{viewModel.year}</span>
-
           {viewModel.runtimeLabel && (
             <>
               <span className="text-gray-600">·</span>
@@ -141,7 +173,6 @@ export default function MovieCard({
               </span>
             </>
           )}
-
           {viewModel.ageRating && (
             <>
               <span className="text-gray-600">·</span>

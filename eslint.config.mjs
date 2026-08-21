@@ -7,6 +7,7 @@ const deprecatedImportPatterns = [
   "@/entities/movie/config/filterParams",
   "@/entities/movie/lib/createMovieCardViewModel",
   "@/features/search/infrastructure/*",
+  "@/lib/utils/format",
 ];
 
 function createNoRestrictedImportsRule({ paths = [], patterns = [] } = {}) {

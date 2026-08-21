@@ -1,5 +1,6 @@
 // features/filters/ui/FilterMenu.tsx
 'use client';
+
 import type { Category } from '@/entities/category';
 import { useMovieFilters } from '../model/useMovieFilters';
 import { useScrollCollapse } from '../model/useScrollCollapse';
@@ -64,8 +65,11 @@ export default function FilterMenu({
           }`}
         >
           {/* ═══ SECCIÓN COLAPSABLE: CONTROLES DE FILTRO ═══ */}
+          {/* z-10 + relative: crea stacking context por encima de ActiveFiltersBar.
+              Esto evita que los dropdowns se "mezclen" visualmente con los
+              filtros activos que están debajo. */}
           <div
-            className="transition-all duration-300 ease-in-out"
+            className="relative z-10 transition-all duration-300 ease-in-out"
             style={{
               maxHeight: isCollapsed ? '0px' : '400px',
               opacity: isCollapsed ? 0 : 1,
@@ -78,12 +82,18 @@ export default function FilterMenu({
                 categories={categories}
                 activeGenres={activeGenres}
                 onToggleGenre={toggleGenre}
+                forceClose={isCollapsed}
               />
-              <RatingFilter value={minRating} onChange={setRating} />
+              <RatingFilter
+                value={minRating}
+                onChange={setRating}
+                forceClose={isCollapsed}
+              />
               <CountryFilter
                 countries={countries}
                 value={country}
                 onChange={setCountry}
+                forceClose={isCollapsed}
               />
               <YearRangeFilter
                 fromYear={fromYear}
@@ -97,7 +107,11 @@ export default function FilterMenu({
               />
               {/* Spacer flexible que empuja SortFilter a la derecha */}
               <div className="flex-1 min-w-4" />
-              <SortFilter value={sort} onChange={setSort} />
+              <SortFilter
+                value={sort}
+                onChange={setSort}
+                forceClose={isCollapsed}
+              />
             </div>
           </div>
 

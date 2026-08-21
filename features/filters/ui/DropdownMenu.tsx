@@ -1,7 +1,7 @@
 // features/filters/ui/DropdownMenu.tsx
 'use client';
 
-import { ReactNode, useEffect, useRef, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { IconChevron } from '@/shared/ui/icons';
 
 interface DropdownMenuProps {
@@ -12,6 +12,8 @@ interface DropdownMenuProps {
   isActive: boolean;
   align?: 'left' | 'right';
   closeOnSelect?: boolean;
+  /** Fuerza el cierre del dropdown (ej: cuando la barra se colapsa) */
+  forceClose?: boolean;
   children: ReactNode;
 }
 
@@ -23,37 +25,87 @@ export default function DropdownMenu({
   isActive,
   align = 'left',
   closeOnSelect = true,
+  forceClose = false,
   children,
 }: DropdownMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // ─── Force close desde el padre ───
+  // Cuando la barra de filtros se colapsa (scroll down),
+  // todos los dropdowns se cierran automáticamente.
   useEffect(() => {
+    if (forceClose) {
+      setIsOpen(false);
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+        closeTimeoutRef.current = null;
+      }
+    }
+  }, [forceClose]);
+
+  // ─── Programar cierre con delay ───
+  // 300ms de gracia para que el mouse pueda viajar
+  // del botón al panel sin cerrar el dropdown.
+  const scheduleClose = useCallback(() => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+    }
+    closeTimeoutRef.current = setTimeout(() => {
+      setIsOpen(false);
+    }, 300);
+  }, []);
+
+  const cancelClose = useCallback(() => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+  }, []);
+
+  // ─── Click outside + Escape ───
+  useEffect(() => {
+    if (!isOpen) return;
+
     const handleClickOutside = (event: MouseEvent) => {
       if (ref.current && !ref.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
-
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setIsOpen(false);
     };
 
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('keydown', handleEscape);
-    }
-
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscape);
     };
   }, [isOpen]);
 
+  // ─── Cleanup del timeout al desmontar ───
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+      }
+    };
+  }, []);
+
   return (
-    <div className="relative" ref={ref}>
+    <div
+      className="relative"
+      ref={ref}
+      onMouseLeave={scheduleClose}
+      onMouseEnter={cancelClose}
+    >
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          cancelClose();
+          setIsOpen(!isOpen);
+        }}
         aria-expanded={isOpen}
         aria-controls={`${id}-dropdown`}
         aria-label={`${label}: ${currentLabel}`}
@@ -70,13 +122,12 @@ export default function DropdownMenu({
         <span className="hidden sm:inline">{currentLabel}</span>
         <IconChevron open={isOpen} className="w-3 h-3 opacity-60" />
       </button>
-
       {isOpen && (
         <div
           id={`${id}-dropdown`}
-          className={`absolute z-[60] top-full ${
+          className={`absolute z-[200] top-full mt-2 ${
             align === 'right' ? 'right-0' : 'left-0'
-          } min-w-[200px] pt-2`}
+          }`}
           onClick={(event) => {
             if (closeOnSelect) {
               setIsOpen(false);

@@ -71,3 +71,14 @@ h1, h2, h3, h4, h5, h6 {
 .animate-fade-in-up {
   animation: fadeInUp 0.4s ease-out both;
 }
+/* ═══ Tooltip de sinopsis (delay asimétrico) ═══ */
+/* Aparece con 500ms de delay, desaparece instantáneamente */
+.synopsis-tooltip {
+  opacity: 0;
+  transition: opacity 300ms ease 0ms;
+  pointer-events: none;
+}
+.group:hover .synopsis-tooltip {
+  opacity: 1;
+  transition: opacity 300ms ease 500ms;
+}

@@ -1,6 +1,6 @@
 import type { Category } from '@/entities/category';
 import type { Movie } from '@/entities/movie';
-import { formatRuntime } from '@/lib/utils/format';
+import { formatRuntime } from '@/entities/movie';
 
 export interface MovieCardViewModel {
   title: string;

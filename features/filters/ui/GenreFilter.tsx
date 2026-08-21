@@ -9,20 +9,22 @@ interface GenreFilterProps {
   categories: Category[];
   activeGenres: string[];
   onToggleGenre: (slug: string) => void;
+  forceClose?: boolean;
 }
 
 export default function GenreFilter({
   categories,
   activeGenres,
   onToggleGenre,
+  forceClose = false,
 }: GenreFilterProps) {
   const genresLabel =
     activeGenres.length === 0
       ? 'Género'
       : activeGenres.length === 1
-        ? categories.find((category) => category.slug === activeGenres[0])
-            ?.name || '1 Género'
-        : `${activeGenres.length} Géneros`;
+      ? categories.find((category) => category.slug === activeGenres[0])
+          ?.name || '1 Género'
+      : `${activeGenres.length} Géneros`;
 
   return (
     <DropdownMenu
@@ -32,6 +34,7 @@ export default function GenreFilter({
       currentLabel={genresLabel}
       isActive={activeGenres.length > 0}
       closeOnSelect={false}
+      forceClose={forceClose}
     >
       <div className="w-80 bg-gray-950/95 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl shadow-black/40">
         <div className="flex flex-wrap gap-2 max-h-56 overflow-y-auto scrollbar-hide">
