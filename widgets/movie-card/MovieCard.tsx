@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { MouseEvent } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { Movie } from '@/entities/movie';
 import { createMovieCardViewModel } from './lib/createMovieCardViewModel';
@@ -17,6 +18,9 @@ export interface MovieCardProps {
   highlightedCategorySlugs?: string[];
 }
 
+const IDLE_DELAY_MS = 700;
+const SCROLL_END_DELAY_MS = 150;
+
 export default function MovieCard({
   movie,
   href,
@@ -27,6 +31,109 @@ export default function MovieCard({
   const viewModel = createMovieCardViewModel(movie);
   const hasSynopsis =
     Boolean(viewModel.synopsis) && viewModel.synopsis.trim().length > 0;
+
+  // ─── Estado del overlay ───
+  const [showOverlay, setShowOverlay] = useState(false);
+  const showOverlayRef = useRef(false);
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isScrollingRef = useRef(false);
+  const scrollEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mouseInsideRef = useRef(false);
+
+  // ─── Mostrar / ocultar overlay ───
+  const showOverlayNow = useCallback(() => {
+    setShowOverlay(true);
+    showOverlayRef.current = true;
+  }, []);
+
+  const hideOverlay = useCallback(() => {
+    setShowOverlay(false);
+    showOverlayRef.current = false;
+  }, []);
+
+  // ─── Timer de "mouse quieto" ───
+  const startIdleTimer = useCallback(() => {
+    if (idleTimerRef.current) {
+      clearTimeout(idleTimerRef.current);
+    }
+    idleTimerRef.current = setTimeout(() => {
+      if (mouseInsideRef.current && !isScrollingRef.current) {
+        showOverlayNow();
+      }
+    }, IDLE_DELAY_MS);
+  }, [showOverlayNow]);
+
+  const cancelIdleTimer = useCallback(() => {
+    if (idleTimerRef.current) {
+      clearTimeout(idleTimerRef.current);
+      idleTimerRef.current = null;
+    }
+  }, []);
+
+  // ─── Handlers de mouse ───
+  const handleMouseEnter = useCallback(() => {
+    mouseInsideRef.current = true;
+    if (!isScrollingRef.current) {
+      startIdleTimer();
+    }
+  }, [startIdleTimer]);
+
+  const handleMouseLeave = useCallback(() => {
+    mouseInsideRef.current = false;
+    hideOverlay();
+    cancelIdleTimer();
+  }, [hideOverlay, cancelIdleTimer]);
+
+  const handleMouseMove = useCallback(() => {
+    // Si el overlay YA está visible, el movimiento del mouse
+    // dentro de la tarjeta NO lo oculta. El usuario puede
+    // leer la sinopsis mientras mueve el cursor libremente.
+    if (showOverlayRef.current) return;
+
+    // Si el overlay no está visible, cualquier movimiento
+    // reinicia el timer de idle.
+    if (mouseInsideRef.current && !isScrollingRef.current) {
+      startIdleTimer();
+    }
+  }, [startIdleTimer]);
+
+  // ─── Detectar scroll activo ───
+  useEffect(() => {
+    const handleScroll = () => {
+      isScrollingRef.current = true;
+      hideOverlay();
+      cancelIdleTimer();
+
+      if (scrollEndTimerRef.current) {
+        clearTimeout(scrollEndTimerRef.current);
+      }
+
+      scrollEndTimerRef.current = setTimeout(() => {
+        isScrollingRef.current = false;
+        if (mouseInsideRef.current) {
+          startIdleTimer();
+        }
+      }, SCROLL_END_DELAY_MS);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollEndTimerRef.current) {
+        clearTimeout(scrollEndTimerRef.current);
+      }
+    };
+  }, [hideOverlay, cancelIdleTimer, startIdleTimer]);
+
+  // ─── Cleanup al desmontar ───
+  useEffect(() => {
+    return () => {
+      cancelIdleTimer();
+      if (scrollEndTimerRef.current) {
+        clearTimeout(scrollEndTimerRef.current);
+      }
+    };
+  }, [cancelIdleTimer]);
 
   return (
     <article
@@ -39,6 +146,9 @@ export default function MovieCard({
         hover:shadow-xl hover:shadow-black/20
         hover:-translate-y-1
       "
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onMouseMove={handleMouseMove}
     >
       <Link
         href={href}
@@ -77,21 +187,22 @@ export default function MovieCard({
           "
         />
 
-        {/* ─── Overlay de sinopsis (solo desktop) ─── */}
-        {/* Aparece sobre el poster al hacer hover en la tarjeta.
-            pointer-events-none para no bloquear el Link. */}
+        {/* ─── Overlay de sinopsis (solo desktop, mouse quieto) ─── */}
+        {/* Sticky: una vez visible, el mouse puede moverse libremente
+            dentro de la tarjeta sin que desaparezca.
+            Solo se oculta con mouseLeave o scroll. */}
         {hasSynopsis && (
           <div
-            className="
+            className={`
               absolute inset-0 z-20
               bg-gray-950/90 backdrop-blur-sm
               flex flex-col justify-end
               p-3.5
-              opacity-0 group-hover:opacity-100
               transition-opacity duration-300
               hidden lg:flex
               pointer-events-none
-            "
+              ${showOverlay ? 'opacity-100' : 'opacity-0'}
+            `}
             aria-hidden="true"
           >
             <p className="text-s text-gray-300 leading-relaxed line-clamp-10 overflow-hidden">

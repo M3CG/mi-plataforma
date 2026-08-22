@@ -1,224 +1,35 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-GREEN='\033[0;32m'
-NC='\033[0m'
+echo "━━━ Fix: Next.js dev server en todas las interfaces de red ━━━"
 
-FILE="widgets/movie-card/MovieCard.tsx"
+python3 << 'PYTHON_FIX'
+import json
 
-echo "━━━ Fix: Sinopsis como overlay dentro del poster ━━━"
+with open("package.json", "r", encoding="utf-8") as f:
+    pkg = json.load(f)
 
-cat > "$FILE" << 'EOF_MOVIE_CARD'
-'use client';
+# Cambiar el script dev para usar --hostname 0.0.0.0
+if "scripts" in pkg and "dev" in pkg["scripts"]:
+    old_dev = pkg["scripts"]["dev"]
+    if "--hostname" not in old_dev:
+        pkg["scripts"]["dev"] = "next dev --hostname 0.0.0.0"
+        print(f"  ✓ Cambiado: '{old_dev}' → '{pkg['scripts']['dev']}'")
+    else:
+        print("  → Ya tiene --hostname configurado")
+else:
+    print("  ⚠ No se encontró el script 'dev' en package.json")
 
-import Image from 'next/image';
-import Link from 'next/link';
-import type { MouseEvent } from 'react';
+with open("package.json", "w", encoding="utf-8") as f:
+    json.dump(pkg, f, indent=2)
+    f.write("\n")
 
-import type { Movie } from '@/entities/movie';
-import { createMovieCardViewModel } from './lib/createMovieCardViewModel';
-import { IconImagePlaceholder, IconStar } from '@/shared/ui/icons';
-import MovieCardCategoryLink from './MovieCardCategoryLink';
+PYTHON_FIX
 
-export interface MovieCardProps {
-  movie: Movie;
-  href: string;
-  getCategoryHref?: (categorySlug: string) => string;
-  onPrimaryLinkClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
-  highlightedCategorySlugs?: string[];
-}
-
-export default function MovieCard({
-  movie,
-  href,
-  getCategoryHref,
-  onPrimaryLinkClick,
-  highlightedCategorySlugs,
-}: MovieCardProps) {
-  const viewModel = createMovieCardViewModel(movie);
-  const hasSynopsis =
-    Boolean(viewModel.synopsis) && viewModel.synopsis.trim().length > 0;
-
-  return (
-    <article
-      className="
-        group relative
-        bg-white/[0.03] border border-white/5
-        rounded-2xl overflow-hidden
-        transition-all duration-300
-        hover:bg-white/[0.06] hover:border-white/10
-        hover:shadow-xl hover:shadow-black/20
-        hover:-translate-y-1
-      "
-    >
-      <Link
-        href={href}
-        onClick={onPrimaryLinkClick}
-        aria-label={`Ver detalle de ${viewModel.title}`}
-        className="absolute inset-0 z-10"
-      />
-
-      {/* ─── Imagen + Overlay de sinopsis ─── */}
-      <div className="relative aspect-[2/3] overflow-hidden">
-        {viewModel.posterUrl ? (
-          <Image
-            src={viewModel.posterUrl}
-            alt={`Póster de ${viewModel.title}`}
-            fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1400px) 25vw, 20vw"
-            className="
-              object-cover
-              transition-transform duration-500
-              group-hover:scale-105
-            "
-          />
-        ) : (
-          <div className="w-full h-full bg-white/5 flex items-center justify-center">
-            <IconImagePlaceholder className="w-10 h-10 text-gray-600" />
-          </div>
-        )}
-
-        {/* Gradiente hover sutil */}
-        <div
-          className="
-            absolute inset-0
-            bg-gradient-to-t from-black/60 via-transparent to-transparent
-            opacity-0 group-hover:opacity-100
-            transition-opacity duration-300
-          "
-        />
-
-        {/* ─── Overlay de sinopsis (solo desktop) ─── */}
-        {/* Aparece sobre el poster al hacer hover en la tarjeta.
-            pointer-events-none para no bloquear el Link. */}
-        {hasSynopsis && (
-          <div
-            className="
-              absolute inset-0 z-20
-              bg-gray-950/90 backdrop-blur-sm
-              flex flex-col justify-end
-              p-3.5
-              opacity-0 group-hover:opacity-100
-              transition-opacity duration-300
-              hidden lg:flex
-              pointer-events-none
-            "
-            aria-hidden="true"
-          >
-            <p className="text-xs font-semibold text-white mb-2 line-clamp-2">
-              {viewModel.title}
-              <span className="text-gray-400 font-normal"> ({viewModel.year})</span>
-            </p>
-            <p className="text-[11px] text-gray-300 leading-relaxed line-clamp-7 overflow-hidden">
-              {viewModel.synopsis}
-            </p>
-          </div>
-        )}
-
-        {/* Badges de calidad y subtítulos */}
-        <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5 z-30">
-          {viewModel.primaryQuality && (
-            <span
-              className="
-                bg-red-600/90 backdrop-blur-sm
-                text-white text-[10px] font-bold
-                px-2 py-0.5 rounded-md
-                uppercase tracking-wide
-              "
-            >
-              {viewModel.primaryQuality}
-            </span>
-          )}
-          {viewModel.hasSubtitles && (
-            <span
-              className="
-                bg-black/60 backdrop-blur-sm
-                text-gray-200 text-[10px] font-semibold
-                px-2 py-0.5 rounded-md
-              "
-            >
-              CC
-            </span>
-          )}
-        </div>
-
-        {/* Rating */}
-        {viewModel.rating > 0 && (
-          <div
-            className="
-              absolute top-2.5 right-2.5 z-30
-              flex items-center gap-1
-              bg-black/70 backdrop-blur-sm
-              px-2 py-1 rounded-lg
-            "
-          >
-            <IconStar className="w-3 h-3 text-amber-400" />
-            <span className="text-xs font-bold text-white">
-              {viewModel.rating.toFixed(1)}
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* ─── Información debajo del poster ─── */}
-      <div className="relative p-3.5">
-        <h2
-          className="
-            text-sm font-semibold text-gray-100
-            leading-snug line-clamp-2 min-h-[2.5rem]
-            group-hover:text-white transition-colors
-          "
-        >
-          {viewModel.title}
-        </h2>
-
-        <div className="flex items-center gap-2 mt-1.5 text-xs">
-          <span className="text-gray-400">{viewModel.year}</span>
-          {viewModel.runtimeLabel && (
-            <>
-              <span className="text-gray-600">·</span>
-              <span className="text-gray-400">
-                {viewModel.runtimeLabel}
-              </span>
-            </>
-          )}
-          {viewModel.ageRating && (
-            <>
-              <span className="text-gray-600">·</span>
-              <span className="text-gray-400">{viewModel.ageRating}</span>
-            </>
-          )}
-        </div>
-
-        {viewModel.languages.length > 0 && (
-          <p className="text-[11px] text-gray-400 mt-1.5 truncate">
-            {viewModel.languages.join(' · ')}
-          </p>
-        )}
-
-        {viewModel.categories.length > 0 && (
-          <div className="relative z-20 flex flex-wrap gap-1 mt-2.5">
-            {viewModel.categories.map((category) => (
-              <MovieCardCategoryLink
-                key={category.id}
-                category={category}
-                href={getCategoryHref?.(category.slug)}
-                highlighted={
-                  highlightedCategorySlugs?.includes(category.slug) ??
-                  false
-                }
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    </article>
-  );
-}
-EOF_MOVIE_CARD
-
-echo "  ✓ MovieCard.tsx sobreescrito."
 echo ""
-echo "Verificando..."
-npx tsc --noEmit 2>&1 | tail -3 && echo "✓ TypeScript OK"
-npm run lint -- --quiet 2>&1 | tail -5
+echo "Ahora reiniciá el servidor de desarrollo:"
+echo "  1. Ctrl+C para detener el servidor actual"
+echo "  2. npm run dev"
+echo ""
+echo "Después abrí http://192.168.1.200:3000/ en el navegador."
+echo "El WebSocket de HMR ahora debería conectar correctamente."

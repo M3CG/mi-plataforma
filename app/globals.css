@@ -82,3 +82,19 @@ h1, h2, h3, h4, h5, h6 {
   opacity: 1;
   transition: opacity 300ms ease 500ms;
 }
+
+/* ═══ Animación fade-in para tooltip que sigue al cursor ═══ */
+@keyframes fadeInTooltip {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-tooltip {
+  animation: fadeInTooltip 150ms ease-out both;
+}
