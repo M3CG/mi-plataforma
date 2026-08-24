@@ -12,7 +12,7 @@ export const EMBED_PROVIDERS: EmbedProvider[] = [
     name: 'VidSrc',
     baseUrl:
       process.env.NEXT_PUBLIC_VIDSRC_URL || 'https://vidsrc.to/embed/movie/',
-    sandbox: DEFAULT_SANDBOX,
+    sandbox: false,
   },
   {
     name: 'VidLink',

@@ -20,11 +20,16 @@ const byCategory = cache(async (query: string, limit: number) =>
   movieSearchRepository.byCategory(query, limit)
 );
 
+const searchUnified = cache(async (query: string, limit: number) =>
+  movieSearchRepository.searchUnified(query, limit)
+);
+
 export const movieSearchQueries: MovieSearchRepository = {
   byTitle,
   byActor,
   byDirector,
   byCategory,
+  searchUnified, // <-- NUEVO
 };
 
 export type { MovieSearchRepository };
