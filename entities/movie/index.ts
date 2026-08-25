@@ -29,7 +29,6 @@ export {
 export {
   shouldUseGenreMatchRanking,
   getMovieGenreMatchCount,
-  rankMoviesByGenreMatch,
 } from './lib/genreMatch';
 
 export { formatRuntime } from './lib/format';

@@ -138,7 +138,7 @@ export default function MovieCard({
   return (
     <article
       className="
-        group relative
+        group relative isolate
         bg-white/[0.03] border border-white/5
         rounded-2xl overflow-hidden
         transition-all duration-300

@@ -1,5 +1,4 @@
 // lib/api/repositories/movies.ts
-
 import {
   type Movie,
   type MovieFilters,
@@ -71,6 +70,24 @@ async function fetchGenreRankedMovies(
     params[GENRE_RANKED_PARAM_KEYS.toYear] = String(queryParams.toYear);
   }
 
+  if (
+    typeof queryParams.fromRuntime === 'number' &&
+    Number.isFinite(queryParams.fromRuntime)
+  ) {
+    params[GENRE_RANKED_PARAM_KEYS.fromRuntime] = String(
+      queryParams.fromRuntime
+    );
+  }
+
+  if (
+    typeof queryParams.toRuntime === 'number' &&
+    Number.isFinite(queryParams.toRuntime)
+  ) {
+    params[GENRE_RANKED_PARAM_KEYS.toRuntime] = String(
+      queryParams.toRuntime
+    );
+  }
+
   if (queryParams.country) {
     params[GENRE_RANKED_PARAM_KEYS.country] = queryParams.country;
   }
@@ -115,7 +132,6 @@ export async function fetchMoviesWithFilters(
       safePage,
       safePageSize
     );
-
     if (rankedResult) {
       return rankedResult;
     }
@@ -208,7 +224,6 @@ export async function fetchMovieBySlug(
   const firstItem = Array.isArray(json?.data)
     ? json.data[0]
     : undefined;
-
   if (!firstItem) return null;
   return normalizeMovie(firstItem);
 }

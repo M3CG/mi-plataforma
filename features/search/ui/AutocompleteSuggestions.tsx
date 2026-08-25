@@ -1,4 +1,5 @@
 'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { IconStar } from '@/shared/ui/icons';
@@ -38,12 +39,13 @@ export default function AutocompleteSuggestions({
           <span className="ml-3 text-sm text-gray-400">Buscando...</span>
         </div>
       )}
-      
+
       {!isLoading && suggestions.length > 0 && (
         <div className="py-2">
           <div className="px-4 py-2 text-xs text-gray-500 uppercase tracking-wide">
             Sugerencias
           </div>
+
           {suggestions.map((suggestion) => (
             <Link
               key={suggestion.id}
@@ -67,7 +69,7 @@ export default function AutocompleteSuggestions({
                   </div>
                 )}
               </div>
-              
+
               {/* Info */}
               <div className="flex-1 min-w-0">
                 <h3 className="text-sm font-medium text-white truncate">
@@ -86,7 +88,7 @@ export default function AutocompleteSuggestions({
                   )}
                 </div>
               </div>
-              
+
               {/* Score indicator (opcional, para debug) */}
               {process.env.NODE_ENV === 'development' && (
                 <div className="text-[10px] text-gray-600 font-mono">
@@ -95,14 +97,14 @@ export default function AutocompleteSuggestions({
               )}
             </Link>
           ))}
-          
+
           {/* Ver todos los resultados */}
           <Link
             href={routes.search(query)}
             onClick={onClose}
             className="flex items-center justify-center gap-2 px-4 py-3 mt-2 border-t border-white/5 hover:bg-white/5 transition-colors text-sm text-red-400 hover:text-red-300"
           >
-            Ver todos los resultados para "{query}"
+            Ver todos los resultados para &ldquo;{query}&rdquo;
           </Link>
         </div>
       )}

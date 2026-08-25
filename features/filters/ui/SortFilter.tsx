@@ -1,5 +1,6 @@
 // features/filters/ui/SortFilter.tsx
 'use client';
+
 import DropdownMenu from './DropdownMenu';
 import { IconSort } from '@/shared/ui/icons';
 import { SORT_OPTIONS } from '../config/options';
@@ -9,9 +10,15 @@ interface SortFilterProps {
   value: MovieSort;
   onChange: (value: MovieSort) => void;
   forceClose?: boolean;
+  className?: string;
 }
 
-export default function SortFilter({ value, onChange, forceClose = false }: SortFilterProps) {
+export default function SortFilter({
+  value,
+  onChange,
+  forceClose = false,
+  className,
+}: SortFilterProps) {
   const currentLabel =
     SORT_OPTIONS.find((option) => option.value === value)?.label ||
     'Ordenar';
@@ -25,6 +32,7 @@ export default function SortFilter({ value, onChange, forceClose = false }: Sort
       isActive={false}
       align="right"
       forceClose={forceClose}
+      className={className}
     >
       <div className="bg-gray-950/95 backdrop-blur-xl border border-white/10 rounded-2xl p-2 shadow-2xl shadow-black/40 min-w-[180px]">
         {SORT_OPTIONS.map((option) => (

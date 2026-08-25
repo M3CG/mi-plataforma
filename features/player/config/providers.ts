@@ -1,9 +1,18 @@
 // features/player/config/providers.ts
-import { DEFAULT_SANDBOX } from './sandbox-policy';
 
 export interface EmbedProvider {
   name: string;
   baseUrl: string;
+  /**
+   * - string:    se usa como valor del atributo sandbox.
+   * - false:     se renderiza el iframe sin sandbox.
+   * - undefined: se usa el sandbox por defecto (definido en sandbox-policy.ts).
+   *
+   * Nota: todos los providers dinámicos actuales requieren sandbox: false
+   * porque dependen de APIs del navegador que el sandbox restringe.
+   * La política DEFAULT_SANDBOX sigue disponible en sandbox-policy.ts
+   * para cualquier provider futuro que sí pueda correr aislado.
+   */
   sandbox?: string | false;
 }
 

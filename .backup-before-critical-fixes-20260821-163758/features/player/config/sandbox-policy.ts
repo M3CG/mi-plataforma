@@ -17,9 +17,9 @@
  * - allow-modals:         Permitiría alert()/confirm() que bloquean la UX.
  */
 const SANDBOX_PERMISSIONS: readonly string[] = [
-  'allow-scripts',
+  //'allow-scripts',
   'allow-same-origin',
-  'allow-popups',
+  //'allow-popups',
   'allow-presentation',
   'allow-forms',
 ];

@@ -1,6 +1,5 @@
 import { Suspense, type ReactNode } from 'react';
 import type { MoviesPageData } from '../types';
-import MoviesHeader from './MoviesHeader';
 import MoviesResults from './MoviesResults';
 
 interface MoviesPageProps {
@@ -22,7 +21,7 @@ export default function MoviesPage({
     <main className="min-h-screen px-4 md:px-8 pb-12 pt-6">
       <div className="flex gap-8 max-w-[1800px] mx-auto">
         <div className="flex-1 min-w-0">
-          <MoviesHeader hasResults={data.hasResults} />
+          <h1 className="sr-only">Catálogo de Películas</h1>
           <Suspense fallback={filtersFallback}>
             {filtersSlot}
           </Suspense>

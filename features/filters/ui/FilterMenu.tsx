@@ -1,6 +1,5 @@
 // features/filters/ui/FilterMenu.tsx
 'use client';
-
 import type { Category } from '@/entities/category';
 import { useMovieFilters } from '../model/useMovieFilters';
 import { useScrollCollapse } from '../model/useScrollCollapse';
@@ -65,9 +64,6 @@ export default function FilterMenu({
           }`}
         >
           {/* ═══ SECCIÓN COLAPSABLE: CONTROLES DE FILTRO ═══ */}
-          {/* z-10 + relative: crea stacking context por encima de ActiveFiltersBar.
-              Esto evita que los dropdowns se "mezclen" visualmente con los
-              filtros activos que están debajo. */}
           <div
             className="relative z-10 transition-all duration-300 ease-in-out"
             style={{
@@ -77,7 +73,17 @@ export default function FilterMenu({
               pointerEvents: isCollapsed ? 'none' : 'auto',
             }}
           >
-            <div className="flex flex-wrap items-center gap-2 px-4 pt-4 pb-3">
+            {/*
+              Layout responsive:
+              - Mobile (< lg): Grid de 3 columnas
+                · Fila 1: Género | Puntuación | País
+                · Fila 2: Año (col-span-3)
+                · Fila 3: Duración (col-span-3)
+                · Fila 4: Ordenar (col-span-3)
+              - Desktop (lg+): Flex wrap clásico
+            */}
+            <div className="grid grid-cols-3 gap-2 px-4 pt-4 pb-3 lg:flex lg:flex-wrap lg:items-center">
+              {/* ─── Fila 1: Género, Puntuación, País ─── */}
               <GenreFilter
                 categories={categories}
                 activeGenres={activeGenres}
@@ -95,22 +101,32 @@ export default function FilterMenu({
                 onChange={setCountry}
                 forceClose={isCollapsed}
               />
+
+              {/* ─── Fila 2: Año (full width en mobile) ─── */}
               <YearRangeFilter
                 fromYear={fromYear}
                 toYear={toYear}
                 onApply={applyYearRange}
+                className="col-span-3"
               />
+
+              {/* ─── Fila 3: Duración (full width en mobile) ─── */}
               <RuntimeRangeFilter
                 fromRuntime={fromRuntime}
                 toRuntime={toRuntime}
                 onApply={applyRuntimeRange}
+                className="col-span-3"
               />
-              {/* Spacer flexible que empuja SortFilter a la derecha */}
-              <div className="flex-1 min-w-4" />
+
+              {/* Spacer: solo visible en desktop para empujar Sort a la derecha */}
+              <div className="hidden lg:block flex-1 min-w-4" />
+
+              {/* ─── Fila 4: Ordenar (full width en mobile) ─── */}
               <SortFilter
                 value={sort}
                 onChange={setSort}
                 forceClose={isCollapsed}
+                className="col-span-3 lg:col-span-auto"
               />
             </div>
           </div>

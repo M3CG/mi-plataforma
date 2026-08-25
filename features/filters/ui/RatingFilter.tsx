@@ -1,5 +1,6 @@
 // features/filters/ui/RatingFilter.tsx
 'use client';
+
 import DropdownMenu from './DropdownMenu';
 import { IconStar } from '@/shared/ui/icons';
 import { RATING_OPTIONS } from '../config/options';
@@ -8,9 +9,15 @@ interface RatingFilterProps {
   value: string | null;
   onChange: (value: string | null) => void;
   forceClose?: boolean;
+  className?: string;
 }
 
-export default function RatingFilter({ value, onChange, forceClose = false }: RatingFilterProps) {
+export default function RatingFilter({
+  value,
+  onChange,
+  forceClose = false,
+  className,
+}: RatingFilterProps) {
   const currentLabel =
     RATING_OPTIONS.find((option) => option.value === (value ?? 'all'))
       ?.label || 'Puntuación';
@@ -23,6 +30,7 @@ export default function RatingFilter({ value, onChange, forceClose = false }: Ra
       currentLabel={currentLabel}
       isActive={Boolean(value)}
       forceClose={forceClose}
+      className={className}
     >
       <div className="bg-gray-950/95 backdrop-blur-xl border border-white/10 rounded-2xl p-2 shadow-2xl shadow-black/40 min-w-[160px]">
         {RATING_OPTIONS.map((option) => (

@@ -1,9 +1,9 @@
 import type { Movie } from '../types/movie';
 
 /**
-* La relevancia por coincidencia de géneros solo se usa
-* cuando hay 2 o más géneros seleccionados.
-*/
+ * La relevancia por coincidencia de géneros solo se usa
+ * cuando hay 2 o más géneros seleccionados.
+ */
 export function shouldUseGenreMatchRanking(
   genres?: string[]
 ): boolean {
@@ -15,8 +15,8 @@ export function shouldUseGenreMatchRanking(
 }
 
 /**
-* Devuelve cuántos géneros seleccionados tiene una película.
-*/
+ * Devuelve cuántos géneros seleccionados tiene una película.
+ */
 export function getMovieGenreMatchCount(
   movie: Pick<Movie, 'categories'>,
   selectedGenres: string[]
@@ -34,7 +34,6 @@ export function getMovieGenreMatchCount(
   );
 
   let count = 0;
-
   selected.forEach((genreSlug) => {
     if (movieGenres.has(genreSlug)) {
       count += 1;
@@ -42,38 +41,4 @@ export function getMovieGenreMatchCount(
   });
 
   return count;
-}
-
-/**
-* Ordena películas por coincidencia de géneros seleccionados.
-*
-* Esto se deja como helper de dominio, aunque el orden principal
-* ahora debe venir desde Strapi.
-*/
-export function rankMoviesByGenreMatch(
-  movies: Movie[],
-  selectedGenres: string[]
-): Movie[] {
-  const selected = selectedGenres
-    .map((genre) => genre.trim())
-    .filter(Boolean);
-
-  if (selected.length < 2) {
-    return movies;
-  }
-
-  return movies
-    .map((movie, index) => ({
-      movie,
-      index,
-      score: getMovieGenreMatchCount(movie, selected),
-    }))
-    .sort((a, b) => {
-      if (b.score !== a.score) {
-        return b.score - a.score;
-      }
-
-      return a.index - b.index;
-    })
-    .map((entry) => entry.movie);
 }

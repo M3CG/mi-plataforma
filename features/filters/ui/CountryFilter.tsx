@@ -1,5 +1,6 @@
 // features/filters/ui/CountryFilter.tsx
 'use client';
+
 import DropdownMenu from './DropdownMenu';
 import { IconGlobe } from '@/shared/ui/icons';
 
@@ -8,6 +9,7 @@ interface CountryFilterProps {
   value: string | null;
   onChange: (value: string | null) => void;
   forceClose?: boolean;
+  className?: string;
 }
 
 export default function CountryFilter({
@@ -15,6 +17,7 @@ export default function CountryFilter({
   value,
   onChange,
   forceClose = false,
+  className,
 }: CountryFilterProps) {
   return (
     <DropdownMenu
@@ -23,7 +26,9 @@ export default function CountryFilter({
       label="País"
       currentLabel={value || 'País'}
       isActive={Boolean(value)}
+      align="right"
       forceClose={forceClose}
+      className={className}
     >
       <div className="bg-gray-950/95 backdrop-blur-xl border border-white/10 rounded-2xl p-2 shadow-2xl shadow-black/40 w-52 max-h-64 overflow-y-auto scrollbar-hide">
         <button

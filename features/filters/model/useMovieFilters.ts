@@ -76,6 +76,7 @@ export function useMovieFilters(): UseMovieFiltersResult {
   const replaceParams = useCallback(
     (mutate: (params: URLSearchParams) => void) => {
       const url = buildFiltersUrl(pathname, mutate, searchParams);
+      router.prefetch(url);
       router.replace(url);
     },
     [router, searchParams, pathname]

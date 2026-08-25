@@ -1,6 +1,5 @@
 import type { Movie } from '@/entities/movie';
 import { SEARCH_PAGE_SIZE } from '@/lib/api/pagination/config';
-import { normalizeSearchTerm } from '../domain/normalize';
 import {
   movieSearchQueries,
   type MovieSearchRepository,
@@ -13,11 +12,10 @@ export async function searchMovies(
   repository: MovieSearchRepository = movieSearchQueries
 ): Promise<Movie[]> {
   const safeQuery = query.trim();
+
   if (!safeQuery || safeQuery.length < 2) {
     return [];
   }
-
-  const normalizedQuery = normalizeSearchTerm(safeQuery);
 
   try {
     // Usamos el método unificado (1 sola query a Strapi con full-text search)

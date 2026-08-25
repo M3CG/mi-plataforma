@@ -14,6 +14,8 @@ interface DropdownMenuProps {
   closeOnSelect?: boolean;
   /** Fuerza el cierre del dropdown (ej: cuando la barra se colapsa) */
   forceClose?: boolean;
+  /** Clases para el contenedor raíz (el padre controla el ancho) */
+  className?: string;
   children: ReactNode;
 }
 
@@ -26,6 +28,7 @@ export default function DropdownMenu({
   align = 'left',
   closeOnSelect = true,
   forceClose = false,
+  className,
   children,
 }: DropdownMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -107,7 +110,7 @@ export default function DropdownMenu({
 
   return (
     <div
-      className="relative"
+      className={`relative ${className ?? ''}`}
       ref={ref}
       onMouseLeave={scheduleClose}
       onMouseEnter={cancelClose}
@@ -121,7 +124,7 @@ export default function DropdownMenu({
         aria-controls={`${id}-dropdown`}
         aria-label={`${label}: ${currentLabel}`}
         title={`${label}: ${currentLabel}`}
-        className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border ${
+        className={`flex w-full items-center justify-between gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border ${
           isActive
             ? 'bg-red-600/80 border-red-500/30 text-white shadow-lg shadow-red-900/20'
             : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:border-white/20 hover:text-white'
@@ -130,9 +133,12 @@ export default function DropdownMenu({
         <span className={isActive ? 'text-red-100' : 'text-gray-500'}>
           {icon}
         </span>
-        <span className="hidden sm:inline">{currentLabel}</span>
+        <span className="min-w-0 flex-1 truncate text-left">
+          {currentLabel}
+        </span>
         <IconChevron open={isOpen} className="w-3 h-3 opacity-60" />
       </button>
+
       {isOpen && (
         <div
           id={`${id}-dropdown`}

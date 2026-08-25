@@ -1,12 +1,11 @@
 'use client';
+
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconSearch } from '@/shared/ui/icons';
 import { routes } from '@/lib/routes';
 import { useAutocomplete } from '../model/useAutocomplete';
 import AutocompleteSuggestions from './AutocompleteSuggestions';
-
-const DEBOUNCE_MS = 300;
 
 export default function SearchBar() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -78,7 +77,6 @@ export default function SearchBar() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);
-
     // Mostrar sugerencias si hay suficiente texto
     if (value.trim().length >= 2) {
       setShowSuggestions(true);
@@ -99,7 +97,7 @@ export default function SearchBar() {
     // Dar tiempo suficiente para que los clicks en sugerencias se registren
     setTimeout(() => {
       setShowSuggestions(false);
-    }, 300); // ← Aumentar de 200ms a 300ms
+    }, 300);
   };
 
   const handleCloseSuggestions = () => {
@@ -132,13 +130,13 @@ export default function SearchBar() {
           onChange={handleChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          autoComplete="off"  // ← AGREGAR: desactiva autocomplete del navegador
-          autoCorrect="off"   // ← AGREGAR
-          autoCapitalize="off" // ← AGREGAR
-          spellCheck="false"   // ← AGREGAR
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck="false"
           className={`w-36 sm:w-44 md:w-56 lg:w-64 bg-white/5 border rounded-full py-2 pl-10 pr-4 text-sm text-white placeholder-gray-500 outline-none transition-all duration-300 ${isFocused
-            ? 'border-red-500/50 ring-2 ring-red-500/20 bg-white/10 w-44 sm:w-56 md:w-64 lg:w-72'
-            : 'border-white/10 hover:border-white/20'
+              ? 'border-red-500/50 ring-2 ring-red-500/20 bg-white/10 w-44 sm:w-56 md:w-64 lg:w-72'
+              : 'border-white/10 hover:border-white/20'
             }`}
         />
 
@@ -146,8 +144,8 @@ export default function SearchBar() {
         <div className="absolute inset-y-0 right-0 hidden lg:flex items-center pr-3 pointer-events-none">
           <kbd
             className={`text-[10px] font-mono px-1.5 py-0.5 rounded border transition-colors duration-200 ${isFocused
-              ? 'border-red-500/30 text-red-400'
-              : 'border-white/10 text-gray-600'
+                ? 'border-red-500/30 text-red-400'
+                : 'border-white/10 text-gray-600'
               }`}
           >
             /
