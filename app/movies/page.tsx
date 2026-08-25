@@ -6,7 +6,7 @@ import {
 } from '@/features/movies-page';
 import { FilterMenu } from '@/features/filters';
 import { parseMovieFiltersFromRecord } from '@/lib/url/movieFilters';
-import { AdBanner } from '@/features/ads';
+import { AdBanner, ADS_ENABLED } from '@/features/ads';
 import { CatalogGridWithAds } from '@/widgets/composition/catalog-grid-with-ads';
 import FilterMenuSkeleton from '@/features/movies-page/ui/FilterMenuSkeleton';
 
@@ -41,11 +41,13 @@ export default async function MoviesRoute({
         />
       }
       sidebarSlot={
-        <aside className="hidden xl:block w-64 flex-shrink-0">
-          <div className="sticky top-24 h-[calc(100vh-8rem)]">
-            <AdBanner format="skyscraper" />
-          </div>
-        </aside>
+        ADS_ENABLED ? (
+          <aside className="hidden xl:block w-64 flex-shrink-0">
+            <div className="sticky top-24 h-[calc(100vh-8rem)]">
+              <AdBanner format="skyscraper" />
+            </div>
+          </aside>
+        ) : undefined
       }
     />
   );

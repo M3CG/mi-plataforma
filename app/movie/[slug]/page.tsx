@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import {
   MovieDetailPage,
+  ViewTracker,
   getMovieDetailPage,
   buildMovieMetadata,
 } from '@/features/movie-detail';
@@ -30,16 +31,19 @@ export default async function MovieDetailRoute({
   }
 
   return (
-    <MovieDetailPage
-      viewModel={viewModel}
-      playerSlot={
-        <MoviePlayerSection
-          movieSlug={viewModel.slug}
-          tmdbId={viewModel.tmdbId}
-          servers={viewModel.servers}
-        />
-      }
-      afterPlayerSlot={<AdBanner format="horizontal" />}
-    />
+    <>
+      <ViewTracker slug={viewModel.slug} />
+      <MovieDetailPage
+        viewModel={viewModel}
+        playerSlot={
+          <MoviePlayerSection
+            movieSlug={viewModel.slug}
+            tmdbId={viewModel.tmdbId}
+            servers={viewModel.servers}
+          />
+        }
+        afterPlayerSlot={<AdBanner format="horizontal" />}
+      />
+    </>
   );
 }

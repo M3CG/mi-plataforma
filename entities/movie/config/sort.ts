@@ -1,5 +1,4 @@
 // entities/movie/config/sort.ts
-
 import type { MovieSort } from '../types/filters';
 
 /**
@@ -13,6 +12,7 @@ export const MOVIE_SORT_VALUES: readonly MovieSort[] = [
   'title-desc',
   'rating',
   'rating-asc',
+  'views',
 ];
 
 /**

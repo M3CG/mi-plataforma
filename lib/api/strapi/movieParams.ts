@@ -12,8 +12,8 @@ import {
 } from './populate';
 
 /**
-* Presets de sorting traducidos a sintaxis de Strapi.
-*/
+ * Presets de sorting traducidos a sintaxis de Strapi.
+ */
 const MOVIE_SORT_PRESETS: Record<MovieSort, string[]> = {
   latest: ['year:desc', 'rating:desc', 'id:desc'],
   oldest: ['year:asc', 'rating:desc', 'id:desc'],
@@ -21,6 +21,7 @@ const MOVIE_SORT_PRESETS: Record<MovieSort, string[]> = {
   'title-desc': ['title:desc', 'year:desc', 'id:desc'],
   rating: ['rating:desc', 'year:desc', 'id:desc'],
   'rating-asc': ['rating:asc', 'year:desc', 'id:desc'],
+  views: ['views:desc', 'rating:desc', 'id:desc'],
 };
 
 function getMovieSortPreset(sort?: MovieSort): string[] {
@@ -28,8 +29,8 @@ function getMovieSortPreset(sort?: MovieSort): string[] {
 }
 
 /**
-* Construye parámetros de consulta para Strapi.
-*/
+ * Construye parámetros de consulta para Strapi.
+ */
 export function buildMovieListParams(
   filters: MovieFilters,
   page: number,
@@ -61,7 +62,6 @@ export function buildMovieListParams(
 
   let fromYear = filters.fromYear;
   let toYear = filters.toYear;
-
   if (fromYear !== undefined) {
     fromYear = clampMovieYear(fromYear);
   }
@@ -84,7 +84,6 @@ export function buildMovieListParams(
 
   let fromRuntime = filters.fromRuntime;
   let toRuntime = filters.toRuntime;
-
   if (fromRuntime !== undefined) {
     fromRuntime = clampMovieRuntime(fromRuntime);
   }
