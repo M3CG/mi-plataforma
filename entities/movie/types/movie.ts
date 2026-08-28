@@ -19,6 +19,8 @@ export interface Movie {
   spanish_title?: string;
   slug: string;
   synopsis: string;
+  english_synopsis?: string;
+  spanish_synopsis?: string;
   year: number;
   rating: number;
   country: string;

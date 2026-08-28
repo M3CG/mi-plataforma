@@ -208,6 +208,8 @@ export function normalizeMovie(raw: unknown): Movie | null {
     spanish_title: movie.spanish_title ?? undefined,
     slug,
     synopsis: movie.synopsis ?? '',
+    english_synopsis: movie.english_synopsis ?? undefined,
+    spanish_synopsis: movie.spanish_synopsis ?? undefined,
     year: movie.year ?? 0,
     rating: movie.rating ?? 0,
     country: movie.country ?? '',

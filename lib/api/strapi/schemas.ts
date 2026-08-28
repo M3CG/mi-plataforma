@@ -41,6 +41,8 @@ export const StrapiMovieSchema = z.object({
   spanish_title: z.string().nullish(),
   slug: z.string().nullish(),
   synopsis: z.string().nullish(),
+  english_synopsis: z.string().nullish(),
+  spanish_synopsis: z.string().nullish(),
   year: z.number().nullish(),
   rating: z.number().nullish(),
   country: z.string().nullish(),

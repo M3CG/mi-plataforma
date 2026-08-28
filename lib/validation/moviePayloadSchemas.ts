@@ -31,6 +31,8 @@ export const MoviePayloadSchema = z.object({
   spanish_title: z.string().optional(),
   slug: z.string(),
   synopsis: z.string(),
+  english_synopsis: z.string().optional(),
+  spanish_synopsis: z.string().optional(),
   year: z.number(),
   rating: z.number(),
   country: z.string(),
