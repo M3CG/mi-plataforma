@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
+    const timeout = setTimeout(() => controller.abort(), 10_000);
 
     const response = await fetch(`${strapiUrl}/api/movies/view`, {
       method: 'POST',
