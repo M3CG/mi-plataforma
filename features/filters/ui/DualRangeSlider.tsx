@@ -98,7 +98,7 @@ export default function DualRangeSlider({
 
         <input
           type="range"
-          min={String(min)}
+          min={min}
           max={max}
           step={step}
           value={fromValue}
@@ -115,7 +115,7 @@ export default function DualRangeSlider({
 
         <input
           type="range"
-          min={String(min)}
+          min={min}
           max={max}
           step={step}
           value={toValue}

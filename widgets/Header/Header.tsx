@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { IconPlay } from '@/shared/ui/icons';
 import { HeaderNavigation } from '@/features/navigation';
-import SearchBar from '@/features/search/ui/SearchBar';
+import { SearchBar } from '@/features/search';
 import { routes } from '@/lib/routes';
 
 export default function Header() {

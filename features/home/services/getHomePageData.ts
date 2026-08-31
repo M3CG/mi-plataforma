@@ -1,36 +1,43 @@
-import { getMoviesWithFilters } from '@/lib/queries/movies';
-import type { Movie } from '@/entities/movie';
-import type { HomePageData } from '../types';
+import {
+  getHomeMovies,
+  getMoviesWithFilters,
+} from '@/lib/queries/movies';
+import type { HomeHeroData, HomeRankingsData } from '../types';
 
 const LATEST_SIZE = 10;
 const TOP_VIEWED_SIZE = 10;
-const HERO_CANDIDATES_SIZE = 5;
+const BEST_RATED_SIZE = 10;
+const HERO_COUNT = 6;
 
 /**
- * Elige la película del hero: la mejor puntuada que tenga backdrop.
+ * Hero + "Recién llegadas".
+ *
+ * IMPORTANTE: el home usa createdAt (últimas agregadas a la base).
+ * El resto del sitio usa year/rating/id (ver movieParams.ts).
  */
-function pickHeroMovie(movies: Movie[]): Movie | null {
-  return movies.find((movie) => Boolean(movie.backdrop_url)) ?? movies[0] ?? null;
+export async function getHomeHeroData(): Promise<HomeHeroData> {
+  const latestMovies = await getHomeMovies();
+  // Para la cinta VHS necesitamos backdrops (16:9).
+  // Priorizamos las que tienen backdrop; si faltan, rellenamos
+  // con las que solo tienen poster.
+  const withBackdrop = latestMovies.filter((m) => Boolean(m.backdrop_url));
+  const withPosterOnly = latestMovies.filter(
+    (m) => !m.backdrop_url && Boolean(m.poster_url)
+  );
+  return {
+    heroMovies: [...withBackdrop, ...withPosterOnly].slice(0, HERO_COUNT),
+    latestMovies: latestMovies.slice(0, LATEST_SIZE),
+  };
 }
 
-/**
- * Home como cartelera curada:
- * - hero (mejor puntuada)
- * - top 10 más vistas (lista numerada)
- * - 10 recién llegadas (fila minimalista)
- *
- * Solo 3 llamadas a Strapi (antes eran ~10 con las filas de género).
- */
-export async function getHomePageData(): Promise<HomePageData> {
-  const [latest, mostViewed, bestRated] = await Promise.all([
-    getMoviesWithFilters({ sort: 'latest' }, 1, LATEST_SIZE),
+/** Rankings ("más vistas" y "lo mejor"). Se streamean después del hero. */
+export async function getHomeRankingsData(): Promise<HomeRankingsData> {
+  const [mostViewed, bestRated] = await Promise.all([
     getMoviesWithFilters({ sort: 'views' }, 1, TOP_VIEWED_SIZE),
-    getMoviesWithFilters({ sort: 'rating' }, 1, HERO_CANDIDATES_SIZE),
+    getMoviesWithFilters({ sort: 'rating' }, 1, BEST_RATED_SIZE),
   ]);
-
   return {
-    heroMovie: pickHeroMovie(bestRated.data),
-    latestMovies: latest.data,
     mostViewedMovies: mostViewed.data,
+    bestOfAllTimeMovies: bestRated.data,
   };
 }

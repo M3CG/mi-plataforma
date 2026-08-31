@@ -45,6 +45,7 @@ export default function AdminImportPage({
 
   // Sincronizar el input con la query de la URL (ej: al volver con back)
   useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
     setSearchInput(urlQuery);
   }, [urlQuery]);
 

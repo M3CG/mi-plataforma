@@ -1,6 +1,6 @@
 // app/movies/loading.tsx
 
-import MovieGridSkeleton from '@/features/catalog/ui/MovieGridSkeleton';
+import { MovieGridSkeleton } from '@/features/catalog';
 
 export default function MoviesLoading() {
   return (

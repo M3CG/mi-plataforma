@@ -7,8 +7,6 @@ import Link from 'next/link';
 import BackButton from '@/shared/ui/BackButton';
 import type {
   FilmographyMovie,
-  PersonPreview,
-  SlugCandidate,
 } from '../types';
 import { usePersonPreview } from '../model/usePersonPreview';
 import { usePersonFilmography } from '../model/usePersonFilmography';
@@ -109,6 +107,7 @@ export default function ActorImportDetail({
         slugCandidates.find((c) => c.recommended) ??
         slugCandidates.find((c) => !c.taken) ??
         slugCandidates[0];
+            // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedSlug(recommended?.slug ?? '');
       setSelectedPhoto(preview.defaultProfileUrl ?? '');
     }

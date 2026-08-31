@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { checkRateLimit, getClientIp } from '@/lib/utils/rate-limit';
+import { getClientIp } from '@/lib/utils/rate-limit';
 import { API_URL } from '@/lib/api/http/config';
 import { logger } from '@/lib/utils/logger';
 

@@ -40,6 +40,7 @@ export default function MovieImportDetail({ tmdbId }: MovieImportDetailProps) {
         slugCandidates.find((c) => c.recommended) ??
         slugCandidates.find((c) => !c.taken) ??
         slugCandidates[0];
+            // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedSlug(recommended?.slug ?? '');
       setSelectedPoster(preview.defaultPosterUrl ?? '');
     }

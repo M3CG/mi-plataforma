@@ -1,6 +1,6 @@
-import { HomePage, getHomePageData } from '@/features/home';
+import { HomePage, getHomeHeroData } from '@/features/home';
 
 export default async function Home() {
-  const data = await getHomePageData();
+  const data = await getHomeHeroData();
   return <HomePage data={data} />;
 }

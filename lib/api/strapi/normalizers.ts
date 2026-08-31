@@ -193,10 +193,16 @@ export function normalizeMovie(raw: unknown): Movie | null {
   const posterUrl =
     getMediaUrl(movie.poster, 'medium') ?? movie.poster_url ?? undefined;
 
-  const backdropUrl =
+  const rawBackdropUrl =
     getMediaUrl(movie.backdrop ?? movie.poster, 'large') ??
     movie.backdrop_url ??
     undefined;
+  // "original" pesa 1-3MB; w1280 alcanza para cualquier pantalla
+  // (Next sirve AVIF/WebP por encima).
+  const backdropUrl = rawBackdropUrl?.replace(
+    '/t/p/original/',
+    '/t/p/w1280/'
+  );
 
   const slug = resolveMovieSlug(movie);
 

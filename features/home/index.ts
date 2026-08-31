@@ -1,2 +1,5 @@
 export { default as HomePage } from './ui/HomePage';
-export { getHomePageData } from './services/getHomePageData';
+export {
+  getHomeHeroData,
+  getHomeRankingsData,
+} from './services/getHomePageData';

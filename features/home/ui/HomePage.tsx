@@ -1,27 +1,46 @@
-import type { HomePageData } from '../types';
-import HeroSection from './HeroSection';
-import TopViewedList from './TopViewedList';
-import LatestArrivals from './LatestArrivals';
+import { Suspense } from 'react';
+import HeroWithTicker from './HeroWithTicker';
+import MovieStrip from './MovieStrip';
 import CatalogCta from './CatalogCta';
+import HomeStripsSkeleton from './HomeStripsSkeleton';
+import { getHomeRankingsData } from '../services/getHomePageData';
+import type { HomeHeroData } from '../types';
 
 interface HomePageProps {
-  data: HomePageData;
+  data: HomeHeroData;
 }
 
-/**
- * Home como cartelera curada:
- * hero editorial + ranking numerado + tira minimalista + CTA.
- * Menos películas, más intención.
- */
-export default function HomePage({ data }: HomePageProps) {
-  const { heroMovie, latestMovies, mostViewedMovies } = data;
+async function HomeRankingsSection() {
+  const { mostViewedMovies, bestOfAllTimeMovies } =
+    await getHomeRankingsData();
+  return (
+    <>
+      <MovieStrip title="Las más vistas" movies={mostViewedMovies} />
+      <MovieStrip
+        title="Lo mejor de todos los tiempos"
+        movies={bestOfAllTimeMovies}
+      />
+    </>
+  );
+}
 
+export default function HomePage({ data }: HomePageProps) {
+  const { heroMovies, latestMovies } = data;
   return (
     <main className="min-h-screen">
-      {heroMovie && <HeroSection movie={heroMovie} />}
-      <div className="max-w-6xl mx-auto px-4 md:px-8 pt-14 md:pt-20 pb-16 space-y-14 md:space-y-20">
-        <TopViewedList movies={mostViewedMovies} />
-        <LatestArrivals movies={latestMovies} />
+      <HeroWithTicker movies={heroMovies} />
+      <div
+        className="
+          max-w-[1600px] mx-auto
+          px-6 md:px-10 lg:px-14
+          pt-14 md:pt-20 pb-16
+          space-y-16 md:space-y-24
+        "
+      >
+        <MovieStrip title="Recién llegadas" movies={latestMovies} />
+        <Suspense fallback={<HomeStripsSkeleton />}>
+          <HomeRankingsSection />
+        </Suspense>
         <CatalogCta />
       </div>
     </main>

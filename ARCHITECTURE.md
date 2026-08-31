@@ -380,6 +380,7 @@ Reglas:
 | Estado de filtros para UI | `features/filters/lib/parseFiltersForUI.ts` |
 | Opciones de sorting con labels | `features/filters/config/sortOptions.ts` |
 | MovieCardViewModel | `widgets/movie-card/lib/createMovieCardViewModel.ts` |
+| `formatRuntime` (duración legible) | `entities/movie/lib/format.ts` — es presentación específica del dominio Movie, no va a `shared/` |
 | Repositorio de búsqueda | `lib/api/repositories/movieSearch.ts` |
 | Queries de búsqueda | `lib/queries/search.ts` |
 | Schemas de payload del catálogo | `lib/validation/moviePayloadSchemas.ts` |

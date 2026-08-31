@@ -15,7 +15,7 @@ import {
  * Presets de sorting traducidos a sintaxis de Strapi.
  */
 const MOVIE_SORT_PRESETS: Record<MovieSort, string[]> = {
-  latest: ['createdAt:desc', 'id:desc'],
+  latest: ['year:desc', 'rating:desc', 'id:desc'],
   oldest: ['createdAt:asc', 'id:desc'],
   title: ['title:asc', 'year:desc', 'id:desc'],
   'title-desc': ['title:desc', 'year:desc', 'id:desc'],

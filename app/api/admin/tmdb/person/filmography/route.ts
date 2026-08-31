@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ADMIN_TOOLS_ENABLED } from '@/lib/config/adminTools';
 import { isTmdbConfigured, tmdbImageUrl } from '@/lib/api/tmdb/config';
 import { tmdbGetPersonMovieCredits } from '@/lib/api/tmdb/client';
-import { checkSlugsTaken } from '@/lib/api/repositories/adminImport';
 
 export async function GET(request: NextRequest) {
   if (!ADMIN_TOOLS_ENABLED) {

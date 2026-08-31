@@ -5,6 +5,7 @@ import { fetchMoviesWithFilters } from '@/lib/api/repositories/movies';
 import { DEFAULT_PAGE_SIZE } from '@/lib/api/pagination/config';
 import { parseMovieFiltersFromSearchParams } from '@/lib/url/movieFilters';
 import { MOVIE_PAGINATION_PARAM_KEYS } from '@/lib/url/movieFilterParams';
+import { PaginatedMoviesSchema } from '@/lib/validation/moviePayloadSchemas';
 import { logger } from '@/lib/utils/logger';
 import { checkRateLimit, getClientIp } from '@/lib/utils/rate-limit';
 
@@ -61,7 +62,28 @@ export async function GET(request: NextRequest) {
 
     const result = await fetchMoviesWithFilters(filters, page, pageSize);
 
-    return NextResponse.json(result, {
+    // ─── Validar contrato de respuesta (Etapa 3 del roadmap) ───
+    const parsed = PaginatedMoviesSchema.safeParse(result);
+    if (!parsed.success) {
+      logger.error('Invalid BFF response payload', {
+        component: 'BFF',
+        action: 'GET /api/movies',
+        error: parsed.error,
+        page,
+        pageSize,
+      });
+      return NextResponse.json(
+        {
+          data: [],
+          hasMore: false,
+          page,
+          pageSize,
+        },
+        { status: 502 }
+      );
+    }
+
+    return NextResponse.json(parsed.data, {
       headers: {
         'X-RateLimit-Remaining': String(remaining),
       },

@@ -24,9 +24,15 @@ import { buildMovieListParams } from '../strapi/movieParams';
 import {
   buildPopulateParams,
   MOVIE_DETAIL_POPULATE,
-} from '../strapi/populate';
+  } from '../strapi/populate';
 import { isValidSlug } from '@/lib/utils/slugify';
 import { logger } from '@/lib/utils/logger';
+
+/**
+ * El home no muestra servidores ni idiomas: pedimos menos
+ * relaciones para achicar el payload RSC/HTML.
+ */
+const HOME_POPULATE = ['poster', 'categories'] as const;
 
 async function fetchGenreRankedMovies(
   queryParams: MovieFilters,
@@ -97,7 +103,7 @@ async function fetchGenreRankedMovies(
     params,
     {
       next: {
-        revalidate: 60,
+        revalidate: 3600,
         tags: ['movies', 'movies:list', 'movies:genre-ranked'],
       },
     }
@@ -157,7 +163,7 @@ export async function fetchMoviesWithFilters(
     params,
     {
       next: {
-        revalidate: 60,
+        revalidate: 3600,
         tags: ['movies', 'movies:list'],
       },
     }
@@ -172,11 +178,15 @@ export async function fetchMoviesWithFilters(
 }
 
 export async function fetchHomeMovies(): Promise<Movie[]> {
-  const params = buildMovieListParams(
-    { sort: 'latest' },
-    1,
-    HOME_PAGE_SIZE
-  );
+  // El home usa createdAt (últimas agregadas a la base).
+  // El resto del sitio usa year/rating/id (ver movieParams.ts).
+  const params = {
+    ...buildPopulateParams(HOME_POPULATE),
+    'pagination[page]': '1',
+    'pagination[pageSize]': String(HOME_PAGE_SIZE),
+    'sort[0]': 'createdAt:desc',
+    'sort[1]': 'id:desc',
+  };
 
   const json = await fetchApi<StrapiListResponse<unknown>>(
     '/movies',

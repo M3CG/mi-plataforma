@@ -80,6 +80,7 @@ export function useTmdbDiscover() {
   // Reset y fetch cuando cambian los filtros o el modo activo
   useEffect(() => {
     if (!isActive) return;
+        // eslint-disable-next-line react-hooks/set-state-in-effect
     setMovies([]);
     setHasMore(false);
     pageRef.current = 1;
