@@ -36,7 +36,7 @@ export default function AutocompleteSuggestions({
       {isLoading && (
         <div className="flex items-center justify-center py-6">
           <div className="w-5 h-5 border-2 border-red-600/60 border-t-transparent rounded-full animate-spin"></div>
-          <span className="ml-3 text-sm text-gray-400">Buscando...</span>
+          <span className="ml-3 text-sm text-gray-400">Searching...</span>
         </div>
       )}
 
@@ -104,7 +104,7 @@ export default function AutocompleteSuggestions({
             onClick={onClose}
             className="flex items-center justify-center gap-2 px-4 py-3 mt-2 border-t border-white/5 hover:bg-white/5 transition-colors text-sm text-red-400 hover:text-red-300"
           >
-            Ver todos los resultados para &ldquo;{query}&rdquo;
+            See all results for &ldquo;{query}&rdquo;
           </Link>
         </div>
       )}

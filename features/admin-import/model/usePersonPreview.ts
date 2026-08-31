@@ -23,7 +23,7 @@ export function usePersonPreview() {
       setPreview(data.preview);
       setSlugCandidates(data.slugCandidates ?? []);
     } catch {
-      setError('No se pudo cargar la previsualización del actor.');
+      setError('Could not load the actor preview.');
     } finally {
       setIsLoading(false);
     }

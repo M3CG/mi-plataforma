@@ -5,7 +5,7 @@ import { ADMIN_TOOLS_ENABLED } from '@/lib/config/adminTools';
 import { ActorImportDetail } from '@/features/admin-import';
 
 export const metadata: Metadata = {
-  title: 'Importar actor | Admin',
+  title: 'Import Actor | Admin',
   robots: { index: false, follow: false },
 };
 

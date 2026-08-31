@@ -57,14 +57,14 @@ export default function MovieGrid({
         {isLoading && (
           <div className="flex items-center gap-3 text-gray-400">
             <div className="w-5 h-5 border-2 border-red-600/60 border-t-transparent rounded-full animate-spin"></div>
-            <span className="text-sm">Cargando más películas...</span>
+            <span className="text-sm">Loading more movies...</span>
           </div>
         )}
 
         {!hasMore && movies.length > 0 && (
           <div className="flex flex-col items-center gap-2">
             <div className="w-8 h-px bg-white/10"></div>
-            <p className="text-gray-500 text-xs">Fin del catálogo</p>
+            <p className="text-gray-500 text-xs">End of catalog</p>
           </div>
         )}
       </div>

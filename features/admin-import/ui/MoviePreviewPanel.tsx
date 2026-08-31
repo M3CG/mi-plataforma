@@ -79,12 +79,12 @@ export default function MoviePreviewPanel({
           </h2>
           {preview.englishTitle && (
             <p className="text-sm text-gray-400 mt-1">
-              Título inglés: {preview.englishTitle}
+              English title: {preview.englishTitle}
             </p>
           )}
           {preview.spanishTitle && (
             <p className="text-sm text-gray-400">
-              Título español: {preview.spanishTitle}
+              Spanish title: {preview.spanishTitle}
             </p>
           )}
           <div className="flex flex-wrap gap-2 mt-3 text-xs">
@@ -126,10 +126,10 @@ export default function MoviePreviewPanel({
 
         <div>
           <h3 className="text-sm font-semibold text-gray-200 mb-2">
-            Sinopsis
+            Synopsis
           </h3>
           <p className="text-sm text-gray-400 leading-relaxed">
-            {preview.mainSynopsis || 'Sin sinopsis disponible.'}
+            {preview.mainSynopsis || 'No synopsis available.'}
           </p>
         </div>
 
@@ -145,7 +145,7 @@ export default function MoviePreviewPanel({
         {preview.cast.length > 0 && (
           <div>
             <h3 className="text-sm font-semibold text-gray-200 mb-2">
-              Reparto
+              Cast
             </h3>
             <p className="text-sm text-gray-400">
               {preview.cast.map((c) => c.name).join(', ')}
@@ -156,7 +156,7 @@ export default function MoviePreviewPanel({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4 border-t border-white/5">
           <div>
             <h3 className="text-sm font-semibold text-gray-200 mb-3">
-              Slug (elegí uno)
+              Slug (pick one)
             </h3>
             <SlugSelector
               candidates={slugCandidates}
@@ -166,7 +166,7 @@ export default function MoviePreviewPanel({
           </div>
           <div>
             <h3 className="text-sm font-semibold text-gray-200 mb-3">
-              Póster (por defecto: sin texto)
+              Poster (default: textless)
             </h3>
             <PosterSelector
               options={posterOptions}
@@ -183,8 +183,8 @@ export default function MoviePreviewPanel({
             className="bg-red-600 hover:bg-red-700 disabled:opacity-50 px-6 py-3 rounded-full text-sm font-semibold text-white"
           >
             {importStatus === 'saving'
-              ? 'Agregando...'
-              : 'Agregar película'}
+              ? 'Adding...'
+              : 'Add movie'}
           </button>
           {importMessage && (
             <p

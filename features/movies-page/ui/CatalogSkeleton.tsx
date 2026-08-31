@@ -18,7 +18,7 @@ export default function CatalogSkeleton() {
       <div className="flex items-center gap-2 mb-4 px-1 py-2">
         <div className="w-3.5 h-3.5 border-2 border-red-600/70 border-t-transparent rounded-full animate-spin" />
         <span className="text-xs text-gray-400">
-          Aplicando filtros...
+          Applying filters...
         </span>
       </div>
       <MovieGridSkeleton count={24} />

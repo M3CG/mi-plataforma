@@ -25,7 +25,7 @@ export default function SearchResults({
   if (isLoading) {
     return (
       <p className="text-gray-400 py-8 text-center">
-        Buscando en TMDB...
+        Searching TMDB...
       </p>
     );
   }

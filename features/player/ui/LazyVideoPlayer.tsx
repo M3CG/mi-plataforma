@@ -48,7 +48,7 @@ export default function LazyVideoPlayer({
       ) : (
         <div className="aspect-video bg-black rounded-2xl overflow-hidden border border-white/5 flex items-center justify-center">
           <p className="text-sm text-gray-600">
-            El reproductor se carga al acercarte a esta sección.
+            The player loads as you approach this section.
           </p>
         </div>
       )}

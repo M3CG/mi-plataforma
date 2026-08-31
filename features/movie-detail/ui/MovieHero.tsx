@@ -50,7 +50,7 @@ export default function MovieHero({ viewModel }: MovieHeroProps) {
               {viewModel.posterUrl ? (
                 <Image
                   src={viewModel.posterUrl}
-                  alt={`Póster de ${viewModel.title}`}
+                  alt={`${viewModel.title} poster`}
                   fill
                   sizes="(max-width: 768px) 160px, 192px"
                   className="object-cover"

@@ -21,14 +21,14 @@ export default function PlayerErrorOverlay({
       <div>
         <h3 className="text-white font-semibold mb-1">
           {allFailed
-            ? 'Ningún servidor respondió'
-            : 'El servidor no respondió'}
+            ? 'No server responded'
+            : 'The server did not respond'}
         </h3>
 
         <p className="text-sm text-gray-400 max-w-sm">
           {allFailed
-            ? 'Todos los servidores están caídos en este momento. Intenta nuevamente en unos minutos.'
-            : 'El servidor tardó demasiado en responder. Puedes reintentar o seleccionar otro servidor manualmente.'}
+            ? 'All servers are down right now. Try again in a few minutes.'
+            : 'The server took too long to respond. You can retry or pick another server manually.'}
         </p>
       </div>
 
@@ -37,7 +37,7 @@ export default function PlayerErrorOverlay({
         className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-5 py-2.5 rounded-full transition-colors"
       >
         <IconRefresh className="w-4 h-4" />
-        Reintentar
+        Retry
       </button>
     </div>
   );

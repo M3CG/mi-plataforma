@@ -14,18 +14,18 @@ export async function GET(request: NextRequest) {
   }
   if (!isTmdbConfigured()) {
     return NextResponse.json(
-      { error: 'TMDB_API_KEY no configurada' },
+      { error: 'TMDB_API_KEY not configured' },
       { status: 500 }
     );
   }
   const id = Number(request.nextUrl.searchParams.get('id'));
   if (!Number.isFinite(id) || id <= 0) {
-    return NextResponse.json({ error: 'id inválido' }, { status: 400 });
+    return NextResponse.json({ error: 'Invalid id' }, { status: 400 });
   }
   const preview = await getMoviePreview(id);
   if (!preview) {
     return NextResponse.json(
-      { error: 'Película no encontrada en TMDB' },
+      { error: 'Movie not found on TMDB' },
       { status: 404 }
     );
   }

@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
   }
   if (!isTmdbConfigured()) {
     return NextResponse.json(
-      { error: 'TMDB_API_KEY no configurada' },
+      { error: 'TMDB_API_KEY not configured' },
       { status: 500 }
     );
   }

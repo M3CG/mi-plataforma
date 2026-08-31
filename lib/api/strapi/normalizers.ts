@@ -209,11 +209,11 @@ export function normalizeMovie(raw: unknown): Movie | null {
   return {
     id: movie.id,
     documentId: movie.documentId ?? String(movie.id),
-    title: movie.title,
+    title: movie.english_title ?? movie.title,
     english_title: movie.english_title ?? undefined,
     spanish_title: movie.spanish_title ?? undefined,
     slug,
-    synopsis: movie.synopsis ?? '',
+    synopsis: movie.english_synopsis ?? movie.synopsis ?? '',
     english_synopsis: movie.english_synopsis ?? undefined,
     spanish_synopsis: movie.spanish_synopsis ?? undefined,
     year: movie.year ?? 0,

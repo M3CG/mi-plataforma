@@ -153,7 +153,7 @@ export default function MovieCard({
       <Link
         href={href}
         onClick={onPrimaryLinkClick}
-        aria-label={`Ver detalle de ${viewModel.title}`}
+        aria-label={`View details for ${viewModel.title}`}
         className="absolute inset-0 z-10"
       />
 
@@ -162,7 +162,7 @@ export default function MovieCard({
         {viewModel.posterUrl ? (
           <Image
             src={viewModel.posterUrl}
-            alt={`Póster de ${viewModel.title}`}
+            alt={`${viewModel.title} poster`}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1400px) 25vw, 20vw"
             className="

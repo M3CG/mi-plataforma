@@ -23,7 +23,7 @@ export default function PlayerFrame({ source, onLoad }: PlayerFrameProps) {
       allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
       sandbox={sandbox}
       className="w-full h-full"
-      title={`Reproductor de video - ${source.name}`}
+      title={`Video player - ${source.name}`}
       onLoad={onLoad}
     />
   );

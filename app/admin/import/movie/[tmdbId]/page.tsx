@@ -5,7 +5,7 @@ import { ADMIN_TOOLS_ENABLED } from '@/lib/config/adminTools';
 import { MovieImportDetail } from '@/features/admin-import';
 
 export const metadata: Metadata = {
-  title: 'Importar película | Admin',
+  title: 'Import Movie | Admin',
   robots: { index: false, follow: false },
 };
 

@@ -31,7 +31,7 @@ function FilmographyGrid({
       <h3 className="text-lg font-semibold text-white mb-4">
         {title}{' '}
         <span className="text-sm font-normal text-gray-500">
-          ({movies.length} títulos — clic para ver detalle)
+          ({movies.length} titles — click for details)
         </span>
       </h3>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
@@ -62,7 +62,7 @@ function FilmographyGrid({
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <span className="absolute bottom-2 left-2 right-2 text-[10px] text-white font-medium opacity-0 group-hover:opacity-100 transition-opacity line-clamp-1">
-                Ver detalle →
+                View details →
               </span>
             </div>
             <div className="p-2.5">
@@ -132,7 +132,7 @@ export default function ActorImportDetail({
       <div className="min-h-screen flex items-center justify-center text-white">
         <div className="flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-4 border-red-600/60 border-t-transparent rounded-full animate-spin" />
-          <p className="text-gray-400">Cargando actor...</p>
+          <p className="text-gray-400">Loading actor...</p>
         </div>
       </div>
     );
@@ -143,7 +143,7 @@ export default function ActorImportDetail({
       <div className="min-h-screen flex items-center justify-center text-white">
         <div className="text-center">
           <p className="text-red-400 mb-4">
-            {error ?? 'Actor no encontrado'}
+            {error ?? 'Actor not found'}
           </p>
           <BackButton fallbackHref="/admin/import" />
         </div>
@@ -167,7 +167,7 @@ export default function ActorImportDetail({
         <div className="flex items-center gap-4 mb-8">
           <BackButton fallbackHref="/admin/import" />
           <span className="text-xs px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300">
-            Solo desarrollo local
+            Local development only
           </span>
         </div>
 
@@ -206,7 +206,7 @@ export default function ActorImportDetail({
 
         <div className="bg-white/[0.03] border border-white/5 rounded-2xl p-6 mb-10">
           <h2 className="text-lg font-semibold text-white mb-4">
-            Agregar a la base de datos
+            Add to the database
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
@@ -221,7 +221,7 @@ export default function ActorImportDetail({
             </div>
             <div>
               <h3 className="text-sm font-semibold text-gray-200 mb-3">
-                Foto de perfil
+                Profile photo
               </h3>
               <PosterSelector
                 options={photoOptions}
@@ -237,14 +237,14 @@ export default function ActorImportDetail({
               disabled={status === 'saving' || !selectedSlug}
               className="bg-red-600 hover:bg-red-700 disabled:opacity-50 px-8 py-4 rounded-full text-sm font-bold text-white shadow-lg shadow-red-600/25"
             >
-              {status === 'saving' ? 'Agregando...' : 'Agregar actor'}
+              {status === 'saving' ? 'Adding...' : 'Add actor'}
             </button>
             {status === 'success' && (
               <div className="flex items-center gap-2 text-green-400 text-sm">
                 <span>✓</span>
                 <span>{message}</span>
                 <span className="text-gray-500 ml-2">
-                  Volviendo a la página anterior...
+                  Returning to the previous page...
                 </span>
               </div>
             )}
@@ -256,18 +256,17 @@ export default function ActorImportDetail({
 
         <div className="space-y-10">
           <h2 className="text-2xl font-bold text-white">
-            Filmografía en TMDB
+            TMDB filmography
           </h2>
           <p className="text-sm text-gray-400 -mt-2">
-            Hacé click en cualquier película para ver su detalle y
-            agregarla al catálogo.
+            Click any movie to see its details and add it to the catalog.
           </p>
 
           {filmography.isLoading && (
             <div className="flex items-center justify-center py-12">
               <div className="w-8 h-8 border-4 border-red-600/60 border-t-transparent rounded-full animate-spin" />
               <span className="ml-3 text-gray-400">
-                Cargando filmografía...
+                Loading filmography...
               </span>
             </div>
           )}
@@ -281,17 +280,17 @@ export default function ActorImportDetail({
           {!filmography.isLoading && !filmography.error && (
             <>
               <FilmographyGrid
-                title="Como actor/actriz"
+                title="As actor/actress"
                 movies={filmography.castMovies}
               />
               <FilmographyGrid
-                title="Como crew (dirección, producción, etc.)"
+                title="As crew (direction, production, etc.)"
                 movies={filmography.crewMovies}
               />
               {filmography.castMovies.length === 0 &&
                 filmography.crewMovies.length === 0 && (
                   <p className="text-gray-500 text-center py-8">
-                    No se encontraron películas asociadas a esta persona.
+                    No movies found for this person.
                   </p>
                 )}
             </>

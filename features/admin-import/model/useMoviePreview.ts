@@ -27,7 +27,7 @@ export function useMoviePreview() {
       setExistsInDb(Boolean(data.existsInDb));
       setExistingSlug(data.existingSlug ?? null);
     } catch {
-      setError('No se pudo cargar la previsualización.');
+      setError('Could not load the preview.');
     } finally {
       setIsLoading(false);
     }

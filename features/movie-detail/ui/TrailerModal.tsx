@@ -20,7 +20,7 @@ export default function TrailerModal({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Tráiler de la película"
+      aria-label="Movie trailer"
       className="
         fixed inset-0 z-[100]
         bg-black/90 backdrop-blur-md
@@ -43,14 +43,14 @@ export default function TrailerModal({
           allow="autoplay; encrypted-media; fullscreen"
           allowFullScreen
           frameBorder="0"
-          title="Tráiler oficial"
+          title="Official trailer"
           className="w-full h-full"
         />
       </div>
 
       <button
         onClick={onClose}
-        aria-label="Cerrar tráiler"
+        aria-label="Close trailer"
         className="
           absolute top-6 right-6
           w-10 h-10

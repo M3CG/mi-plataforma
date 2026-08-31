@@ -30,7 +30,7 @@ export default function ServerSelector({
             aria-pressed={isActive}
             title={
               isFailed
-                ? 'Este servidor no respondió. Clic para reintentar.'
+                ? 'This server did not respond. Click to retry.'
                 : source.name
             }
             className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border ${

@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
   }
   if (!isTmdbConfigured()) {
     return NextResponse.json(
-      { error: 'TMDB_API_KEY no configurada' },
+      { error: 'TMDB_API_KEY not configured' },
       { status: 500 }
     );
   }
@@ -24,14 +24,14 @@ export async function POST(request: NextRequest) {
     body = await request.json();
   } catch {
     return NextResponse.json(
-      { error: 'JSON inválido' },
+      { error: 'Invalid JSON' },
       { status: 400 }
     );
   }
   const { tmdbId, slug } = body;
   if (!tmdbId || !slug) {
     return NextResponse.json(
-      { error: 'tmdbId y slug son requeridos' },
+      { error: 'tmdbId and slug are required' },
       { status: 400 }
     );
   }
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
   const preview = await getPersonPreview(tmdbId);
   if (!preview) {
     return NextResponse.json(
-      { error: 'No se pudo obtener la persona desde TMDB' },
+      { error: 'Could not fetch the person from TMDB' },
       { status: 502 }
     );
   }
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
 
   if (!result.ok) {
     return NextResponse.json(
-      { error: result.error ?? 'No se pudo crear el actor' },
+      { error: result.error ?? 'Could not create the actor' },
       { status: 409 }
     );
   }

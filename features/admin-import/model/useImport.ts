@@ -29,17 +29,17 @@ export function useImportMovie() {
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok || !data.ok) {
-          throw new Error(data.error || 'No se pudo crear la película');
+          throw new Error(data.error || 'Could not create the movie');
         }
         setStatus('success');
         setMessage(
-          `Película creada correctamente (slug: ${data.slug ?? payload.slug}).`
+          `Movie created successfully (slug: ${data.slug ?? payload.slug}).`
         );
         return true;
       } catch (err) {
         setStatus('error');
         setMessage(
-          err instanceof Error ? err.message : 'Error al crear la película'
+          err instanceof Error ? err.message : 'Error creating the movie'
         );
         return false;
       }
@@ -75,15 +75,15 @@ export function useImportActor() {
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok || !data.ok) {
-          throw new Error(data.error || 'No se pudo crear el actor');
+          throw new Error(data.error || 'Could not create the actor');
         }
         setStatus('success');
-        setMessage(`Actor creado correctamente (slug: ${payload.slug}).`);
+        setMessage(`Actor created successfully (slug: ${payload.slug}).`);
         return true;
       } catch (err) {
         setStatus('error');
         setMessage(
-          err instanceof Error ? err.message : 'Error al crear el actor'
+          err instanceof Error ? err.message : 'Error creating the actor'
         );
         return false;
       }

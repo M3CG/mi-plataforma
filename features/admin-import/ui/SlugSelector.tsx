@@ -16,7 +16,7 @@ export default function SlugSelector({
   if (candidates.length === 0) {
     return (
       <p className="text-sm text-gray-500">
-        Sin candidatos de slug disponibles.
+        No slug candidates available.
       </p>
     );
   }

@@ -22,9 +22,9 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "CineStream | Películas y Series en HD",
+  title: "CineStream | Movies & Series in HD",
   description:
-    "Disfruta de las mejores películas y series en streaming. Latino, Castellano y Subtitulado en alta calidad.",
+    "Watch the best movies and series in streaming. HD quality with multiple servers and subtitles.",
 };
 
 export default function RootLayout({
@@ -33,7 +33,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es">
+    <html lang="en">
       {/*
         Se eliminó suppressHydrationWarning del body.
 

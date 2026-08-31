@@ -42,7 +42,7 @@ export function useTmdbSearch() {
         }
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') return;
-        setError('Error al buscar en TMDB. Verifica TMDB_API_KEY.');
+        setError('Error searching TMDB. Check TMDB_API_KEY.');
       } finally {
         setIsLoading(false);
       }

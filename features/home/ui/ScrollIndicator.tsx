@@ -21,7 +21,7 @@ export default function ScrollIndicator() {
     <div className="flex justify-center pt-6 md:pt-8 pb-10 md:pb-14">
       <button
         onClick={handleClick}
-        aria-label="Desplazarse hacia abajo para ver más contenido"
+        aria-label="Scroll down to see more content"
         className="
           group flex flex-col items-center gap-1
           text-gray-500
@@ -38,7 +38,7 @@ export default function ScrollIndicator() {
             transition-colors
           "
         >
-          Ver más
+          See more
         </span>
         <span className="animate-bounce">
           <IconChevron className="w-5 h-5" />

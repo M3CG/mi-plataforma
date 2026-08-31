@@ -21,7 +21,7 @@ export default function MovieCastSection({
   return (
     <div className="mb-12">
       <h2 className="text-lg font-semibold text-white mb-4">
-        Reparto Principal
+        Main Cast
       </h2>
 
       <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
@@ -30,7 +30,7 @@ export default function MovieCastSection({
             key={actor.documentId}
             href={routes.actor(actor.slug)}
             className="flex-shrink-0 w-24 text-center group"
-            title={`Ver películas de ${actor.name}`}
+            title={`See movies featuring ${actor.name}`}
           >
             <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-red-500/50 transition-all duration-300 mb-2 mx-auto">
               {actor.profile_image_url ? (

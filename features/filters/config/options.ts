@@ -15,7 +15,7 @@ export const RUNTIME_MIN = MOVIE_RUNTIME_MIN;
 export const RUNTIME_MAX = MOVIE_RUNTIME_MAX;
 
 export const RATING_OPTIONS = [
-  { value: 'all', label: 'Todas' },
+  { value: 'all', label: 'All' },
   { value: '5', label: '5.0+' },
   { value: '6', label: '6.0+' },
   { value: '7', label: '7.0+' },

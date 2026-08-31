@@ -21,7 +21,7 @@ export function usePersonFilmography() {
       setCastMovies(data.cast ?? []);
       setCrewMovies(data.crew ?? []);
     } catch {
-      setError('No se pudo cargar la filmografía.');
+      setError('Could not load the filmography.');
     } finally {
       setIsLoading(false);
     }

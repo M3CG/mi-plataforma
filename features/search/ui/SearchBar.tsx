@@ -124,8 +124,8 @@ export default function SearchBar() {
           ref={inputRef}
           id="search-input"
           type="search"
-          placeholder="Buscar..."
-          title="Buscar películas (presiona / para enfocar)"
+          placeholder="Search..."
+          title="Search movies (press / to focus)"
           value={searchQuery}
           onChange={handleChange}
           onFocus={handleFocus}

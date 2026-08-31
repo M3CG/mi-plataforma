@@ -24,8 +24,8 @@ export default function RuntimeRangeFilter({
       initialFrom={fromRuntime ?? RUNTIME_MIN}
       initialTo={toRuntime ?? RUNTIME_MAX}
       onApply={onApply}
-      fromLabel="Duración mínima (minutos)"
-      toLabel="Duración máxima (minutos)"
+      fromLabel="Minimum runtime (minutes)"
+      toLabel="Maximum runtime (minutes)"
       className={className}
     />
   );

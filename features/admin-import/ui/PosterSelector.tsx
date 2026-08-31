@@ -22,7 +22,7 @@ export default function PosterSelector({
 }: PosterSelectorProps) {
   if (options.length === 0) {
     return (
-      <p className="text-sm text-gray-500">Sin imágenes disponibles.</p>
+      <p className="text-sm text-gray-500">No images available.</p>
     );
   }
   return (

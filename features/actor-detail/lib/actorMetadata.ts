@@ -1,5 +1,4 @@
 // features/actor-detail/lib/actorMetadata.ts
-
 import type { Metadata } from 'next';
 import type { ActorDetailViewModel } from '../types';
 
@@ -8,18 +7,16 @@ export function buildActorMetadata(
 ): Metadata {
   if (!viewModel) {
     return {
-      title: 'Actor no encontrado',
+      title: 'Actor not found',
     };
   }
-
   const { actor } = viewModel;
-
   return {
     title: `${actor.name} | CineStream`,
-    description: `Descubre todas las películas de ${actor.name} en CineStream. Filmografía completa en HD.`,
+    description: `Discover all movies starring ${actor.name} on CineStream. Complete filmography in HD.`,
     openGraph: {
       title: `${actor.name} | CineStream`,
-      description: `Descubre todas las películas de ${actor.name} en CineStream.`,
+      description: `Discover all movies starring ${actor.name} on CineStream.`,
       images: actor.profile_image_url
         ? [actor.profile_image_url]
         : [],
@@ -27,7 +24,7 @@ export function buildActorMetadata(
     twitter: {
       card: 'summary',
       title: `${actor.name} | CineStream`,
-      description: `Descubre todas las películas de ${actor.name} en CineStream.`,
+      description: `Discover all movies starring ${actor.name} on CineStream.`,
       images: actor.profile_image_url
         ? [actor.profile_image_url]
         : [],

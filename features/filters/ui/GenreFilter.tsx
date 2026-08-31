@@ -22,17 +22,17 @@ export default function GenreFilter({
 }: GenreFilterProps) {
   const genresLabel =
     activeGenres.length === 0
-      ? 'Género'
+      ? 'Genre'
       : activeGenres.length === 1
         ? categories.find((category) => category.slug === activeGenres[0])
-            ?.name || '1 Género'
-        : `${activeGenres.length} Géneros`;
+            ?.name || '1 Genre'
+        : `${activeGenres.length} Genres`;
 
   return (
     <DropdownMenu
       id="genres"
       icon={<IconFilm />}
-      label="Género"
+      label="Genre"
       currentLabel={genresLabel}
       isActive={activeGenres.length > 0}
       closeOnSelect={false}

@@ -9,13 +9,13 @@ export default function CatalogCta() {
   return (
     <section className="border-t border-white/5 pt-12 flex flex-col items-center text-center gap-4">
       <p className="text-sm text-gray-500">
-        ¿Buscás algo específico? Explorá el catálogo completo con filtros por género, año y puntuación.
+        Looking for something specific? Browse the full catalog with filters by genre, year and rating.
       </p>
       <Link
         href={routes.movies}
         className="border border-white/15 rounded-full px-7 py-2.5 text-sm text-gray-200 hover:bg-white hover:text-black transition-colors duration-200"
       >
-        Explorar catálogo completo
+        Browse the full catalog
       </Link>
     </section>
   );

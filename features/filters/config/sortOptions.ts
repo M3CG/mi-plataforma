@@ -11,10 +11,10 @@ export interface MovieSortOption {
 }
 
 export const MOVIE_SORT_OPTIONS: readonly MovieSortOption[] = [
-  { value: 'latest', label: 'Recientes' },
-  { value: 'oldest', label: 'Antiguas' },
+  { value: 'latest', label: 'Recent' },
+  { value: 'oldest', label: 'Oldest' },
   { value: 'title', label: 'A - Z' },
   { value: 'title-desc', label: 'Z - A' },
-  { value: 'rating', label: 'Mejor Puntuadas' },
-  { value: 'rating-asc', label: 'Peor Puntuadas' },
+  { value: 'rating', label: 'Top Rated' },
+  { value: 'rating-asc', label: 'Lowest Rated' },
 ];

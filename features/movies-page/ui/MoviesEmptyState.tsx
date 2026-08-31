@@ -11,11 +11,11 @@ export default function MoviesEmptyState() {
         <IconSearch className="w-8 h-8 text-gray-500" />
       </div>
       <h3 className="text-lg font-semibold text-gray-200 mb-1">
-        Sin resultados
+        No results
       </h3>
       <p className="text-sm text-gray-400 mb-6 max-w-sm">
-        No encontramos películas con los filtros seleccionados. Intenta con
-        otros criterios.
+        No movies match the selected filters. Try
+        different criteria.
       </p>
       <Link
         href={routes.movies}
@@ -30,7 +30,7 @@ export default function MoviesEmptyState() {
         "
       >
         <IconRefresh />
-        Limpiar filtros
+        Clear filters
       </Link>
     </div>
   );

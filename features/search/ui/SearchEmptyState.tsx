@@ -7,11 +7,11 @@ export default function SearchEmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-24 text-center">
       <h3 className="text-lg font-semibold text-gray-200 mb-1">
-        Sin resultados
+        No results
       </h3>
       <p className="text-sm text-gray-400 mb-6 max-w-sm">
-        No encontramos películas para tu búsqueda. Revisa la ortografía o
-        intenta con otro término.
+        We found no movies for your search. Check the spelling or
+        try another term.
       </p>
       <Link
         href={routes.movies}
@@ -25,7 +25,7 @@ export default function SearchEmptyState() {
           transition-all
         "
       >
-        Explorar catálogo completo
+        Browse the full catalog
       </Link>
     </div>
   );

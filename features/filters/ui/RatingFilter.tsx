@@ -20,13 +20,13 @@ export default function RatingFilter({
 }: RatingFilterProps) {
   const currentLabel =
     RATING_OPTIONS.find((option) => option.value === (value ?? 'all'))
-      ?.label || 'Puntuación';
+      ?.label || 'Rating';
 
   return (
     <DropdownMenu
       id="rating"
       icon={<IconStar />}
-      label="Puntuación"
+      label="Rating"
       currentLabel={currentLabel}
       isActive={Boolean(value)}
       forceClose={forceClose}

@@ -66,7 +66,7 @@ export default function MovieImportDetail({ tmdbId }: MovieImportDetailProps) {
       <div className="min-h-screen flex items-center justify-center text-white">
         <div className="flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-4 border-red-600/60 border-t-transparent rounded-full animate-spin" />
-          <p className="text-gray-400">Cargando película...</p>
+          <p className="text-gray-400">Loading movie...</p>
         </div>
       </div>
     );
@@ -76,7 +76,7 @@ export default function MovieImportDetail({ tmdbId }: MovieImportDetailProps) {
     return (
       <div className="min-h-screen flex items-center justify-center text-white">
         <div className="text-center">
-          <p className="text-red-400 mb-4">{error ?? 'Película no encontrada'}</p>
+          <p className="text-red-400 mb-4">{error ?? 'Movie not found'}</p>
           <BackButton fallbackHref="/admin/import" />
         </div>
       </div>
@@ -103,7 +103,7 @@ export default function MovieImportDetail({ tmdbId }: MovieImportDetailProps) {
         <div className="flex items-center gap-4 mb-8">
           <BackButton fallbackHref="/admin/import" />
           <span className="text-xs px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300">
-            Solo desarrollo local
+            Local development only
           </span>
         </div>
 
@@ -115,10 +115,10 @@ export default function MovieImportDetail({ tmdbId }: MovieImportDetailProps) {
             </div>
             <div className="flex-1">
               <p className="text-green-200 font-semibold">
-                Esta película ya está en la base de datos
+                This movie is already in the database
               </p>
               <p className="text-green-300/70 text-sm mt-0.5">
-                Slug actual:{' '}
+                Current slug:{' '}
                 <code className="font-mono text-green-200">
                   {existingSlug}
                 </code>
@@ -130,7 +130,7 @@ export default function MovieImportDetail({ tmdbId }: MovieImportDetailProps) {
                 target="_blank"
                 className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-full text-sm font-semibold flex-shrink-0"
               >
-                Ver en el sitio →
+                View on site →
               </Link>
             )}
           </div>
@@ -161,12 +161,12 @@ export default function MovieImportDetail({ tmdbId }: MovieImportDetailProps) {
             </h1>
             {preview.englishTitle && (
               <p className="text-sm text-gray-400 mt-1">
-                Título inglés: {preview.englishTitle}
+                English title: {preview.englishTitle}
               </p>
             )}
             {preview.spanishTitle && (
               <p className="text-sm text-gray-400">
-                Título español: {preview.spanishTitle}
+                Spanish title: {preview.spanishTitle}
               </p>
             )}
             <div className="flex flex-wrap gap-2 mt-3 text-xs">
@@ -213,10 +213,10 @@ export default function MovieImportDetail({ tmdbId }: MovieImportDetailProps) {
 
           <div className="bg-white/[0.03] border border-white/5 rounded-2xl p-6">
             <h3 className="text-sm font-semibold text-gray-200 mb-3">
-              Sinopsis
+              Synopsis
             </h3>
             <p className="text-sm text-gray-400 leading-relaxed">
-              {preview.mainSynopsis || 'Sin sinopsis disponible.'}
+              {preview.mainSynopsis || 'No synopsis available.'}
             </p>
             {preview.englishSynopsis &&
               preview.englishSynopsis !== preview.mainSynopsis && (
@@ -246,7 +246,7 @@ export default function MovieImportDetail({ tmdbId }: MovieImportDetailProps) {
             {preview.cast.length > 0 && (
               <div className="bg-white/[0.03] border border-white/5 rounded-2xl p-6">
                 <h3 className="text-sm font-semibold text-gray-200 mb-2">
-                  Reparto principal
+                  Main cast
                 </h3>
                 <p className="text-sm text-gray-400">
                   {preview.cast.map((c) => c.name).join(', ')}
@@ -261,7 +261,7 @@ export default function MovieImportDetail({ tmdbId }: MovieImportDetailProps) {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-6 border-t border-white/5">
                 <div>
                   <h3 className="text-sm font-semibold text-gray-200 mb-3">
-                    Slug (elegí uno)
+                    Slug (pick one)
                   </h3>
                   <SlugSelector
                     candidates={slugCandidates}
@@ -271,7 +271,7 @@ export default function MovieImportDetail({ tmdbId }: MovieImportDetailProps) {
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-gray-200 mb-3">
-                    Póster (por defecto: sin texto)
+                    Poster (default: textless)
                   </h3>
                   <PosterSelector
                     options={posterOptions}
@@ -287,14 +287,14 @@ export default function MovieImportDetail({ tmdbId }: MovieImportDetailProps) {
                   disabled={status === 'saving' || !selectedSlug}
                   className="bg-red-600 hover:bg-red-700 disabled:opacity-50 px-8 py-4 rounded-full text-sm font-bold text-white shadow-lg shadow-red-600/25"
                 >
-                  {status === 'saving' ? 'Agregando...' : 'Agregar película'}
+                  {status === 'saving' ? 'Adding...' : 'Add movie'}
                 </button>
                 {status === 'success' && (
                   <div className="flex items-center gap-2 text-green-400 text-sm">
                     <span>✓</span>
                     <span>{message}</span>
                     <span className="text-gray-500 ml-2">
-                      Volviendo a la página anterior...
+                      Returning to the previous page...
                     </span>
                   </div>
                 )}

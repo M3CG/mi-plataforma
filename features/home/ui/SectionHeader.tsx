@@ -14,7 +14,7 @@ interface SectionHeaderProps {
 export default function SectionHeader({
   title,
   href,
-  linkLabel = 'Ver todo',
+  linkLabel = 'View all',
 }: SectionHeaderProps) {
   return (
     <div className="flex items-center justify-between gap-4 mb-6 border-b border-white/5 pb-3">

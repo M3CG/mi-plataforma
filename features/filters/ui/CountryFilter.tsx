@@ -23,8 +23,8 @@ export default function CountryFilter({
     <DropdownMenu
       id="country"
       icon={<IconGlobe />}
-      label="País"
-      currentLabel={value || 'País'}
+      label="Country"
+      currentLabel={value || 'Country'}
       isActive={Boolean(value)}
       align="right"
       forceClose={forceClose}

@@ -57,7 +57,7 @@ export default function HeaderNavigation() {
       {/* Desktop */}
       <nav
         className="hidden md:flex items-center gap-1"
-        aria-label="Navegación principal"
+        aria-label="Main navigation"
       >
         {NAV_LINKS.map((link) => (
           <NavLinkItem
@@ -71,7 +71,7 @@ export default function HeaderNavigation() {
       {/* Mobile (solo iconos) */}
       <nav
         className="flex md:hidden items-center gap-1"
-        aria-label="Navegación principal"
+        aria-label="Main navigation"
       >
         {NAV_LINKS.map((link) => (
           <NavLinkItem

@@ -74,7 +74,7 @@ export default function ActorPreviewPanel({
         </div>
         <div>
           <h3 className="text-sm font-semibold text-gray-200 mb-3">
-            Foto de perfil
+            Profile photo
           </h3>
           <PosterSelector
             options={photoOptions}
@@ -90,7 +90,7 @@ export default function ActorPreviewPanel({
           disabled={importStatus === 'saving' || !selectedSlug}
           className="bg-red-600 hover:bg-red-700 disabled:opacity-50 px-6 py-3 rounded-full text-sm font-semibold text-white"
         >
-          {importStatus === 'saving' ? 'Agregando...' : 'Agregar actor'}
+          {importStatus === 'saving' ? 'Adding...' : 'Add actor'}
         </button>
         {importMessage && (
           <p

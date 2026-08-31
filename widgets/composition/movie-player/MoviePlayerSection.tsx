@@ -24,7 +24,7 @@ export default function MoviePlayerSection({
       className="scroll-mt-20 pt-10 border-t border-white/5 mb-10"
     >
       <h2 className="text-lg font-semibold text-white mb-4">
-        Ver Película
+        Watch Movie
       </h2>
       <PlayerErrorBoundary>
         <LazyVideoPlayer key={movieSlug} sources={sources} />

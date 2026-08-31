@@ -54,9 +54,9 @@ export default function ActorHero({ viewModel }: ActorHeroProps) {
             <p className="text-gray-400 mt-3 text-sm md:text-base">
               {movieCount}{' '}
               {movieCount === 1
-                ? 'película disponible'
-                : 'películas disponibles'}{' '}
-              en el catálogo
+                ? 'movie available'
+                : 'movies available'}{' '}
+              in the catalog
             </p>
           </div>
         </div>

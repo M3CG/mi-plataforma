@@ -78,8 +78,8 @@ export default function ActiveFiltersBar({
           <button
             key={slug}
             onClick={() => onRemoveGenre(slug)}
-            aria-label={`Quitar filtro ${category.name}`}
-            title={`Quitar ${category.name}`}
+            aria-label={`Remove filter ${category.name}`}
+            title={`Remove ${category.name}`}
             className="flex items-center gap-1.5 bg-white/5 border border-white/10 hover:bg-red-600/20 hover:border-red-500/30 text-gray-300 hover:text-white text-xs px-3 py-1.5 rounded-full transition-all duration-150"
           >
             <IconFilm className="w-3 h-3 opacity-60" />
@@ -92,8 +92,8 @@ export default function ActiveFiltersBar({
       {minRating && (
         <button
           onClick={onRemoveRating}
-          aria-label={`Quitar filtro de puntuación ${ratingLabel}`}
-          title={`Quitar puntuación ${ratingLabel}`}
+          aria-label={`Remove rating filter ${ratingLabel}`}
+          title={`Remove rating ${ratingLabel}`}
           className="flex items-center gap-1.5 bg-white/5 border border-white/10 hover:bg-red-600/20 hover:border-red-500/30 text-gray-300 hover:text-white text-xs px-3 py-1.5 rounded-full transition-all duration-150"
         >
           <IconStar className="w-3 h-3 opacity-60" />
@@ -105,8 +105,8 @@ export default function ActiveFiltersBar({
       {country && (
         <button
           onClick={onRemoveCountry}
-          aria-label={`Quitar filtro de país ${country}`}
-          title={`Quitar ${country}`}
+          aria-label={`Remove country filter ${country}`}
+          title={`Remove ${country}`}
           className="flex items-center gap-1.5 bg-white/5 border border-white/10 hover:bg-red-600/20 hover:border-red-500/30 text-gray-300 hover:text-white text-xs px-3 py-1.5 rounded-full transition-all duration-150"
         >
           <IconGlobe className="w-3 h-3 opacity-60" />
@@ -118,8 +118,8 @@ export default function ActiveFiltersBar({
       {hasYearFilter && (
         <button
           onClick={onRemoveYear}
-          aria-label="Quitar filtro de año"
-          title={`Quitar ${displayFromYear} - ${displayToYear}`}
+          aria-label="Remove year filter"
+          title={`Remove ${displayFromYear} - ${displayToYear}`}
           className="flex items-center gap-1.5 bg-white/5 border border-white/10 hover:bg-red-600/20 hover:border-red-500/30 text-gray-300 hover:text-white text-xs px-3 py-1.5 rounded-full transition-all duration-150"
         >
           <IconCalendar className="w-3 h-3 opacity-60" />
@@ -131,8 +131,8 @@ export default function ActiveFiltersBar({
       {hasRuntimeFilter && (
         <button
           onClick={onRemoveRuntime}
-          aria-label="Quitar filtro de duración"
-          title={`Quitar ${displayFromRuntime} - ${displayToRuntime} min`}
+          aria-label="Remove runtime filter"
+          title={`Remove ${displayFromRuntime} - ${displayToRuntime} min`}
           className="flex items-center gap-1.5 bg-white/5 border border-white/10 hover:bg-red-600/20 hover:border-red-500/30 text-gray-300 hover:text-white text-xs px-3 py-1.5 rounded-full transition-all duration-150"
         >
           <IconClock className="w-3 h-3 opacity-60" />
@@ -143,12 +143,12 @@ export default function ActiveFiltersBar({
 
       <button
         onClick={onClearAll}
-        aria-label="Limpiar filtros activos"
-        title="Limpiar filtros activos"
+        aria-label="Clear active filters"
+        title="Clear active filters"
         className="flex items-center gap-1.5 ml-auto bg-red-950/40 border border-red-800/30 text-red-400 hover:bg-red-600/80 hover:text-white hover:border-red-500/30 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-150"
       >
         <IconTrash />
-        <span className="hidden sm:inline">Limpiar {filterCount}</span>
+        <span className="hidden sm:inline">Clear {filterCount}</span>
       </button>
     </div>
   );

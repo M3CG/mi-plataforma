@@ -27,7 +27,7 @@ export default function SortFilter({
     <DropdownMenu
       id="sort"
       icon={<IconSort />}
-      label="Ordenar"
+      label="Sort by"
       currentLabel={currentLabel}
       isActive={false}
       align="right"

@@ -68,7 +68,7 @@ export function useTmdbDiscover() {
         pageRef.current = pageNum;
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') return;
-        setError('Error al cargar películas de TMDB');
+        setError('Error loading movies from TMDB');
       } finally {
         loadingRef.current = false;
         setIsLoading(false);

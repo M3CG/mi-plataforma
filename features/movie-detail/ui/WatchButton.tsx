@@ -33,7 +33,7 @@ export default function WatchButton() {
       "
     >
       <IconPlay className="w-5 h-5" />
-      Ver Película
+      Watch Movie
     </button>
   );
 }

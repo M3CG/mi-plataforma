@@ -24,8 +24,8 @@ export default function YearRangeFilter({
       initialFrom={fromYear ?? YEAR_MIN}
       initialTo={toYear ?? YEAR_MAX}
       onApply={onApply}
-      fromLabel="Año mínimo"
-      toLabel="Año máximo"
+      fromLabel="Minimum year"
+      toLabel="Maximum year"
       className={className}
     />
   );

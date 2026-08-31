@@ -20,7 +20,7 @@ export default function ActorFilmography({
   return (
     <>
       <h2 className="text-lg font-semibold text-white mb-6">
-        Filmografía
+        Filmography
       </h2>
 
       <PosterGrid variant="compact">

@@ -11,15 +11,15 @@ export default function MovieInfoSection({
 }: MovieInfoSectionProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-12">
-      {/* Sinopsis */}
+      {/* Synopsis */}
       <div className="lg:col-span-2">
         <h2 className="text-lg font-semibold text-white mb-3">
-          Sinopsis
+          Synopsis
         </h2>
 
         <p className="text-gray-300 leading-relaxed text-sm md:text-base">
           {viewModel.synopsis ||
-            'No hay sinopsis disponible para este título.'}
+            'No synopsis available for this title.'}
         </p>
       </div>
 
@@ -40,7 +40,7 @@ export default function MovieInfoSection({
         {viewModel.country && (
           <div>
             <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
-              País
+              Country
             </h3>
 
             <p className="text-sm text-gray-300">

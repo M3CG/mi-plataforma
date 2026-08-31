@@ -15,9 +15,9 @@ async function HomeRankingsSection() {
     await getHomeRankingsData();
   return (
     <>
-      <MovieStrip title="Las más vistas" movies={mostViewedMovies} />
+      <MovieStrip title="Most Watched" movies={mostViewedMovies} />
       <MovieStrip
-        title="Lo mejor de todos los tiempos"
+        title="Best of All Time"
         movies={bestOfAllTimeMovies}
       />
     </>
@@ -37,7 +37,7 @@ export default function HomePage({ data }: HomePageProps) {
           space-y-16 md:space-y-24
         "
       >
-        <MovieStrip title="Recién llegadas" movies={latestMovies} />
+        <MovieStrip title="New Arrivals" movies={latestMovies} />
         <Suspense fallback={<HomeStripsSkeleton />}>
           <HomeRankingsSection />
         </Suspense>

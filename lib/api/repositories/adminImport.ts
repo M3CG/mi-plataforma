@@ -168,7 +168,7 @@ export async function importMovie(
   if (existing) {
     return {
       ok: false,
-      error: 'La película ya existe en la base de datos.',
+      error: 'This movie already exists in the database.',
     };
   }
 
@@ -209,7 +209,7 @@ export async function importMovie(
     english_title: preview.englishTitle ?? null,
     spanish_title: preview.spanishTitle ?? null,
     slug: selection.slug,
-    synopsis: preview.mainSynopsis || 'Sin sinopsis disponible.',
+    synopsis: preview.mainSynopsis || 'No synopsis available.',
     english_synopsis: preview.englishSynopsis ?? null,
     spanish_synopsis: preview.spanishSynopsis ?? null,
     tmdb_id: preview.tmdbId,
@@ -241,7 +241,7 @@ export async function importMovie(
       slug: created.data.slug,
     };
   }
-  return { ok: false, error: 'No se pudo crear la película en Strapi.' };
+  return { ok: false, error: 'Could not create the movie in Strapi.' };
 }
 
 export async function importActor(
@@ -259,5 +259,5 @@ export async function importActor(
     }
   );
   if (documentId) return { ok: true, documentId };
-  return { ok: false, error: 'No se pudo crear el actor en Strapi.' };
+  return { ok: false, error: 'Could not create the actor in Strapi.' };
 }

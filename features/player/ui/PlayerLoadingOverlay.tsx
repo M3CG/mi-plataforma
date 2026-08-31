@@ -14,16 +14,16 @@ export default function PlayerLoadingOverlay({
       <div className="w-10 h-10 border-4 border-red-600/60 border-t-transparent rounded-full animate-spin" />
 
       <p className="text-sm text-gray-400">
-        Conectando con{' '}
+        Connecting to{' '}
         <span className="text-white font-medium">
-          {serverName || 'servidor'}
+          {serverName || 'server'}
         </span>
         ...
       </p>
 
       <p className="text-[11px] text-gray-600">
-        Si no carga en {Math.round(timeoutMs / 1000)}s, se intentará otro
-        servidor automáticamente
+        If it does not load in {Math.round(timeoutMs / 1000)}s, another
+        server will be tried automatically
       </p>
     </div>
   );

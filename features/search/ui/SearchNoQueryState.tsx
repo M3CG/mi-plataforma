@@ -4,7 +4,7 @@ export default function SearchNoQueryState() {
   return (
     <div className="text-center mt-20">
       <p className="text-gray-400">
-        Escribe algo en la barra de búsqueda...
+        Type something in the search bar...
       </p>
     </div>
   );

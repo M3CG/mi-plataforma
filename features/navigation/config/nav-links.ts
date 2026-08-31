@@ -10,13 +10,13 @@ export interface NavLink {
 
 export const NAV_LINKS: NavLink[] = [
   {
-    label: 'Inicio',
+    label: 'Home',
     href: routes.home,
-    title: 'Ir a la página principal',
+    title: 'Go to the home page',
   },
   {
-    label: 'Películas',
+    label: 'Movies',
     href: routes.movies,
-    title: 'Explorar catálogo de películas',
+    title: 'Browse the movie catalog',
   },
 ];

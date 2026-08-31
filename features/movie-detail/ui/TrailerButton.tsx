@@ -34,7 +34,7 @@ export default function TrailerButton({
         "
       >
         <IconPlay className="w-4 h-4" />
-        Ver Tráiler
+        Watch Trailer
       </button>
 
       {isOpen && (

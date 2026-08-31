@@ -1,22 +1,21 @@
 // features/movies-page/lib/moviesPageMetadata.ts
-
 import type { Metadata } from 'next';
 
 export function buildMoviesPageMetadata(): Metadata {
   return {
-    title: 'Catálogo de Películas | CineStream',
+    title: 'Movie Catalog | CineStream',
     description:
-      'Explora el catálogo completo de CineStream. Filtra películas por género, año, puntuación y país.',
+      'Browse the full CineStream catalog. Filter movies by genre, year, rating and country.',
     openGraph: {
-      title: 'Catálogo de Películas | CineStream',
+      title: 'Movie Catalog | CineStream',
       description:
-        'Explora el catálogo completo de CineStream. Filtra películas por género, año, puntuación y país.',
+        'Browse the full CineStream catalog. Filter movies by genre, year, rating and country.',
     },
     twitter: {
       card: 'summary',
-      title: 'Catálogo de Películas | CineStream',
+      title: 'Movie Catalog | CineStream',
       description:
-        'Explora el catálogo completo de CineStream. Filtra películas por género, año, puntuación y país.',
+        'Browse the full CineStream catalog. Filter movies by genre, year, rating and country.',
     },
   };
 }

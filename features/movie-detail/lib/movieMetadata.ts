@@ -1,11 +1,9 @@
 // features/movie-detail/lib/movieMetadata.ts
-
 import type { Metadata } from 'next';
 import type { MovieDetailViewModel } from './createMovieDetailViewModel';
 
 function truncate(value: string, maxLength: number): string {
   if (value.length <= maxLength) return value;
-
   return `${value.slice(0, maxLength).trimEnd()}...`;
 }
 
@@ -14,18 +12,14 @@ export function buildMovieMetadata(
 ): Metadata {
   if (!viewModel) {
     return {
-      title: 'Película no encontrada',
+      title: 'Movie not found',
     };
   }
-
   const cleanSynopsis = viewModel.synopsis.trim();
-
   const description = cleanSynopsis
     ? truncate(cleanSynopsis, 150)
-    : `Descubre ${viewModel.title} (${viewModel.year}) en CineStream. Película disponible en HD con múltiples servidores.`;
-
+    : `Watch ${viewModel.title} (${viewModel.year}) on CineStream. Available in HD with multiple servers.`;
   const images = viewModel.posterUrl ? [viewModel.posterUrl] : [];
-
   return {
     title: `${viewModel.title} (${viewModel.year}) | CineStream`,
     description,

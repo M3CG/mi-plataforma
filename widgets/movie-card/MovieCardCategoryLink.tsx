@@ -44,13 +44,13 @@ export default function MovieCardCategoryLink({
       href={href}
       title={
         highlighted
-          ? `Coincide con tu filtro: ${category.name}`
-          : `Filtrar películas por ${category.name}`
+          ? `Matches your filter: ${category.name}`
+          : `Filter movies by ${category.name}`
       }
       aria-label={
         highlighted
-          ? `Coincide con tu filtro: ${category.name}`
-          : `Filtrar películas por ${category.name}`
+          ? `Matches your filter: ${category.name}`
+          : `Filter movies by ${category.name}`
       }
       className={`${baseClasses} ${stateClasses}`}
     >

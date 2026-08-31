@@ -35,7 +35,7 @@ export default function VideoPlayer({ sources }: VideoPlayerProps) {
   if (!sources || sources.length === 0) {
     return (
       <div className="aspect-video bg-white/[0.02] border border-white/5 rounded-2xl flex items-center justify-center text-gray-500">
-        No hay servidores disponibles para esta película.
+        No servers available for this movie.
       </div>
     );
   }
@@ -52,7 +52,7 @@ export default function VideoPlayer({ sources }: VideoPlayerProps) {
       {autoSwitched && loadStatus === 'loading' && (
         <div className="mb-3 flex items-center gap-2 text-xs text-amber-400/80 bg-amber-500/5 border border-amber-500/10 rounded-lg px-3 py-2">
           <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse flex-shrink-0" />
-          El servidor anterior no respondió. Cambiando automáticamente a{' '}
+          The previous server did not respond. Automatically switching to{' '}
           <strong>{activeSource?.name}</strong>...
         </div>
       )}
@@ -82,9 +82,9 @@ export default function VideoPlayer({ sources }: VideoPlayerProps) {
       </div>
 
       <p className="mt-2 text-[10px] text-gray-600 text-center">
-        El contenido se reproduce en un entorno aislado por seguridad. Si un
-        servidor muestra publicidad emergente, ciérrala directamente en el
-        reproductor.
+        Content plays in a sandboxed environment for security. If a
+        server shows pop-up ads, close them directly in the
+        player.
       </p>
     </div>
   );

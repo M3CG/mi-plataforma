@@ -15,8 +15,8 @@ export default function Header() {
         <Link
           href={routes.home}
           className="flex items-center gap-2.5 group flex-shrink-0"
-          title="CineStream - Página principal"
-          aria-label="CineStream, ir a la página principal"
+          title="CineStream - Home page"
+          aria-label="CineStream, go to the home page"
         >
           <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center group-hover:bg-red-500 transition-colors shadow-lg shadow-red-600/25">
             <IconPlay className="w-4 h-4 text-white ml-0.5" />

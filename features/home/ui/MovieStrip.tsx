@@ -53,7 +53,7 @@ export default function MovieStrip({
         <button
           type="button"
           onClick={() => scrollBy(-1)}
-          aria-label={`Desplazar ${title} hacia la izquierda`}
+          aria-label={`Scroll ${title} left`}
           className="
             hidden md:flex flex-shrink-0
             w-9 h-9 items-center justify-center
@@ -105,7 +105,7 @@ export default function MovieStrip({
                   {movie.poster_url ? (
                     <Image
                       src={movie.poster_url}
-                      alt={`Póster de ${movie.title}`}
+                      alt={`${movie.title} poster`}
                       fill
                       sizes="(max-width: 640px) 176px, (max-width: 1024px) 208px, 224px"
                       className="
@@ -138,7 +138,7 @@ export default function MovieStrip({
         <button
           type="button"
           onClick={() => scrollBy(1)}
-          aria-label={`Desplazar ${title} hacia la derecha`}
+          aria-label={`Scroll ${title} right`}
           className="
             hidden md:flex flex-shrink-0
             w-9 h-9 items-center justify-center

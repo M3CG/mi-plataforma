@@ -10,19 +10,19 @@ export async function GET(request: NextRequest) {
   }
   if (!isTmdbConfigured()) {
     return NextResponse.json(
-      { error: 'TMDB_API_KEY no configurada' },
+      { error: 'TMDB_API_KEY not configured' },
       { status: 500 }
     );
   }
   const id = Number(request.nextUrl.searchParams.get('id'));
   if (!Number.isFinite(id) || id <= 0) {
-    return NextResponse.json({ error: 'id inválido' }, { status: 400 });
+    return NextResponse.json({ error: 'Invalid id' }, { status: 400 });
   }
 
   const credits = await tmdbGetPersonMovieCredits(id);
   if (!credits) {
     return NextResponse.json(
-      { error: 'No se pudo obtener la filmografía' },
+      { error: 'Could not fetch the filmography' },
       { status: 404 }
     );
   }

@@ -8,7 +8,7 @@ import { getCategories } from '@/lib/queries/categories';
 import { getCountries } from '@/lib/queries/countries';
 
 export const metadata: Metadata = {
-  title: 'Importar contenido | Admin',
+  title: 'Import Content | Admin',
   robots: { index: false, follow: false },
 };
 
@@ -26,7 +26,7 @@ export default async function AdminImportRoute() {
         <div className="min-h-screen flex items-center justify-center text-white">
           <div className="flex flex-col items-center gap-4">
             <div className="w-10 h-10 border-4 border-red-600/60 border-t-transparent rounded-full animate-spin" />
-            <p className="text-gray-400">Cargando...</p>
+            <p className="text-gray-400">Loading...</p>
           </div>
         </div>
       }

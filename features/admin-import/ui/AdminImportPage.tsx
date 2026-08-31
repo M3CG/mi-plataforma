@@ -105,14 +105,13 @@ export default function AdminImportPage({
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-10">
         {/* Header */}
         <header className="mb-8">
-          <h1 className="text-3xl font-bold">Importar contenido</h1>
+          <h1 className="text-3xl font-bold">Import content</h1>
           <p className="text-sm text-gray-400 mt-2">
-            Explora TMDB con los filtros del catálogo, previsualiza y agrega
-            películas o actores a la base de datos.
+            Browse TMDB with the catalog filters, preview and add
+            movies or actors to the database.
           </p>
           <span className="inline-flex items-center gap-2 mt-3 text-xs px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300">
-            Herramienta de administración — solo disponible en desarrollo
-            local
+            Admin tool — only available in local development
           </span>
         </header>
 
@@ -122,13 +121,13 @@ export default function AdminImportPage({
             onClick={() => handleTabChange('movie')}
             className={tabClasses(tab === 'movie')}
           >
-            Películas
+            Movies
           </button>
           <button
             onClick={() => handleTabChange('person')}
             className={tabClasses(tab === 'person')}
           >
-            Actores
+            Actors
           </button>
         </div>
 
@@ -147,8 +146,8 @@ export default function AdminImportPage({
               onChange={(event) => setSearchInput(event.target.value)}
               placeholder={
                 tab === 'movie'
-                  ? 'Buscar película específica en TMDB...'
-                  : 'Buscar actor en TMDB...'
+                  ? 'Search a specific movie on TMDB...'
+                  : 'Search an actor on TMDB...'
               }
               className="w-full bg-white/5 border border-white/10 rounded-full px-5 py-3 pr-12 text-sm outline-none focus:border-red-500/50"
             />
@@ -157,7 +156,7 @@ export default function AdminImportPage({
                 type="button"
                 onClick={handleClearSearch}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white text-sm"
-                aria-label="Limpiar búsqueda"
+                aria-label="Clear search"
               >
                 ✕
               </button>
@@ -168,7 +167,7 @@ export default function AdminImportPage({
             disabled={searchLoading}
             className="bg-red-600 hover:bg-red-700 disabled:opacity-50 px-6 py-3 rounded-full text-sm font-semibold"
           >
-            {searchLoading ? 'Buscando...' : 'Buscar'}
+            {searchLoading ? 'Searching...' : 'Search'}
           </button>
         </form>
 
@@ -189,7 +188,7 @@ export default function AdminImportPage({
                   disabled={discover.isLoading}
                   className="bg-white/5 hover:bg-white/10 border border-white/10 disabled:opacity-50 px-8 py-3 rounded-full text-sm font-semibold"
                 >
-                  {discover.isLoading ? 'Cargando...' : 'Cargar más'}
+                  {discover.isLoading ? 'Loading...' : 'Load more'}
                 </button>
               </div>
             )}
@@ -197,7 +196,7 @@ export default function AdminImportPage({
               discover.movies.length === 0 &&
               !discover.error && (
                 <p className="text-gray-500 text-center py-12">
-                  No se encontraron películas con los filtros seleccionados.
+                  No movies found with the selected filters.
                 </p>
               )}
           </>

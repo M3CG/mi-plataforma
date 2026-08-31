@@ -21,7 +21,7 @@ export default function AdBanner({
           <IconAd />
         </div>
         <p className="text-xs text-gray-500 text-center leading-relaxed">
-          Espacio<br />Publicitario
+          Ad<br />Space
         </p>
         <p className="text-[10px] text-gray-600 font-mono">
           160 × 600
@@ -41,7 +41,7 @@ export default function AdBanner({
           <IconAd className="w-4 h-4 text-gray-500" />
         </div>
         <p className="text-xs text-gray-500">
-          Espacio Publicitario
+          Ad Space
         </p>
       </div>
     </div>
