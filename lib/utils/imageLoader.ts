@@ -14,7 +14,7 @@ export default function imageLoader({
   src,
   width,
 }: ImageLoaderProps): string {
-  // Para URLs de TMDB, aprovechar sus tamaños predefinidos
+  // Para URLs de TMDB, aprovechar sus tamaños predefinidos.
   // TMDB ofrece: w92, w154, w185, w342, w500, w780, original
   if (src.includes('image.tmdb.org')) {
     const tmdbSizes = [

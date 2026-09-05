@@ -53,6 +53,8 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
 
   images: {
+    loader: 'custom',
+    loaderFile: './lib/utils/imageLoader',
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [
@@ -68,6 +70,12 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'image.tmdb.org',
         pathname: '/t/p/**',
+      },
+            // Strapi en Railway (producción)
+      {
+        protocol: 'https',
+        hostname: 'db-production-d11b.up.railway.app',
+        pathname: '/uploads/**',
       },
       // ⚠️ AGREGA AQUÍ tu Strapi de producción cuando lo tengas desplegado
       // Ejemplo:
