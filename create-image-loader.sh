@@ -1,3 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+GREEN='\033[0;32m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+LOADER_FILE="lib/utils/imageLoader.ts"
+
+echo "━━━ Crear imageLoader.ts faltante ━━━"
+
+# Crear directorio si no existe
+mkdir -p "$(dirname "$LOADER_FILE")"
+
+# Crear el archivo del loader
+cat > "$LOADER_FILE" << 'EOF_LOADER'
 import type { ImageLoaderProps } from 'next/image';
 
 /**
@@ -36,3 +52,12 @@ export default function imageLoader({
   // Para otras URLs (Railway uploads, etc), devolver tal cual
   return src;
 }
+EOF_LOADER
+
+echo -e "${GREEN}✓ $LOADER_FILE creado${NC}"
+echo ""
+echo "Verificando TypeScript..."
+npx tsc --noEmit 2>&1 | tail -3 && echo -e "${GREEN}✓ TypeScript OK${NC}"
+
+echo ""
+echo "Ahora ejecutá: npm run dev"

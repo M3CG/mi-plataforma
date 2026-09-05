@@ -43,8 +43,6 @@ const securityHeaders = [
   },
 ];
 
-import imageLoader from '@/lib/utils/imageLoader';
-
 const nextConfig: NextConfig = {
   // Activa el modo estricto de React: ayuda a detectar bugs en desarrollo
   // haciendo doble-render de componentes. No afecta producción.
@@ -55,8 +53,6 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
 
   images: {
-    loader: 'custom',
-    loaderFile: '@/lib/utils/imageLoader',
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [
