@@ -55,7 +55,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://image.tmdb.org" crossOrigin="anonymous" />
         <link rel="preconnect" href={strapiOrigin} />
         <ScrollToTop />
-        <Header />
+                <Header />
         <main className="pt-16 min-h-screen">{children}</main>
       </body>
     </html>
