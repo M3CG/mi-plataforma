@@ -53,8 +53,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
 
   images: {
-    loader: 'custom',
-    loaderFile: './lib/utils/imageLoader',
+    unoptimized: true,
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [
