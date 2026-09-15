@@ -4,6 +4,10 @@ export * from './types';
 export * from './client';
 export * from './normalizers';
 export * from './slugCandidates';
+export * from './slugResolver';
+export * from './catalogNormalizer';
+export * from './genres';
+export * from './trending';
 
 import { tmdbGetMovie, tmdbGetPerson, tmdbGetPersonMovieCredits } from './client';
 import {

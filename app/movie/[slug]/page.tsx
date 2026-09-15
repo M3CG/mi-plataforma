@@ -32,7 +32,7 @@ export default async function MovieDetailRoute({
 
   return (
     <>
-      <ViewTracker slug={viewModel.slug} />
+      <ViewTracker slug={viewModel.slug} tmdbId={viewModel.tmdbId} />
       <MovieDetailPage
         viewModel={viewModel}
         playerSlot={

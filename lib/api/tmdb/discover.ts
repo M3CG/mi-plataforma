@@ -8,15 +8,44 @@ import {
 } from './config';
 
 /**
-* Orden por defecto para la página de importación:
-* de más antiguas a más nuevas.
-*/
+ * Orden por defecto para la página de importación:
+ * de más antiguas a más nuevas.
+ */
 export const ADMIN_IMPORT_DEFAULT_SORT = 'oldest';
 
 /**
-* Mapeo de slug de género (generado por slugify del nombre en inglés)
-* al ID de género de TMDB. Los IDs de TMDB son fijos y universales.
-*/
+ * Orden por defecto para el catálogo público.
+ * "views" mapea a popularity.desc en TMDB.
+ * Muestra lo más popular primero, simulando curación.
+ */
+export const CATALOG_DEFAULT_SORT = 'views';
+
+/**
+ * Umbral de calidad para el catálogo público.
+ *
+ * vote_count.gte: mínimo de votos para que el rating sea confiable.
+ *   - 10  → cualquier película (admin)
+ *   - 200 → solo películas "conocidas" (catálogo)
+ *
+ * vote_average.gte: rating mínimo.
+ *   - 6.0 elimina películas malas sin ser demasiado restrictivo.
+ *   - Solo se aplica como default. Si el usuario filtra por rating,
+ *     se respeta su filtro.
+ */
+const CATALOG_MIN_VOTE_COUNT = 200;
+const CATALOG_MIN_RATING = 6.0;
+const ADMIN_MIN_VOTE_COUNT = 10;
+
+/**
+ * Modo de descubrimiento.
+ * - 'catalog': filtros de calidad para el público
+ * - 'admin': sin restricciones para importación manual
+ */
+export type DiscoverMode = 'catalog' | 'admin';
+
+/**
+ * Mapeo de slug de género al ID de género de TMDB.
+ */
 const GENRE_SLUG_TO_TMDB_ID: Record<string, number> = {
   action: 28,
   adventure: 12,
@@ -40,9 +69,8 @@ const GENRE_SLUG_TO_TMDB_ID: Record<string, number> = {
 };
 
 /**
-* Mapeo de nombre de país (como viene de TMDB production_countries)
-* a código ISO 3166-1 alpha-2 (lo que espera with_origin_country).
-*/
+ * Mapeo de nombre de país a código ISO 3166-1 alpha-2.
+ */
 const COUNTRY_NAME_TO_ISO: Record<string, string> = {
   'United States of America': 'US',
   'United States': 'US',
@@ -80,9 +108,9 @@ const COUNTRY_NAME_TO_ISO: Record<string, string> = {
 };
 
 /**
-* Traducción de los presets de sorting del dominio
-* a los valores de sort_by de TMDB Discover.
-*/
+ * Traducción de los presets de sorting del dominio
+ * a los valores de sort_by de TMDB Discover.
+ */
 const SORT_TO_TMDB: Record<string, string> = {
   latest: 'primary_release_date.desc',
   oldest: 'primary_release_date.asc',
@@ -101,12 +129,17 @@ export interface DiscoverResult {
 }
 
 /**
-* Traduce los query params de filtros del catálogo a una llamada
-* a TMDB Discover y devuelve resultados normalizados.
-*/
+ * Traduce los query params de filtros del catálogo a una llamada
+ * a TMDB Discover y devuelve resultados normalizados.
+ *
+ * @param searchParams - Filtros del usuario
+ * @param requestedPage - Página solicitada
+ * @param mode - 'catalog' aplica filtros de calidad, 'admin' no
+ */
 export async function discoverMovies(
   searchParams: URLSearchParams,
-  requestedPage: number
+  requestedPage: number,
+  mode: DiscoverMode = 'catalog'
 ): Promise<DiscoverResult> {
   const empty: DiscoverResult = {
     results: [],
@@ -114,6 +147,7 @@ export async function discoverMovies(
     page: requestedPage,
     totalPages: 0,
   };
+
   if (!isTmdbConfigured()) return empty;
 
   const url = new URL(`${TMDB_BASE_URL}/discover/movie`);
@@ -121,19 +155,38 @@ export async function discoverMovies(
   url.searchParams.set('language', 'en-US');
   url.searchParams.set('page', String(Math.max(1, requestedPage)));
   url.searchParams.set('include_adult', 'false');
-  // Evitar películas sin votos suficientes (ratings poco confiables)
-  url.searchParams.set('vote_count.gte', '10');
+
+  // ─── Filtros de calidad según el modo ───
+  if (mode === 'catalog') {
+    // Catálogo público: solo películas con suficientes votos
+    // y rating mínimo. Esto simula curación sin curar.
+    url.searchParams.set('vote_count.gte', String(CATALOG_MIN_VOTE_COUNT));
+
+    // Solo aplicar vote_average.gte como default.
+    // Si el usuario ya está filtrando por rating, respetar su filtro.
+    const userMinRating = searchParams.get('minRating');
+    if (!userMinRating) {
+      url.searchParams.set(
+        'vote_average.gte',
+        String(CATALOG_MIN_RATING)
+      );
+    }
+  } else {
+    // Admin: sin restricciones de calidad
+    url.searchParams.set('vote_count.gte', String(ADMIN_MIN_VOTE_COUNT));
+  }
 
   // ─── Géneros ───
   const genres = searchParams.getAll('genres');
   const genreIds = genres
     .map((slug) => GENRE_SLUG_TO_TMDB_ID[slug])
     .filter((id): id is number => typeof id === 'number');
+
   if (genreIds.length > 0) {
     url.searchParams.set('with_genres', genreIds.join('|'));
   }
 
-  // ─── Puntuación mínima ───
+  // ─── Puntuación mínima (del usuario) ───
   const minRating = searchParams.get('minRating');
   if (minRating) {
     url.searchParams.set('vote_average.gte', minRating);
@@ -142,6 +195,7 @@ export async function discoverMovies(
   // ─── Rango de años ───
   const fromYear = searchParams.get('fromYear');
   const toYear = searchParams.get('toYear');
+
   if (fromYear) {
     url.searchParams.set('primary_release_date.gte', `${fromYear}-01-01`);
   }
@@ -152,6 +206,7 @@ export async function discoverMovies(
   // ─── Rango de duración ───
   const fromRuntime = searchParams.get('fromRuntime');
   const toRuntime = searchParams.get('toRuntime');
+
   if (fromRuntime) {
     url.searchParams.set('with_runtime.gte', fromRuntime);
   }
@@ -168,11 +223,17 @@ export async function discoverMovies(
     }
   }
 
-  // ─── Ordenamiento (default: oldest) ───
-  const sort = searchParams.get('sort') || ADMIN_IMPORT_DEFAULT_SORT;
+  // ─── Ordenamiento ───
+  // Catálogo: default es "views" (popularity.desc)
+  // Admin: default es "oldest" (primary_release_date.asc)
+  const defaultSort = mode === 'catalog'
+    ? CATALOG_DEFAULT_SORT
+    : ADMIN_IMPORT_DEFAULT_SORT;
+
+  const sort = searchParams.get('sort') || defaultSort;
   url.searchParams.set(
     'sort_by',
-    SORT_TO_TMDB[sort] ?? SORT_TO_TMDB.oldest
+    SORT_TO_TMDB[sort] ?? SORT_TO_TMDB[defaultSort]
   );
 
   const controller = new AbortController();
@@ -180,13 +241,17 @@ export async function discoverMovies(
     () => controller.abort(),
     TMDB_FETCH_TIMEOUT_MS
   );
+
   try {
     const res = await fetch(url.toString(), {
       signal: controller.signal,
     });
     clearTimeout(timeout);
+
     if (!res.ok) return empty;
+
     const data = await res.json();
+
     const results = (data.results ?? []).map(
       (movie: Record<string, unknown>) => ({
         tmdbId: movie.id,
@@ -195,12 +260,15 @@ export async function discoverMovies(
         year: movie.release_date
           ? new Date(String(movie.release_date)).getFullYear()
           : undefined,
-        posterUrl: tmdbImageUrl(movie.poster_path as string | null, 'w342'),
+        posterUrl: tmdbImageUrl(movie.poster_path as string | null, 'w500'),
+        backdropUrl: tmdbImageUrl(movie.backdrop_path as string | null, 'w780'),
         rating: movie.vote_average,
         overview: movie.overview,
         originalLanguage: movie.original_language,
+        genreIds: movie.genre_ids ?? [],
       })
     );
+
     return {
       results,
       hasMore: requestedPage < (data.total_pages ?? 0),

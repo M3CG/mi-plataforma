@@ -39,6 +39,7 @@ function resolveSpanish(detail: TmdbMovieDetail): {
   const esTranslations = translations.filter(
     (t) => t.iso_639_1 === 'es'
   );
+
   const countryCodes = (detail.production_countries ?? []).map(
     (c) => c.iso_3166_1
   );
@@ -111,8 +112,10 @@ function resolveOriginal(detail: TmdbMovieDetail): {
 
 function mapCertification(certification?: string): string | undefined {
   if (!certification) return undefined;
+
   const normalized = certification.toUpperCase().trim();
   if (VALID_AGE_RATINGS.includes(normalized)) return normalized;
+
   const equivalences: Record<string, string> = {
     PG13: 'PG-13',
     'PG 13': 'PG-13',
@@ -140,7 +143,6 @@ function resolveTrailerUrl(detail: TmdbMovieDetail): string | undefined {
   const trailers = videos.filter(
     (v) => v.type === 'Trailer' && v.site === 'YouTube'
   );
-
   if (trailers.length === 0) return undefined;
 
   // 1. Preferir tráiler sin idioma (internacional/original)
@@ -150,8 +152,6 @@ function resolveTrailerUrl(detail: TmdbMovieDetail): string | undefined {
   }
 
   // 2. Preferir tráiler en español (cualquier variante)
-  // Nota: TMDB no distingue es-MX de es-ES en videos,
-  // pero los tráilers latinos suelen ser más comunes
   const spanish = trailers.find((v) => v.iso_639_1 === 'es');
   if (spanish) {
     return `https://www.youtube.com/embed/${spanish.key}`;
@@ -234,8 +234,8 @@ export function normalizeMovieDetail(
   const originalTitle = detail.original_title || detail.title || '';
   const englishTitle =
     originalTitle &&
-      detail.title &&
-      detail.title !== originalTitle
+    detail.title &&
+    detail.title !== originalTitle
       ? detail.title
       : undefined;
   const englishSynopsis = emptyToNull(detail.overview);
@@ -245,6 +245,7 @@ export function normalizeMovieDetail(
   const year = detail.release_date
     ? new Date(detail.release_date).getFullYear()
     : 0;
+
   const { posters, defaultPosterUrl } = normalizePosters(detail);
 
   const genres = (detail.genres ?? []).map((g) => ({
@@ -289,7 +290,9 @@ export function normalizeMovieDetail(
     cast,
     directors,
     defaultPosterUrl,
-    defaultBackdropUrl: tmdbImageUrl(detail.backdrop_path, 'original'),
+    // w1280 alcanza para cualquier pantalla (inclusive 4K).
+    // "original" puede pesar 1-3 MB por imagen.
+    defaultBackdropUrl: tmdbImageUrl(detail.backdrop_path, 'w1280'),
     posters,
   };
 }
@@ -302,8 +305,10 @@ export function normalizePersonDetail(
       url: tmdbImageUrl(img.file_path, 'w500') as string,
     }))
     .filter((p) => Boolean(p.url));
+
   const defaultProfileUrl =
     profiles[0]?.url ?? tmdbImageUrl(detail.profile_path, 'w500');
+
   return {
     tmdbId: detail.id,
     name: detail.name,

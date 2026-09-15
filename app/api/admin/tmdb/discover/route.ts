@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     1,
     Number(request.nextUrl.searchParams.get('page')) || 1
   );
-  const result = await discoverMovies(request.nextUrl.searchParams, page);
+  const result = await discoverMovies(request.nextUrl.searchParams, page, 'admin');
 
   // Marcar cuáles ya están en la DB
   const tmdbIds = result.results

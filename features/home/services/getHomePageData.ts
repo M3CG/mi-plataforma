@@ -1,8 +1,11 @@
-import {
-  getHomeMovies,
-  getMoviesWithFilters,
-} from '@/lib/queries/movies';
+// features/home/services/getHomePageData.ts
 import type { HomeHeroData, HomeRankingsData } from '../types';
+import {
+  fetchTrendingMovies,
+  fetchTopRatedMovies,
+  fetchNowPlayingMovies,
+  fetchPopularMovies,
+} from '@/lib/api/tmdb/trending';
 
 const LATEST_SIZE = 10;
 const TOP_VIEWED_SIZE = 10;
@@ -12,32 +15,47 @@ const HERO_COUNT = 6;
 /**
  * Hero + "Recién llegadas".
  *
- * IMPORTANTE: el home usa createdAt (últimas agregadas a la base).
- * El resto del sitio usa year/rating/id (ver movieParams.ts).
+ * Ya NO consulta Strapi. Todo viene de TMDB:
+ * - Hero: TMDB Trending (las más populares de la semana)
+ * - "New Arrivals": TMDB Now Playing (en cines ahora)
+ *
+ * IMPORTANTE: el home usa caché de 1 hora (next.revalidate en trending.ts).
  */
 export async function getHomeHeroData(): Promise<HomeHeroData> {
-  const latestMovies = await getHomeMovies();
+  const [trending, nowPlaying] = await Promise.all([
+    fetchTrendingMovies(HERO_COUNT + LATEST_SIZE),
+    fetchNowPlayingMovies(LATEST_SIZE),
+  ]);
+
   // Para la cinta VHS necesitamos backdrops (16:9).
   // Priorizamos las que tienen backdrop; si faltan, rellenamos
   // con las que solo tienen poster.
-  const withBackdrop = latestMovies.filter((m) => Boolean(m.backdrop_url));
-  const withPosterOnly = latestMovies.filter(
+  const withBackdrop = trending.filter((m) => Boolean(m.backdrop_url));
+  const withPosterOnly = trending.filter(
     (m) => !m.backdrop_url && Boolean(m.poster_url)
   );
+
   return {
     heroMovies: [...withBackdrop, ...withPosterOnly].slice(0, HERO_COUNT),
-    latestMovies: latestMovies.slice(0, LATEST_SIZE),
+    latestMovies: nowPlaying.slice(0, LATEST_SIZE),
   };
 }
 
-/** Rankings ("más vistas" y "lo mejor"). Se streamean después del hero. */
+/**
+ * Rankings ("más vistas" y "lo mejor").
+ * Se streamean después del hero.
+ *
+ * - "Most Watched": TMDB Popular (por popularidad)
+ * - "Best of All Time": TMDB Top Rated
+ */
 export async function getHomeRankingsData(): Promise<HomeRankingsData> {
-  const [mostViewed, bestRated] = await Promise.all([
-    getMoviesWithFilters({ sort: 'views' }, 1, TOP_VIEWED_SIZE),
-    getMoviesWithFilters({ sort: 'rating' }, 1, BEST_RATED_SIZE),
+  const [popular, topRated] = await Promise.all([
+    fetchPopularMovies(TOP_VIEWED_SIZE),
+    fetchTopRatedMovies(BEST_RATED_SIZE),
   ]);
+
   return {
-    mostViewedMovies: mostViewed.data,
-    bestOfAllTimeMovies: bestRated.data,
+    mostViewedMovies: popular,
+    bestOfAllTimeMovies: topRated,
   };
 }
