@@ -14,6 +14,8 @@ export interface TmdbSearchMovieItem {
   backdrop_path?: string | null;
   vote_average?: number;
   original_language?: string;
+  genre_ids?: number[];
+  popularity?: number;
 }
 
 export interface TmdbSearchPersonItem {

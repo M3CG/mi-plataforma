@@ -10,7 +10,7 @@ export function isTmdbConfigured(): boolean {
 
 export function tmdbImageUrl(
   path: string | null | undefined,
-  size: 'w185' | 'w342' | 'w500' | 'w780' | 'original' = 'original'
+  size: 'w185' | 'w342' | 'w500' | 'w780' | 'w1280' | 'original' = 'original'
 ): string | undefined {
   if (!path) return undefined;
   return `${TMDB_IMAGE_BASE}/${size}${path}`;
