@@ -58,8 +58,12 @@ export async function tmdbGetMovie(
 ): Promise<TmdbMovieDetail | null> {
   return tmdbFetch(`/movie/${id}`, {
     language: 'en-US',
-    append_to_response:
-      'translations,credits,videos,release_dates,images',
+    append_to_response: 'translations,credits,videos,release_dates,images',
+    // 'en,null' = posters en inglés + posters SIN idioma (sin texto).
+    // Hace explícito lo que TMDB hacía por defecto: garantiza que los
+    // posters textless (iso_639_1 === null) siempre vengan en la respuesta,
+    // que es de donde sale el defaultPosterUrl.
+    include_image_language: 'en,null',
   });
 }
 

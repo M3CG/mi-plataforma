@@ -1,13 +1,21 @@
+// app/api/movies/view/route.ts
+import { after } from 'next/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { getClientIp } from '@/lib/utils/rate-limit';
-import { API_URL } from '@/lib/api/http/config';
 import { logger } from '@/lib/utils/logger';
-import { isTmdbConfigured } from '@/lib/api/tmdb/config';
-import { getMoviePreview, generateSlugCandidates } from '@/lib/api/tmdb';
+import { extractTmdbIdFromSlug } from '@/lib/api/tmdb/slugResolver';
 import {
-  checkSlugsTaken,
-  checkMovieTmdbIds,
+  materializeMovieFromTmdb,
+  incrementMovieView,
 } from '@/lib/api/repositories/adminImport';
+
+// La materialización corre post-response vía after(), pero dentro del
+// presupuesto de la función. Default de Vercel (10s) puede cortarla a
+// mitad con Strapi remoto. 60s = margen completo para el caso realista
+// (TMDB + relaciones + inserts), con tope para el patológico.
+export const maxDuration = 60;
+
+// ── Rate limiter (idéntico al anterior: se conserva sin cambios) ──
 
 const VIEW_RATE_LIMIT_WINDOW_MS = 60_000;
 const VIEW_RATE_LIMIT_MAX = 10;
@@ -54,97 +62,65 @@ function checkViewRateLimit(identifier: string): {
   return { allowed: true, remaining: VIEW_RATE_LIMIT_MAX - entry.count };
 }
 
-function isValidSlug(slug: unknown): slug is string {
-  if (typeof slug !== 'string') return false;
-  const trimmed = slug.trim();
-  return trimmed.length >= 1 && trimmed.length <= 200 && trimmed !== 'undefined' && trimmed !== 'null';
-}
-
-function isValidTmdbId(tmdbId: unknown): tmdbId is number {
-  return typeof tmdbId === 'number' && Number.isFinite(tmdbId) && tmdbId > 0;
-}
+// ── Resolución del identificador ──
 
 /**
- * Crea la película en Strapi automáticamente.
- * Proceso de fondo: se dispara la primera vez que un usuario ve una película.
+ * Acepta:
+ *  - { tmdbId: number }            ← contrato preferido
+ *  - { tmdbId: "603" }             ← número como string (defensivo)
+ *  - { slug: "603-the-matrix" }    ← slug de URL de TMDB (compatibilidad)
+ *
+ * NO acepta slugs canónicos de DB ("the-matrix"): un slug sin prefijo
+ * numérico no contiene información para resolver el tmdbId. ViewTracker
+ * debe enviar siempre tmdbId.
  */
-async function autoCreateMovieInStrapi(tmdbId: number): Promise<{
-  created: boolean;
-  slug?: string;
-}> {
-  if (!isTmdbConfigured()) {
-    return { created: false };
+function resolveTmdbId(
+  body: { slug?: unknown; tmdbId?: unknown } | null
+): number | null {
+  const { tmdbId, slug } = body ?? {};
+
+  if (typeof tmdbId === 'number' && Number.isFinite(tmdbId) && tmdbId > 0) {
+    return tmdbId;
   }
+  if (typeof tmdbId === 'string') {
+    const parsed = Number(tmdbId);
+    if (Number.isFinite(parsed) && parsed > 0) return parsed;
+  }
+  if (
+    typeof slug === 'string' &&
+    slug.trim().length >= 1 &&
+    slug.trim().length <= 200
+  ) {
+    return extractTmdbIdFromSlug(slug.trim());
+  }
+  return null;
+}
 
-  try {
-    // Verificar si ya existe en Strapi por tmdb_id
-    const existingIds = await checkMovieTmdbIds([tmdbId]);
-    if (existingIds.includes(tmdbId)) {
-      return { created: false };
-    }
+// ── Trabajo de fondo (corre post-response vía after) ──
 
-    // Obtener datos de TMDB
-    const preview = await getMoviePreview(tmdbId);
-    if (!preview) {
-      return { created: false };
-    }
-
-    // Generar slug candidates con la lógica existente
-    const baseCandidates = generateSlugCandidates({
-      originalTitle: preview.originalTitle,
-      englishTitle: preview.englishTitle,
-      spanishTitle: preview.spanishTitle,
-      year: preview.year || undefined,
-    });
-
-    const slugs = baseCandidates.map((c) => c.slug);
-    const takenSet = await checkSlugsTaken('movies', slugs);
-
-    // Elegir el primer slug disponible
-    let selectedSlug: string | null = null;
-    for (const candidate of baseCandidates) {
-      if (!takenSet.has(candidate.slug)) {
-        selectedSlug = candidate.slug;
-        break;
-      }
-    }
-
-    if (!selectedSlug) {
-      // Todos los slugs están ocupados, usar el último con índice
-      const lastSlug = slugs[slugs.length - 1];
-      selectedSlug = `${lastSlug}-${Date.now()}`;
-    }
-
-    // Crear la película en Strapi usando la misma lógica del admin import
-    const { importMovie } = await import('@/lib/api/repositories/adminImport');
-    const result = await importMovie(preview, {
-      slug: selectedSlug,
-      posterUrl: preview.defaultPosterUrl,
-      backdropUrl: preview.defaultBackdropUrl,
-    });
-
-    if (result.ok) {
-      logger.info('Película creada automáticamente en Strapi', {
-        component: 'BFF',
-        action: 'POST /api/movies/view',
-        tmdbId,
-        slug: selectedSlug,
-        documentId: result.documentId,
-      });
-      return { created: true, slug: selectedSlug };
-    }
-
-    return { created: false };
-  } catch (error) {
-    logger.error('Error creando película automáticamente en Strapi', {
+async function trackView(tmdbId: number): Promise<void> {
+  const record = await materializeMovieFromTmdb(tmdbId);
+  if (!record) {
+    logger.warn('View no registrada: no se pudo materializar la película', {
       component: 'BFF',
       action: 'POST /api/movies/view',
       tmdbId,
-      error,
     });
-    return { created: false };
+    return;
+  }
+
+  const ok = await incrementMovieView(record.slug);
+  if (!ok) {
+    logger.warn('View no registrada: Strapi rechazó el incremento', {
+      component: 'BFF',
+      action: 'POST /api/movies/view',
+      tmdbId,
+      slug: record.slug,
+    });
   }
 }
+
+// ── Handler ──
 
 export async function POST(request: NextRequest) {
   const clientIp = getClientIp(request);
@@ -157,62 +133,37 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ ok: false, error: 'Invalid JSON' }, { status: 400 });
-  }
-
-  const { slug, tmdbId } = body ?? {};
-
-  if (!isValidSlug(slug) || !isValidTmdbId(tmdbId)) {
     return NextResponse.json(
-      { ok: false, error: 'Invalid slug or tmdbId' },
+      { ok: false, error: 'Invalid JSON' },
       { status: 400 }
     );
   }
 
-  const strapiToken = process.env.STRAPI_API_TOKEN;
-  const strapiUrl = (API_URL || 'http://localhost:1337').replace(/\/$/, '');
+  const tmdbId = resolveTmdbId(body);
+  if (!tmdbId) {
+    return NextResponse.json(
+      { ok: false, error: 'Valid tmdbId or TMDB slug required' },
+      { status: 400 }
+    );
+  }
 
-  try {
-    // Paso 1: Intentar crear la película si no existe (fondo, no bloquea)
-    await autoCreateMovieInStrapi(tmdbId);
-
-    // Paso 2: Incrementar views en Strapi
-    // Buscar por slug (puede ser el slug de Strapi o el de TMDB)
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10_000);
-
-    const response = await fetch(`${strapiUrl}/api/movies/view`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(strapiToken ? { Authorization: `Bearer ${strapiToken}` } : {}),
-      },
-      body: JSON.stringify({ slug }),
-      signal: controller.signal,
-    });
-    clearTimeout(timeout);
-
-    if (!response.ok) {
-      logger.debug('Strapi view tracking returned non-OK', {
+  // La respuesta sale YA: el usuario nunca espera la materialización
+  // (TMDB + relaciones + Strapi pueden tardar segundos en una película
+  // fría). Todo el trabajo corre post-response.
+  after(async () => {
+    try {
+      await trackView(tmdbId);
+    } catch (error) {
+      logger.error('View tracking falló', {
         component: 'BFF',
         action: 'POST /api/movies/view',
-        slug,
         tmdbId,
-        status: response.status,
+        error,
       });
-      return NextResponse.json({ ok: false }, { status: 200 });
     }
+  });
 
-    const result = await response.json();
-    return NextResponse.json(result);
-  } catch (error) {
-    logger.debug('View tracking failed silently', {
-      component: 'BFF',
-      action: 'POST /api/movies/view',
-      slug,
-      tmdbId,
-      error: error instanceof Error ? error.message : String(error),
-    });
-    return NextResponse.json({ ok: false }, { status: 200 });
-  }
+  // 200 (no 202) por compatibilidad con consumers que validen el status
+  // exacto. El body indica que el trabajo quedó encolado.
+  return NextResponse.json({ ok: true, queued: true });
 }

@@ -38,6 +38,7 @@ export async function GET(request: NextRequest) {
     englishTitle: preview.englishTitle,
     spanishTitle: preview.spanishTitle,
     year: preview.year || undefined,
+    tmdbId: preview.tmdbId,   // ← agregar esta línea
   });
   const slugs = baseCandidates.map((candidate) => candidate.slug);
   const takenSet = await checkSlugsTaken('movies', slugs);
