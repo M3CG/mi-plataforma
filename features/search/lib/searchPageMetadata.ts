@@ -8,9 +8,9 @@ export function buildSearchMetadata(
   const query = normalizeSearchQuery(rawQuery);
   if (!query) {
     return {
-      title: 'Search | CineStream',
+      title: 'Search | Cinelito',
       description:
-        'Search movies by title, actor, director or genre on CineStream.',
+        'Search movies by title, actor, director or genre on Cinelito.',
       robots: {
         index: false,
         follow: true,
@@ -18,16 +18,16 @@ export function buildSearchMetadata(
     };
   }
   return {
-    title: `Search: "${query}" | CineStream`,
-    description: `Search results for "${query}" on CineStream.`,
+    title: `Search: "${query}" | Cinelito`,
+    description: `Search results for "${query}" on Cinelito.`,
     openGraph: {
-      title: `Search: "${query}" | CineStream`,
-      description: `Search results for "${query}" on CineStream.`,
+      title: `Search: "${query}" | Cinelito`,
+      description: `Search results for "${query}" on Cinelito.`,
     },
     twitter: {
       card: 'summary',
-      title: `Search: "${query}" | CineStream`,
-      description: `Search results for "${query}" on CineStream.`,
+      title: `Search: "${query}" | Cinelito`,
+      description: `Search results for "${query}" on Cinelito.`,
     },
     robots: {
       index: false,

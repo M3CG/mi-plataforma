@@ -15,15 +15,15 @@ export default function Header() {
         <Link
           href={routes.home}
           className="flex items-center gap-2.5 group flex-shrink-0"
-          title="CineStream - Home page"
-          aria-label="CineStream, go to the home page"
+          title="Cinelito - Home page"
+          aria-label="Cinelito, go to the home page"
         >
           <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center group-hover:bg-red-500 transition-colors shadow-lg shadow-red-600/25">
             <IconPlay className="w-4 h-4 text-white ml-0.5" />
           </div>
 
           <span className="text-lg font-bold tracking-wide text-white hidden sm:block">
-            CINE<span className="text-red-500">STREAM</span>
+            CINE<span className="text-red-500">LITO</span>
           </span>
         </Link>
 

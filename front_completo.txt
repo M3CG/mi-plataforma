@@ -2,7 +2,7 @@
 VUELCO COMPLETO EN UN ARCHIVO
 ==============================================================================
 
-Raíz: /home/mario/Projects/Cinestream/mi-plataforma
+Raíz: /home/mario/Projects/Cinelito/mi-plataforma
 Fecha: 2026-10-15 10:01
 Alcance: solo frontend (mi-plataforma)
 Archivos incluidos: 260 · Chars: 495,483 (~123,870 tokens aprox.)
@@ -1672,7 +1672,7 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "CineStream | Movies & Series in HD",
+  title: "Cinelito | Movies & Series in HD",
   description:
     "Watch the best movies and series in streaming. HD quality with multiple servers and subtitles.",
 };
@@ -3734,19 +3734,19 @@ export function buildActorMetadata(
   }
   const { actor } = viewModel;
   return {
-    title: `${actor.name} | CineStream`,
-    description: `Discover all movies starring ${actor.name} on CineStream. Complete filmography in HD.`,
+    title: `${actor.name} | Cinelito`,
+    description: `Discover all movies starring ${actor.name} on Cinelito. Complete filmography in HD.`,
     openGraph: {
-      title: `${actor.name} | CineStream`,
-      description: `Discover all movies starring ${actor.name} on CineStream.`,
+      title: `${actor.name} | Cinelito`,
+      description: `Discover all movies starring ${actor.name} on Cinelito.`,
       images: actor.profile_image_url
         ? [actor.profile_image_url]
         : [],
     },
     twitter: {
       card: 'summary',
-      title: `${actor.name} | CineStream`,
-      description: `Discover all movies starring ${actor.name} on CineStream.`,
+      title: `${actor.name} | Cinelito`,
+      description: `Discover all movies starring ${actor.name} on Cinelito.`,
       images: actor.profile_image_url
         ? [actor.profile_image_url]
         : [],
@@ -9413,10 +9413,10 @@ export function buildMovieMetadata(
   const cleanSynopsis = viewModel.synopsis.trim();
   const description = cleanSynopsis
     ? truncate(cleanSynopsis, 150)
-    : `Watch ${viewModel.title} (${viewModel.year}) on CineStream. Available in HD with multiple servers.`;
+    : `Watch ${viewModel.title} (${viewModel.year}) on Cinelito. Available in HD with multiple servers.`;
   const images = viewModel.posterUrl ? [viewModel.posterUrl] : [];
   return {
-    title: `${viewModel.title} (${viewModel.year}) | CineStream`,
+    title: `${viewModel.title} (${viewModel.year}) | Cinelito`,
     description,
     openGraph: {
       title: `${viewModel.title} (${viewModel.year})`,
@@ -10146,19 +10146,19 @@ import type { Metadata } from 'next';
 
 export function buildMoviesPageMetadata(): Metadata {
   return {
-    title: 'Movie Catalog | CineStream',
+    title: 'Movie Catalog | Cinelito',
     description:
-      'Browse the full CineStream catalog. Filter movies by genre, year, rating and country.',
+      'Browse the full Cinelito catalog. Filter movies by genre, year, rating and country.',
     openGraph: {
-      title: 'Movie Catalog | CineStream',
+      title: 'Movie Catalog | Cinelito',
       description:
-        'Browse the full CineStream catalog. Filter movies by genre, year, rating and country.',
+        'Browse the full Cinelito catalog. Filter movies by genre, year, rating and country.',
     },
     twitter: {
       card: 'summary',
-      title: 'Movie Catalog | CineStream',
+      title: 'Movie Catalog | Cinelito',
       description:
-        'Browse the full CineStream catalog. Filter movies by genre, year, rating and country.',
+        'Browse the full Cinelito catalog. Filter movies by genre, year, rating and country.',
     },
   };
 }
@@ -11667,9 +11667,9 @@ export function buildSearchMetadata(
   const query = normalizeSearchQuery(rawQuery);
   if (!query) {
     return {
-      title: 'Search | CineStream',
+      title: 'Search | Cinelito',
       description:
-        'Search movies by title, actor, director or genre on CineStream.',
+        'Search movies by title, actor, director or genre on Cinelito.',
       robots: {
         index: false,
         follow: true,
@@ -11677,16 +11677,16 @@ export function buildSearchMetadata(
     };
   }
   return {
-    title: `Search: "${query}" | CineStream`,
-    description: `Search results for "${query}" on CineStream.`,
+    title: `Search: "${query}" | Cinelito`,
+    description: `Search results for "${query}" on Cinelito.`,
     openGraph: {
-      title: `Search: "${query}" | CineStream`,
-      description: `Search results for "${query}" on CineStream.`,
+      title: `Search: "${query}" | Cinelito`,
+      description: `Search results for "${query}" on Cinelito.`,
     },
     twitter: {
       card: 'summary',
-      title: `Search: "${query}" | CineStream`,
-      description: `Search results for "${query}" on CineStream.`,
+      title: `Search: "${query}" | Cinelito`,
+      description: `Search results for "${query}" on Cinelito.`,
     },
     robots: {
       index: false,
@@ -16828,7 +16828,7 @@ const securityHeaders = [
   {
     // Evita que tu página sea embebida en un iframe de otro sitio (protege contra clickjacking).
     // Nota: nuestros iframes de video no se ven afectados porque están EN nuestra página,
-    // esto protege que OTROS sitios embebidos carguen CineStream dentro de ellos.
+    // esto protege que OTROS sitios embebidos carguen Cinelito dentro de ellos.
     key: 'X-Frame-Options',
     value: 'DENY',
   },
@@ -16972,7 +16972,7 @@ export default config;
 ==============================================================================
 ARCHIVO [238/260]: README.md  (38 líneas)
 ==============================================================================
-# CineStream — Frontend
+# Cinelito — Frontend
 
 Plataforma de streaming de películas con **Next.js 16 (App Router)**,
 **React 19**, **TypeScript estricto** y **Tailwind CSS 4**.
@@ -18158,8 +18158,8 @@ export default function Header() {
         <Link
           href={routes.home}
           className="flex items-center gap-2.5 group flex-shrink-0"
-          title="CineStream - Home page"
-          aria-label="CineStream, go to the home page"
+          title="Cinelito - Home page"
+          aria-label="Cinelito, go to the home page"
         >
           <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center group-hover:bg-red-500 transition-colors shadow-lg shadow-red-600/25">
             <IconPlay className="w-4 h-4 text-white ml-0.5" />

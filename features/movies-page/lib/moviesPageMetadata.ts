@@ -3,19 +3,19 @@ import type { Metadata } from 'next';
 
 export function buildMoviesPageMetadata(): Metadata {
   return {
-    title: 'Movie Catalog | CineStream',
+    title: 'Movie Catalog | Cinelito',
     description:
-      'Browse the full CineStream catalog. Filter movies by genre, year, rating and country.',
+      'Browse the full Cinelito catalog. Filter movies by genre, year, rating and country.',
     openGraph: {
-      title: 'Movie Catalog | CineStream',
+      title: 'Movie Catalog | Cinelito',
       description:
-        'Browse the full CineStream catalog. Filter movies by genre, year, rating and country.',
+        'Browse the full Cinelito catalog. Filter movies by genre, year, rating and country.',
     },
     twitter: {
       card: 'summary',
-      title: 'Movie Catalog | CineStream',
+      title: 'Movie Catalog | Cinelito',
       description:
-        'Browse the full CineStream catalog. Filter movies by genre, year, rating and country.',
+        'Browse the full Cinelito catalog. Filter movies by genre, year, rating and country.',
     },
   };
 }

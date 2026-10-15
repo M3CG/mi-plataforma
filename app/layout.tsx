@@ -21,7 +21,7 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "CineStream | Movies & Series in HD",
+  title: "Cinelito | Movies & Series in HD",
   description:
     "Watch the best movies and series in streaming. HD quality with multiple servers and subtitles.",
 };

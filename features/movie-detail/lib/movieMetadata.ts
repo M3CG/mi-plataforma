@@ -18,10 +18,10 @@ export function buildMovieMetadata(
   const cleanSynopsis = viewModel.synopsis.trim();
   const description = cleanSynopsis
     ? truncate(cleanSynopsis, 150)
-    : `Watch ${viewModel.title} (${viewModel.year}) on CineStream. Available in HD with multiple servers.`;
+    : `Watch ${viewModel.title} (${viewModel.year}) on Cinelito. Available in HD with multiple servers.`;
   const images = viewModel.posterUrl ? [viewModel.posterUrl] : [];
   return {
-    title: `${viewModel.title} (${viewModel.year}) | CineStream`,
+    title: `${viewModel.title} (${viewModel.year}) | Cinelito`,
     description,
     openGraph: {
       title: `${viewModel.title} (${viewModel.year})`,

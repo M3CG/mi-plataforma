@@ -12,7 +12,7 @@ const securityHeaders = [
   {
     // Evita que tu página sea embebida en un iframe de otro sitio (protege contra clickjacking).
     // Nota: nuestros iframes de video no se ven afectados porque están EN nuestra página,
-    // esto protege que OTROS sitios embebidos carguen CineStream dentro de ellos.
+    // esto protege que OTROS sitios embebidos carguen Cinelito dentro de ellos.
     key: 'X-Frame-Options',
     value: 'DENY',
   },

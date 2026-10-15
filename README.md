@@ -1,4 +1,4 @@
-# CineStream — Frontend
+# Cinelito — Frontend
 
 Plataforma de streaming de películas con **Next.js 16 (App Router)**,
 **React 19**, **TypeScript estricto** y **Tailwind CSS 4**.

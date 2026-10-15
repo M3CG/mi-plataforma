@@ -12,19 +12,19 @@ export function buildActorMetadata(
   }
   const { actor } = viewModel;
   return {
-    title: `${actor.name} | CineStream`,
-    description: `Discover all movies starring ${actor.name} on CineStream. Complete filmography in HD.`,
+    title: `${actor.name} | Cinelito`,
+    description: `Discover all movies starring ${actor.name} on Cinelito. Complete filmography in HD.`,
     openGraph: {
-      title: `${actor.name} | CineStream`,
-      description: `Discover all movies starring ${actor.name} on CineStream.`,
+      title: `${actor.name} | Cinelito`,
+      description: `Discover all movies starring ${actor.name} on Cinelito.`,
       images: actor.profile_image_url
         ? [actor.profile_image_url]
         : [],
     },
     twitter: {
       card: 'summary',
-      title: `${actor.name} | CineStream`,
-      description: `Discover all movies starring ${actor.name} on CineStream.`,
+      title: `${actor.name} | Cinelito`,
+      description: `Discover all movies starring ${actor.name} on Cinelito.`,
       images: actor.profile_image_url
         ? [actor.profile_image_url]
         : [],
