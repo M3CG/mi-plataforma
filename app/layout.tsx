@@ -1,10 +1,9 @@
-
-
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from '@/widgets/Header/Header';
 import ScrollToTop from '@/app/providers/ScrollToTop';
+import PageTransitionGate from '@/app/providers/PageTransitionGate';
 import { WebVitalsReporter } from './vitals';
 import { SITE_URL } from '@/lib/config/site';
 import { API_URL } from '@/lib/api/http/config';
@@ -36,7 +35,6 @@ export default function RootLayout({
     <html lang="en">
       {/*
         Se eliminó suppressHydrationWarning del body.
-
         En este proyecto no hay una causa legítima para silenciar
         warnings de hidratación:
 
@@ -55,7 +53,8 @@ export default function RootLayout({
         <link rel="preconnect" href="https://image.tmdb.org" crossOrigin="anonymous" />
         <link rel="preconnect" href={strapiOrigin} />
         <ScrollToTop />
-                <Header />
+        <PageTransitionGate />
+        <Header />
         <main className="pt-16 min-h-screen">{children}</main>
       </body>
     </html>

@@ -1,5 +1,6 @@
 // features/filters/ui/FilterMenu.tsx
 'use client';
+
 import type { Category } from '@/entities/category';
 import { useMovieFilters } from '../model/useMovieFilters';
 import { useScrollCollapse } from '../model/useScrollCollapse';
@@ -48,7 +49,15 @@ export default function FilterMenu({
   } = useMovieFilters();
 
   const { ref: sentinelRef, isStuck } = useStickySentinel<HTMLDivElement>();
-  const isCollapsed = useScrollCollapse();
+
+  // Histéresis de scroll: en celulares hace falta un arrastre
+  // sostenido para alternar la barra. Los rebotes de pocos píxeles
+  // del overscroll táctil ya no la hacen parpadear.
+  const isCollapsed = useScrollCollapse({
+    hideAfter: 200,
+    hideDelta: 100,
+    showDelta: 80,
+  });
 
   return (
     <>
@@ -65,22 +74,28 @@ export default function FilterMenu({
         >
           {/* ═══ SECCIÓN COLAPSABLE: CONTROLES DE FILTRO ═══ */}
           <div
-            className="relative z-10 transition-all duration-300 ease-in-out"
+            className="relative z-10 duration-300 ease-in-out"
             style={{
-              maxHeight: isCollapsed ? '0px' : '400px',
+              // 260px cubre el layout mobile más alto (4 filas ≈ 200px)
+              // con margen. Con 400px la animación tenía un tramo
+              // muerto largo que se percibía como lag.
+              maxHeight: isCollapsed ? '0px' : '260px',
               opacity: isCollapsed ? 0 : 1,
-              transform: isCollapsed ? 'translateY(-8px)' : 'translateY(0)',
+              transform: isCollapsed
+                ? 'translateY(-8px)'
+                : 'translateY(0)',
               pointerEvents: isCollapsed ? 'none' : 'auto',
+              transitionProperty: 'max-height, opacity, transform',
             }}
           >
             {/*
-              Layout responsive:
-              - Mobile (< lg): Grid de 3 columnas
-                · Fila 1: Género | Puntuación | País
-                · Fila 2: Año (col-span-3)
-                · Fila 3: Duración (col-span-3)
-                · Fila 4: Ordenar (col-span-3)
-              - Desktop (lg+): Flex wrap clásico
+            Layout responsive:
+            - Mobile (< lg): Grid de 3 columnas
+              · Fila 1: Género | Puntuación | País
+              · Fila 2: Año (col-span-3)
+              · Fila 3: Duración (col-span-3)
+              · Fila 4: Ordenar (col-span-3)
+            - Desktop (lg+): Flex wrap clásico
             */}
             <div className="grid grid-cols-3 gap-2 px-4 pt-4 pb-3 lg:flex lg:flex-wrap lg:items-center">
               {/* ─── Fila 1: Género, Puntuación, País ─── */}
