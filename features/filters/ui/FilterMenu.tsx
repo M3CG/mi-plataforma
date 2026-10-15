@@ -53,11 +53,7 @@ export default function FilterMenu({
   // Histéresis de scroll: en celulares hace falta un arrastre
   // sostenido para alternar la barra. Los rebotes de pocos píxeles
   // del overscroll táctil ya no la hacen parpadear.
-  const isCollapsed = useScrollCollapse({
-    hideAfter: 200,
-    hideDelta: 100,
-    showDelta: 80,
-  });
+  const isCollapsed = useScrollCollapse();
 
   return (
     <>
@@ -66,11 +62,10 @@ export default function FilterMenu({
 
       <div className="sticky top-16 z-30 -mx-4 md:-mx-8 px-4 md:px-8 pb-4">
         <div
-          className={`bg-gray-950/80 backdrop-blur-xl border border-white/5 shadow-2xl shadow-black/20 transition-all duration-300 ${
-            isStuck
+          className={`bg-gray-950/80 backdrop-blur-xl border border-white/5 shadow-2xl shadow-black/20 transition-all duration-300 ${isStuck
               ? 'rounded-b-2xl rounded-t-none border-t-0'
               : 'rounded-2xl'
-          }`}
+            }`}
         >
           {/* ═══ SECCIÓN COLAPSABLE: CONTROLES DE FILTRO ═══ */}
           <div
