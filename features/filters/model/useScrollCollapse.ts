@@ -3,162 +3,126 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-export interface UseScrollCollapseOptions {
-  /** Posición máxima de la página (px) donde la barra siempre está visible. */
+interface UseScrollCollapseOptions {
+  /** Scroll mínimo desde el top para que el colapso pueda activarse. */
   hideAfter?: number;
-  /** Arrastre acumulado hacia ABAJO (px) necesario para ocultar la barra. */
-  hideDelta?: number;
-  /** Arrastre acumulado hacia ARRIBA (px) necesario para mostrarla de nuevo. */
-  showDelta?: number;
-  /** Salto de un solo frame (px) considerado programático (no alterna estado). */
-  teleportThreshold?: number;
-}
-
-const DEFAULT_HIDE_AFTER = 200;
-const DEFAULT_HIDE_DELTA = 100;
-const DEFAULT_SHOW_DELTA = 80;
-const DEFAULT_TELEPORT_THRESHOLD = 250;
-
-export interface ScrollCollapseFrame {
-  /** scrollY actual. */
-  y: number;
-  /** Diferencia con el frame anterior (positiva = hacia abajo). */
-  frameDelta: number;
-  /** scrollY mínimo del gesto (punto más alto de la página). */
-  startY: number;
-  /** scrollY máximo del gesto (punto más bajo de la página). */
-  peakY: number;
-}
-
-export interface ScrollCollapseThresholds {
-  hideAfter: number;
-  hideDelta: number;
-  showDelta: number;
-  teleportThreshold: number;
-}
-
-export type ScrollCollapseToggle = 'hide' | 'show' | null;
-
-export interface ScrollCollapseDecision {
-  toggle: ScrollCollapseToggle;
-  startY: number;
-  peakY: number;
+  /** Px que hay que arrastrar hacia abajo para ocultar los controles. */
+  collapseThreshold?: number;
+  /** Px que hay que arrastrar hacia arriba para volver a mostrarlos. */
+  expandThreshold?: number;
+  /** Ms de "cuarentena" tras cada cambio de estado para asentar el layout. */
+  settleMs?: number;
 }
 
 /**
- * Decisión pura de colapso por frame.
+ * Colapsa/expande la barra de filtros según la dirección del scroll.
  *
- * Usa histéresis por extremos: acumula el punto más alto (startY) y
- * más bajo (peakY) del gesto, y solo alterna el estado cuando el
- * arrastre sostenido supera el umbral correspondiente. Las micro
- * reversiones del scroll táctil no reinician la acumulación.
+ * ─── El bug que corrige (parpadeo en móviles Chromium / Brave) ───
  *
- * Al alternar el estado (o al llegar al tope de la página) ambas
- * referencias se reinician en la posición actual: el próximo gesto
- * se mide desde el punto de alternancia.
- */
-export function decideScrollCollapse(
-  frame: ScrollCollapseFrame,
-  thresholds: ScrollCollapseThresholds
-): ScrollCollapseDecision {
-  const { y, frameDelta, startY, peakY } = frame;
-  const { hideAfter, hideDelta, showDelta, teleportThreshold } =
-    thresholds;
-
-  // Salto en un solo frame = scroll programático (restauración de
-  // posición del grid, scrollTo, etc.): re-baselinear sin alternar.
-  if (Math.abs(frameDelta) > teleportThreshold) {
-    return { toggle: null, startY: y, peakY: y };
-  }
-
-  // Cerca del tope de la página la barra siempre está visible.
-  if (y <= hideAfter) {
-    return { toggle: 'show', startY: y, peakY: y };
-  }
-
-  const nextStartY = Math.min(startY, y);
-  const nextPeakY = Math.max(peakY, y);
-
-  // Arrastre sostenido hacia abajo → ocultar.
-  if (y - nextStartY >= hideDelta) {
-    return { toggle: 'hide', startY: y, peakY: y };
-  }
-
-  // Arrastre sostenido hacia arriba → mostrar.
-  if (nextPeakY - y >= showDelta) {
-    return { toggle: 'show', startY: y, peakY: y };
-  }
-
-  return { toggle: null, startY: nextStartY, peakY: nextPeakY };
-}
-
-/**
- * Decide si la barra de filtros debe colapsarse según el gesto de scroll.
+ * La versión anterior alternaba `isCollapsed` comparando el scrollY de
+ * dos frames consecutivos con un umbral de 5px. En Chromium eso entraba
+ * en un bucle de realimentación:
  *
- * En celulares el scroll rebota unos pocos píxeles (overscroll elástico,
- * la barra de navegación del sistema, etc.). La versión anterior
- * alternaba el estado con deltas de 1-5 px y eso producía el parpadeo
- * de "se muestra y se oculta" en períodos muy breves.
+ *   colapsar → la barra reduce su altura ~200px → el scroll-anchoring
+ *   de Chromium mueve window.scrollY → el hook lo lee como "subió" →
+ *   expande → la altura vuelve a cambiar → otro salto de scrollY →
+ *   colapsa de nuevo… y la barra parpadea sola con el usuario quieto.
  *
- * Ahora hace falta un arrastre sostenido (~100 px hacia abajo para
- * ocultar, ~80 px hacia arriba para mostrar) antes de alternar.
+ * En Firefox no ocurre: Gecko no aplica scroll-anchoring de la misma
+ * forma y throttlea distinto los eventos de scroll.
+ *
+ * ─── Las tres correcciones ───
+ *
+ * 1. HISTÉRESIS: ya no basta 1px entre frames. Hay que arrastrar un
+ *    mínimo claro hacia abajo para ocultar y hacia arriba para mostrar,
+ *    medido desde un "ancla", no entre frames consecutivos. El
+ *    micro-jitter no llega al umbral.
+ *
+ * 2. CUARENTENA POST-CAMBIO: tras cada colapso/expansión se ignoran los
+ *    eventos de scroll durante `settleMs` (cubre la transición de 300ms).
+ *    En esa ventana solo se mueve el ancla, sin evaluar el estado. Así el
+ *    reflow del propio colapso no se retroalimenta.
+ *
+ * 3. ANCLA DIRECCIONAL: mientras está colapsado, el ancla persigue el
+ *    punto más bajo alcanzado; mientras está expandido, el más alto. Así
+ *    "arrastrar X px hacia arriba" se mide desde donde empezó el gesto,
+ *    no desde un punto arbitrario.
  */
 export function useScrollCollapse(
   options?: UseScrollCollapseOptions
 ): boolean {
-  const hideAfter = options?.hideAfter ?? DEFAULT_HIDE_AFTER;
-  const hideDelta = options?.hideDelta ?? DEFAULT_HIDE_DELTA;
-  const showDelta = options?.showDelta ?? DEFAULT_SHOW_DELTA;
-  const teleportThreshold =
-    options?.teleportThreshold ?? DEFAULT_TELEPORT_THRESHOLD;
+  const hideAfter = options?.hideAfter ?? 150;
+  const collapseThreshold = options?.collapseThreshold ?? 32;
+  const expandThreshold = options?.expandThreshold ?? 32;
+  const settleMs = options?.settleMs ?? 400;
 
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  // Extremos del gesto actual. Null hasta el primer frame.
-  const startYRef = useRef<number | null>(null);
-  const peakYRef = useRef<number | null>(null);
-  const lastYRef = useRef<number | null>(null);
-  const ticking = useRef(false);
+  // Refs para el estado "real": el setState es asíncrono y el handler
+  // de scroll necesita leer el valor vigente dentro del rAF.
+  const collapsedRef = useRef(false);
+  const anchorYRef = useRef(0);
+  const lastChangeAtRef = useRef(-Infinity);
+  const tickingRef = useRef(false);
 
   const handleScroll = useCallback(() => {
-    if (ticking.current) return;
-    ticking.current = true;
+    if (tickingRef.current) return;
+    tickingRef.current = true;
 
     window.requestAnimationFrame(() => {
-      ticking.current = false;
+      tickingRef.current = false;
 
-      const y = window.scrollY;
-      const startY = startYRef.current;
-      const peakY = peakYRef.current;
-      const lastY = lastYRef.current;
+      const currentY = window.scrollY;
+      const now = performance.now();
 
-      // Primer frame: línea base, sin decidir nada.
-      // Cubre también el regreso al catálogo con scroll restaurado.
-      if (startY === null || peakY === null || lastY === null) {
-        startYRef.current = y;
-        peakYRef.current = y;
-        lastYRef.current = y;
+      // ─── 1. Cuarentena: absorber el reflow del propio colapso ───
+      if (now - lastChangeAtRef.current < settleMs) {
+        anchorYRef.current = collapsedRef.current
+          ? Math.max(anchorYRef.current, currentY)
+          : Math.min(anchorYRef.current, currentY);
         return;
       }
 
-      const decision = decideScrollCollapse(
-        { y, frameDelta: y - lastY, startY, peakY },
-        { hideAfter, hideDelta, showDelta, teleportThreshold }
-      );
-
-      lastYRef.current = y;
-      startYRef.current = decision.startY;
-      peakYRef.current = decision.peakY;
-
-      if (decision.toggle === 'hide') {
-        setIsCollapsed(true);
-      } else if (decision.toggle === 'show') {
+      // ─── 2. Red de seguridad: cerca del top, siempre expandido ───
+      if (collapsedRef.current && currentY <= hideAfter) {
+        collapsedRef.current = false;
+        lastChangeAtRef.current = now;
+        anchorYRef.current = currentY;
         setIsCollapsed(false);
+        return;
+      }
+
+      if (!collapsedRef.current) {
+        // Expandido: el ancla persigue el punto más alto alcanzado.
+        anchorYRef.current = Math.min(anchorYRef.current, currentY);
+
+        // ─── 3. Ocultar: gesto claro hacia abajo ───
+        if (
+          currentY - anchorYRef.current >= collapseThreshold &&
+          currentY > hideAfter
+        ) {
+          collapsedRef.current = true;
+          lastChangeAtRef.current = now;
+          anchorYRef.current = currentY;
+          setIsCollapsed(true);
+        }
+      } else {
+        // Colapsado: el ancla persigue el punto más bajo alcanzado.
+        anchorYRef.current = Math.max(anchorYRef.current, currentY);
+
+        // ─── 3. Mostrar: gesto claro hacia arriba ───
+        if (anchorYRef.current - currentY >= expandThreshold) {
+          collapsedRef.current = false;
+          lastChangeAtRef.current = now;
+          anchorYRef.current = currentY;
+          setIsCollapsed(false);
+        }
       }
     });
-  }, [hideAfter, hideDelta, showDelta, teleportThreshold]);
+  }, [hideAfter, collapseThreshold, expandThreshold, settleMs]);
 
   useEffect(() => {
+    anchorYRef.current = window.scrollY;
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => {
       window.removeEventListener('scroll', handleScroll);
