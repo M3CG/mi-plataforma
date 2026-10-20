@@ -4,7 +4,7 @@ import { routes } from '@/lib/routes';
 
 export default function NotFound() {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-900 text-white px-4">
+    <main className="min-h-screen flex items-center justify-center bg-[#000F20] text-white px-4">
       <div className="text-center max-w-md">
         <h1 className="text-8xl font-extrabold text-red-600 mb-4">404</h1>
         <h2 className="text-3xl font-bold mb-4">Page not found</h2>
@@ -20,7 +20,7 @@ export default function NotFound() {
           </Link>
           <Link
             href={routes.movies}
-            className="bg-gray-800 hover:bg-gray-700 text-white font-medium px-6 py-3 rounded-lg transition-colors"
+            className="bg-white/10 hover:bg-white/15 text-white font-medium px-6 py-3 rounded-lg transition-colors"
           >
             Browse catalog
           </Link>

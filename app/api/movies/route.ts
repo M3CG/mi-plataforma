@@ -1,7 +1,6 @@
 // app/api/movies/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { DEFAULT_PAGE_SIZE } from '@/lib/api/pagination/config';
-import { parseMovieFiltersFromSearchParams } from '@/lib/url/movieFilters';
 import { MOVIE_PAGINATION_PARAM_KEYS } from '@/lib/url/movieFilterParams';
 import { PaginatedMoviesSchema } from '@/lib/validation/moviePayloadSchemas';
 import { logger } from '@/lib/utils/logger';
@@ -19,8 +18,17 @@ export async function GET(request: NextRequest) {
       ip: clientIp,
     });
     return NextResponse.json(
-      { data: [], hasMore: false, page: 1, pageSize: DEFAULT_PAGE_SIZE, error: 'Too many requests' },
-      { status: 429, headers: { 'Retry-After': '60', 'X-RateLimit-Remaining': '0' } }
+      {
+        data: [],
+        hasMore: false,
+        page: 1,
+        pageSize: DEFAULT_PAGE_SIZE,
+        error: 'Too many requests',
+      },
+      {
+        status: 429,
+        headers: { 'Retry-After': '60', 'X-RateLimit-Remaining': '0' },
+      }
     );
   }
 
@@ -28,16 +36,26 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const page = Math.max(
       1,
-      Math.min(Number(searchParams.get(MOVIE_PAGINATION_PARAM_KEYS.page)) || 1, 500)
+      Math.min(
+        Number(searchParams.get(MOVIE_PAGINATION_PARAM_KEYS.page)) || 1,
+        500
+      )
     );
     const pageSize = Math.max(
       1,
-      Math.min(Number(searchParams.get(MOVIE_PAGINATION_PARAM_KEYS.pageSize)) || DEFAULT_PAGE_SIZE, 100)
+      Math.min(
+        Number(searchParams.get(MOVIE_PAGINATION_PARAM_KEYS.pageSize)) ||
+          DEFAULT_PAGE_SIZE,
+        100
+      )
     );
 
-    // TMDB Discover usa los mismos query params que el BFF anterior.
-    // discoverMovies ya traduce genres, minRating, fromYear, etc.
-    const discoverResult = await discoverMovies(searchParams, page, 'catalog');
+    const discoverResult = await discoverMovies(
+      searchParams,
+      page,
+      'catalog',
+      pageSize
+    );
 
     const movies = normalizeTmdbResultsToMovies(discoverResult.results);
 

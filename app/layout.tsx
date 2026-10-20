@@ -33,21 +33,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      {/*
-        Se eliminó suppressHydrationWarning del body.
-        En este proyecto no hay una causa legítima para silenciar
-        warnings de hidratación:
-
-        - No hay theme switching.
-        - No hay scripts inline que muten el HTML antes de hidratar.
-        - sessionStorage se usa dentro de useEffect.
-        - los componentes client tienen estado inicial estable.
-
-        Si aparece un warning de hidratación, hay que encontrar la
-        causa real, no silenciarla con suppressHydrationWarning.
-      */}
       <body
-        className={`${geistSans.variable} ${geistMono.variable} bg-gray-900 text-white antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} bg-[#000F20] text-white antialiased`}
       >
         <WebVitalsReporter />
         <link rel="preconnect" href="https://image.tmdb.org" crossOrigin="anonymous" />

@@ -7,10 +7,6 @@ interface SectionHeaderProps {
   linkLabel?: string;
 }
 
-/**
- * Header de sección: versalitas con tracking amplio + hairline
- * + botón "Ver todo" con estilo pill.
- */
 export default function SectionHeader({
   title,
   href,

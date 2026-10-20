@@ -4,24 +4,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
-/**
- * Duración mínima percibida de cada navegación entre páginas (ms).
- *
- * El sitio responde tan rápido que muchas transiciones son
- * instantáneas (prefetch + router cache). Eso genera dos problemas:
- *
- * 1. El usuario no percibe que cambió de página.
- * 2. Los tiempos son inconsistentes: 0 ms, 200 ms, 400 ms...
- *    El usuario no lo detecta conscientemente, pero se siente.
- *
- * Este componente garantiza un mínimo uniforme por navegación:
- * si la transición terminó antes del mínimo, muestra un overlay de
- * carga por el tiempo restante. Si tardó más (fetch real lento),
- * no agrega nada: el skeleton de la ruta ya cubrió ese tiempo.
- *
- * Resultado: toda navegación dura max(tiempoReal, MIN_PAGE_DURATION_MS).
- */
-const MIN_PAGE_DURATION_MS = 900;
+const MIN_PAGE_DURATION_MS = 100;
 const FADE_OUT_MS = 150;
 
 type GatePhase = 'idle' | 'visible' | 'fading';
@@ -30,16 +13,10 @@ export default function PageTransitionGate() {
   const pathname = usePathname();
   const [phase, setPhase] = useState<GatePhase>('idle');
 
-  // Momento en que el usuario inició la navegación.
   const intentAtRef = useRef<number | null>(null);
-  // Última ruta procesada (evita disparar en mount / strict mode).
   const lastPathnameRef = useRef(pathname);
   const timersRef = useRef<number[]>([]);
 
-  // ─── Registrar el inicio de cada navegación ───
-  // Click en links internos, submit de formularios (búsqueda)
-  // y popstate (back/forward). Links externos, con modificadores
-  // o target=_blank se ignoran.
   useEffect(() => {
     const registerIntent = () => {
       intentAtRef.current = performance.now();
@@ -83,28 +60,17 @@ export default function PageTransitionGate() {
     };
   }, []);
 
-  // ─── Completar el mínimo cuando cambia la ruta ───
-  //
-  // useLayoutEffect (no useEffect): el overlay debe pintarse en el
-  // mismo frame que la página nueva; con useEffect el contenido
-  // nuevo flashea un instante antes de taparse.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useLayoutEffect(() => {
-    // Sin cambio real de ruta (mount, re-render, strict mode).
     if (lastPathnameRef.current === pathname) return;
     lastPathnameRef.current = pathname;
 
     const startedAt = intentAtRef.current;
     intentAtRef.current = null;
 
-    // Sin evento registrado (navegación programática sin click):
-    // el mínimo se cuenta desde que la página nueva quedó montada.
     const elapsed =
       startedAt === null ? 0 : performance.now() - startedAt;
     const remaining = MIN_PAGE_DURATION_MS - elapsed;
 
-    // La transición ya tardó más que el mínimo: el skeleton real
-    // cubrió el tiempo, no agregar carga artificial.
     if (remaining <= 0) return;
 
     timersRef.current.forEach((timer) => window.clearTimeout(timer));
@@ -122,7 +88,6 @@ export default function PageTransitionGate() {
     timersRef.current.push(hideTimer);
   }, [pathname]);
 
-  // ─── Limpieza de timers al desmontar ───
   useEffect(() => {
     return () => {
       timersRef.current.forEach((timer) =>
@@ -137,7 +102,7 @@ export default function PageTransitionGate() {
     <div
       role="status"
       aria-label="Loading page"
-      className={`fixed inset-0 z-[80] bg-gray-900 flex flex-col items-center justify-center gap-4 ${
+      className={`fixed inset-0 z-[80] bg-[#000F20] flex flex-col items-center justify-center gap-4 ${
         phase === 'visible'
           ? 'opacity-100'
           : 'opacity-0 pointer-events-none transition-opacity duration-150 ease-out'

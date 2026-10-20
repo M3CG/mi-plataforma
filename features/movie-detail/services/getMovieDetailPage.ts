@@ -1,25 +1,21 @@
 // features/movie-detail/services/getMovieDetailPage.ts
-import { isValidSlug } from '@/lib/utils/slugify';
+import { isValidSlug, slugify } from '@/lib/utils/slugify';
 import {
   extractTmdbIdFromSlug,
-  isTmdbSlug,
+  generateTmdbSlug,
 } from '@/lib/api/tmdb/slugResolver';
-import { tmdbGetMovie } from '@/lib/api/tmdb/client';
+import { tmdbGetMovie, tmdbSearchMovies } from '@/lib/api/tmdb/client';
 import { normalizeMovieDetail } from '@/lib/api/tmdb/normalizers';
 import {
   createMovieDetailViewModel,
   type MovieDetailViewModel,
 } from '../lib/createMovieDetailViewModel';
 import type { Movie } from '@/entities/movie';
-import { generateTmdbSlug } from '@/lib/api/tmdb/slugResolver';
-import { slugify } from '@/lib/utils/slugify';
 import { logger } from '@/lib/utils/logger';
 
-/**
- * Convierte un TmdbMoviePreview a la entidad Movie
- * para poder usar createMovieDetailViewModel.
- */
-function tmdbPreviewToMovie(preview: ReturnType<typeof normalizeMovieDetail>): Movie {
+function tmdbPreviewToMovie(
+  preview: ReturnType<typeof normalizeMovieDetail>
+): Movie {
   const slug = generateTmdbSlug(preview.tmdbId, preview.originalTitle);
 
   return {
@@ -52,14 +48,14 @@ function tmdbPreviewToMovie(preview: ReturnType<typeof normalizeMovieDetail>): M
       id: c.tmdbId,
       documentId: `tmdb-person-${c.tmdbId}`,
       name: c.name,
-      slug: slugify(c.name) || `person-${c.tmdbId}`,
+      slug: generateTmdbSlug(c.tmdbId, c.name),
       profile_image_url: c.profileImageUrl,
     })),
     directors: preview.directors.map((d) => ({
       id: d.tmdbId,
       documentId: `tmdb-person-${d.tmdbId}`,
       name: d.name,
-      slug: slugify(d.name) || `person-${d.tmdbId}`,
+      slug: generateTmdbSlug(d.tmdbId, d.name),
       profile_image_url: d.profileImageUrl,
     })),
   };
@@ -72,18 +68,21 @@ export async function getMovieDetailPage(
     return null;
   }
 
-  // Extraer el tmdbId del slug.
-  // Si el slug tiene formato TMDB ({id}-{titulo}), buscar en TMDB.
-  const tmdbId = extractTmdbIdFromSlug(slug);
+  let tmdbId = extractTmdbIdFromSlug(slug);
 
   if (tmdbId === null) {
-    // Slug sin formato TMDB: no se puede resolver.
-    logger.debug('Slug sin formato TMDB, no se puede resolver', {
-      component: 'MovieDetail',
-      action: 'getMovieDetailPage',
-      slug,
-    });
-    return null;
+    const query = slug.replace(/-/g, ' ').trim();
+    const searchRes = await tmdbSearchMovies(query);
+    const firstMatch = searchRes?.results?.[0];
+    if (!firstMatch?.id) {
+      logger.debug('Película no encontrada por búsqueda de slug', {
+        component: 'MovieDetail',
+        action: 'getMovieDetailPage',
+        slug,
+      });
+      return null;
+    }
+    tmdbId = firstMatch.id;
   }
 
   try {

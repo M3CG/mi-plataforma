@@ -49,31 +49,23 @@ export default function FilterMenu({
   } = useMovieFilters();
 
   const { ref: sentinelRef, isStuck } = useStickySentinel<HTMLDivElement>();
-
-  // Histéresis de scroll: en celulares hace falta un arrastre
-  // sostenido para alternar la barra. Los rebotes de pocos píxeles
-  // del overscroll táctil ya no la hacen parpadear.
   const isCollapsed = useScrollCollapse();
 
   return (
     <>
-      {/* Sentinel para detectar cuándo el menú está "pegado" al header */}
       <div ref={sentinelRef} className="h-px" aria-hidden="true" />
 
       <div className="sticky top-16 z-30 -mx-4 md:-mx-8 px-4 md:px-8 pb-4">
         <div
-          className={`bg-gray-950/80 backdrop-blur-xl border border-white/5 shadow-2xl shadow-black/20 transition-all duration-300 ${isStuck
+          className={`bg-[#000F20]/80 backdrop-blur-xl border border-white/5 shadow-2xl shadow-black/20 transition-all duration-300 ${
+            isStuck
               ? 'rounded-b-2xl rounded-t-none border-t-0'
               : 'rounded-2xl'
-            }`}
+          }`}
         >
-          {/* ═══ SECCIÓN COLAPSABLE: CONTROLES DE FILTRO ═══ */}
           <div
             className="relative z-10 duration-300 ease-in-out"
             style={{
-              // 260px cubre el layout mobile más alto (4 filas ≈ 200px)
-              // con margen. Con 400px la animación tenía un tramo
-              // muerto largo que se percibía como lag.
               maxHeight: isCollapsed ? '0px' : '260px',
               opacity: isCollapsed ? 0 : 1,
               transform: isCollapsed
@@ -83,17 +75,7 @@ export default function FilterMenu({
               transitionProperty: 'max-height, opacity, transform',
             }}
           >
-            {/*
-            Layout responsive:
-            - Mobile (< lg): Grid de 3 columnas
-              · Fila 1: Género | Puntuación | País
-              · Fila 2: Año (col-span-3)
-              · Fila 3: Duración (col-span-3)
-              · Fila 4: Ordenar (col-span-3)
-            - Desktop (lg+): Flex wrap clásico
-            */}
             <div className="grid grid-cols-3 gap-2 px-4 pt-4 pb-3 lg:flex lg:flex-wrap lg:items-center">
-              {/* ─── Fila 1: Género, Puntuación, País ─── */}
               <GenreFilter
                 categories={categories}
                 activeGenres={activeGenres}
@@ -112,7 +94,6 @@ export default function FilterMenu({
                 forceClose={isCollapsed}
               />
 
-              {/* ─── Fila 2: Año (full width en mobile) ─── */}
               <YearRangeFilter
                 fromYear={fromYear}
                 toYear={toYear}
@@ -120,7 +101,6 @@ export default function FilterMenu({
                 className="col-span-3"
               />
 
-              {/* ─── Fila 3: Duración (full width en mobile) ─── */}
               <RuntimeRangeFilter
                 fromRuntime={fromRuntime}
                 toRuntime={toRuntime}
@@ -128,10 +108,8 @@ export default function FilterMenu({
                 className="col-span-3"
               />
 
-              {/* Spacer: solo visible en desktop para empujar Sort a la derecha */}
               <div className="hidden lg:block flex-1 min-w-4" />
 
-              {/* ─── Fila 4: Ordenar (full width en mobile) ─── */}
               <SortFilter
                 value={sort}
                 onChange={setSort}
@@ -141,7 +119,6 @@ export default function FilterMenu({
             </div>
           </div>
 
-          {/* ═══ SECCIÓN SIEMPRE VISIBLE: FILTROS ACTIVOS ═══ */}
           <ActiveFiltersBar
             categories={categories}
             activeGenres={activeGenres}

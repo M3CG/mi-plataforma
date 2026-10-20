@@ -39,7 +39,7 @@ export default function GenreFilter({
       forceClose={forceClose}
       className={className}
     >
-      <div className="w-80 max-w-[calc(100vw-2.5rem)] bg-gray-950/95 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl shadow-black/40">
+      <div className="w-80 max-w-[calc(100vw-2.5rem)] bg-[#000F20]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl shadow-black/40">
         <div className="flex flex-wrap gap-2 max-h-56 overflow-y-auto scrollbar-hide">
           {categories.map((category) => (
             <button

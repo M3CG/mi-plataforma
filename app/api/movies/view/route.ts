@@ -7,15 +7,10 @@ import { extractTmdbIdFromSlug } from '@/lib/api/tmdb/slugResolver';
 import {
   materializeMovieFromTmdb,
   incrementMovieView,
+  StrapiUnreachableError,
 } from '@/lib/api/repositories/adminImport';
 
-// La materialización corre post-response vía after(), pero dentro del
-// presupuesto de la función. Default de Vercel (10s) puede cortarla a
-// mitad con Strapi remoto. 60s = margen completo para el caso realista
-// (TMDB + relaciones + inserts), con tope para el patológico.
 export const maxDuration = 60;
-
-// ── Rate limiter (idéntico al anterior: se conserva sin cambios) ──
 
 const VIEW_RATE_LIMIT_WINDOW_MS = 60_000;
 const VIEW_RATE_LIMIT_MAX = 10;
@@ -62,18 +57,6 @@ function checkViewRateLimit(identifier: string): {
   return { allowed: true, remaining: VIEW_RATE_LIMIT_MAX - entry.count };
 }
 
-// ── Resolución del identificador ──
-
-/**
- * Acepta:
- *  - { tmdbId: number }            ← contrato preferido
- *  - { tmdbId: "603" }             ← número como string (defensivo)
- *  - { slug: "603-the-matrix" }    ← slug de URL de TMDB (compatibilidad)
- *
- * NO acepta slugs canónicos de DB ("the-matrix"): un slug sin prefijo
- * numérico no contiene información para resolver el tmdbId. ViewTracker
- * debe enviar siempre tmdbId.
- */
 function resolveTmdbId(
   body: { slug?: unknown; tmdbId?: unknown } | null
 ): number | null {
@@ -96,8 +79,6 @@ function resolveTmdbId(
   return null;
 }
 
-// ── Trabajo de fondo (corre post-response vía after) ──
-
 async function trackView(tmdbId: number): Promise<void> {
   const record = await materializeMovieFromTmdb(tmdbId);
   if (!record) {
@@ -109,7 +90,11 @@ async function trackView(tmdbId: number): Promise<void> {
     return;
   }
 
-  const ok = await incrementMovieView(record.slug);
+  const ok = await incrementMovieView(
+    record.slug,
+    record.documentId,
+    record.views
+  );
   if (!ok) {
     logger.warn('View no registrada: Strapi rechazó el incremento', {
       component: 'BFF',
@@ -119,8 +104,6 @@ async function trackView(tmdbId: number): Promise<void> {
     });
   }
 }
-
-// ── Handler ──
 
 export async function POST(request: NextRequest) {
   const clientIp = getClientIp(request);
@@ -147,13 +130,18 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // La respuesta sale YA: el usuario nunca espera la materialización
-  // (TMDB + relaciones + Strapi pueden tardar segundos en una película
-  // fría). Todo el trabajo corre post-response.
   after(async () => {
     try {
       await trackView(tmdbId);
     } catch (error) {
+      if (error instanceof StrapiUnreachableError) {
+        logger.debug('Strapi offline: vista omitida temporalmente', {
+          component: 'BFF',
+          action: 'POST /api/movies/view',
+          tmdbId,
+        });
+        return;
+      }
       logger.error('View tracking falló', {
         component: 'BFF',
         action: 'POST /api/movies/view',
@@ -163,7 +151,5 @@ export async function POST(request: NextRequest) {
     }
   });
 
-  // 200 (no 202) por compatibilidad con consumers que validen el status
-  // exacto. El body indica que el trabajo quedó encolado.
   return NextResponse.json({ ok: true, queued: true });
 }

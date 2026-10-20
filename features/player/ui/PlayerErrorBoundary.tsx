@@ -14,12 +14,6 @@ interface State {
   error?: Error;
 }
 
-/**
- * Error boundary específico para el reproductor de video.
- *
- * Si el player falla, muestra un fallback elegante sin romper
- * toda la página de detalle de la película.
- */
 export default class PlayerErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -55,10 +49,10 @@ export default class PlayerErrorBoundary extends Component<Props, State> {
           </div>
           <div className="text-center">
             <h3 className="text-white font-semibold mb-1">
-              Error en el reproductor
+              Player error
             </h3>
             <p className="text-sm text-gray-400 max-w-sm">
-              No se pudo cargar el video. Podés seguir explorando la información de la película.
+              Could not load the video player. You can continue exploring the movie details.
             </p>
           </div>
           <button
@@ -66,7 +60,7 @@ export default class PlayerErrorBoundary extends Component<Props, State> {
             className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-5 py-2.5 rounded-full transition-colors"
           >
             <IconRefresh className="w-4 h-4" />
-            Reintentar
+            Retry
           </button>
         </div>
       );

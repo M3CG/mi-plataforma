@@ -32,7 +32,7 @@ export default function RatingFilter({
       forceClose={forceClose}
       className={className}
     >
-      <div className="bg-gray-950/95 backdrop-blur-xl border border-white/10 rounded-2xl p-2 shadow-2xl shadow-black/40 min-w-[160px]">
+      <div className="bg-[#000F20]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-2 shadow-2xl shadow-black/40 min-w-[160px]">
         {RATING_OPTIONS.map((option) => (
           <button
             key={option.value}

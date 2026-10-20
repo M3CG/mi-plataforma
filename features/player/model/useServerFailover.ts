@@ -1,3 +1,4 @@
+// features/player/model/useServerFailover.ts
 'use client';
 
 import {
@@ -14,18 +15,15 @@ import { findNextAvailableSource } from '../lib/findNextAvailableSource';
 interface UseServerFailoverProps {
   sources: PlayableSource[];
   timeoutMs?: number;
+  enabled?: boolean;
 }
 
 export function useServerFailover({
   sources,
   timeoutMs = LOAD_TIMEOUT_MS,
+  enabled = true,
 }: UseServerFailoverProps) {
   const [activeIndex, setActiveIndex] = useState(0);
-  // Estado interno que solo cambia por eventos explícitos:
-  // - 'loaded'   cuando el iframe carga
-  // - 'timeout'  cuando expira el timer
-  // - 'loading'  cuando el usuario reintenta o cambia de servidor
-  // El estado 'idle' se deriva cuando no hay fuente activa.
   const [internalLoadStatus, setInternalLoadStatus] =
     useState<LoadStatus>('idle');
   const [autoSwitched, setAutoSwitched] = useState(false);
@@ -36,29 +34,26 @@ export function useServerFailover({
 
   const failedSourceIdsRef = useRef<Set<string>>(failedSourceIds);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const enabledRef = useRef<boolean>(enabled);
 
   useEffect(() => {
     failedSourceIdsRef.current = failedSourceIds;
   }, [failedSourceIds]);
 
-  // ─── Derivación durante render ───
-  // Si la lista de fuentes cambia y activeIndex queda fuera de rango,
-  // derivamos un índice seguro sin usar efecto + setState.
+  useEffect(() => {
+    enabledRef.current = enabled;
+  }, [enabled]);
+
   const safeActiveIndex =
     sources.length > 0 && activeIndex >= sources.length ? 0 : activeIndex;
 
   const activeSource = sources[safeActiveIndex] ?? null;
 
-  // Estado efectivo derivado:
-  // - Sin fuente activa  → 'idle'
-  // - Con fuente activa  → lo que diga internalLoadStatus,
-  //   pero si está en 'idle' por defecto, asumimos 'loading'
-  //   (porque tener una fuente implica que estamos intentando cargar).
   const effectiveLoadStatus: LoadStatus = useMemo(() => {
-    if (!activeSource) return 'idle';
+    if (!activeSource || !enabled) return 'idle';
     if (internalLoadStatus === 'idle') return 'loading';
     return internalLoadStatus;
-  }, [activeSource, internalLoadStatus]);
+  }, [activeSource, enabled, internalLoadStatus]);
 
   const clearLoadTimeout = useCallback(() => {
     if (timeoutRef.current) {
@@ -87,9 +82,7 @@ export function useServerFailover({
     setFailedSourceIds(next);
   }, []);
 
-  // Timer de carga del servidor activo.
-  // Este efecto SOLO configura el timer de failover.
-  // No cambia loadStatus: el estado se deriva durante el render.
+  // Timer de carga del servidor activo: usa enabledRef para evaluar sin alterar el tamaño del array de dependencias
   useEffect(() => {
     clearLoadTimeout();
 
@@ -98,6 +91,8 @@ export function useServerFailover({
     }
 
     timeoutRef.current = setTimeout(() => {
+      if (!enabledRef.current) return;
+
       markSourceFailed(activeSource.id);
 
       const nextIndex = findNextAvailableSource(
@@ -148,13 +143,10 @@ export function useServerFailover({
       setAutoSwitched(false);
 
       if (index === safeActiveIndex) {
-        // Reintento manual del mismo servidor.
-        setInternalLoadStatus('loading');
+        setInternalLoadStatus(enabledRef.current ? 'loading' : 'idle');
         setRetryCounter((previous) => previous + 1);
       } else {
         setActiveIndex(index);
-        // Al cambiar de fuente, el estado derivado
-        // pasará automáticamente a 'loading'.
         setInternalLoadStatus('idle');
       }
     },

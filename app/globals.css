@@ -3,7 +3,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0a0a0a;
+  --background: #000F20;
   --foreground: #ededed;
 }
 
@@ -40,9 +40,21 @@ h1, h2, h3, h4, h5, h6 {
     display: none;
   }
 
+  .text-s {
+    font-size: 0.8125rem;
+    line-height: 1.35rem;
+  }
+
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-15 {
+    display: -webkit-box;
+    -webkit-line-clamp: 15;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }

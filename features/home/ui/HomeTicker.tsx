@@ -12,21 +12,21 @@ interface HomeTickerProps {
   railRef: RefObject<HTMLDivElement | null>;
 }
 
-// ─── Geometría de la cinta ───
-export const FRAME_WIDTH = 170;
-export const FRAME_HEIGHT = 96;
-export const FRAME_GAP = 22;
+// ─── Geometría de la cinta (ligeramente más grande) ───
+export const FRAME_WIDTH = 196;
+export const FRAME_HEIGHT = 110;
+export const FRAME_GAP = 24;
 export const UNIT_WIDTH = FRAME_WIDTH + FRAME_GAP;
 export const MARKER_POS = 100 / 3;
 export const TRANSITION_POINT = (FRAME_WIDTH + FRAME_GAP / 2) / UNIT_WIDTH;
 export const INITIAL_PROGRESS = TRANSITION_POINT - 1;
 
-const RAIL_HEIGHT = 34;
-const PERF_SIZE = 17;
-const PERF_TILE_W = 48;
+const RAIL_HEIGHT = 38;
+const PERF_SIZE = 19;
+const PERF_TILE_W = 52;
 const COPIES = 5;
 const TILT_DEG = 3;
-const BORDER_COLOR = 'rgba(255,255,255,0.3)';
+const BORDER_COLOR = 'rgba(255,255,255,0.32)';
 
 /** Transform del rail para índice+progress dados (escritura directa al DOM). */
 export function tickerTransform(
@@ -40,7 +40,7 @@ export function tickerTransform(
 
 const PERF_TILE = `data:image/svg+xml,${encodeURIComponent(
   `<svg xmlns='http://www.w3.org/2000/svg' width='${PERF_TILE_W}' height='${RAIL_HEIGHT}'>` +
-    `<rect x='${(PERF_TILE_W - PERF_SIZE) / 2}' y='${(RAIL_HEIGHT - PERF_SIZE) / 2}' width='${PERF_SIZE}' height='${PERF_SIZE}' rx='6' fill='#0a0a0a' stroke='${BORDER_COLOR}' stroke-width='1'/>` +
+    `<rect x='${(PERF_TILE_W - PERF_SIZE) / 2}' y='${(RAIL_HEIGHT - PERF_SIZE) / 2}' width='${PERF_SIZE}' height='${PERF_SIZE}' rx='6' fill='#000F20' stroke='${BORDER_COLOR}' stroke-width='1'/>` +
     `</svg>`
 )}`;
 
@@ -56,7 +56,7 @@ function LightBeam() {
     <svg
       viewBox="0 0 40 100"
       preserveAspectRatio="none"
-      className="h-full w-14 overflow-visible"
+      className="h-full w-16 overflow-visible"
       aria-hidden="true"
     >
       <defs>
@@ -94,7 +94,7 @@ export default function HomeTicker({ movies, railRef }: HomeTickerProps) {
         }}
       >
         <div
-          className="relative overflow-hidden bg-red-950"
+          className="relative overflow-hidden bg-red-950 shadow-2xl shadow-black/60"
           style={{ border: `1px solid ${BORDER_COLOR}` }}
         >
           <div
@@ -122,6 +122,8 @@ export default function HomeTicker({ movies, railRef }: HomeTickerProps) {
                   <div className="flex" style={{ height: FRAME_HEIGHT }}>
                     <Link
                       href={routes.movie(movie.slug)}
+                      tabIndex={-1}
+                      aria-label={movie.title}
                       className="relative block overflow-hidden rounded-md"
                       style={{
                         width: FRAME_WIDTH,
@@ -132,13 +134,13 @@ export default function HomeTicker({ movies, railRef }: HomeTickerProps) {
                       {backdrop ? (
                         <Image
                           src={backdrop}
-                          alt=""
+                          alt={movie.title}
                           fill
                           sizes={`${FRAME_WIDTH}px`}
                           className="object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full bg-zinc-800" />
+                        <div className="w-full h-full bg-[#071a33]" />
                       )}
                     </Link>
                     <div style={{ width: FRAME_GAP }} />
@@ -167,8 +169,8 @@ export default function HomeTicker({ movies, railRef }: HomeTickerProps) {
           className="absolute z-30 pointer-events-none"
           style={{
             left: `${MARKER_POS}%`,
-            top: '-48px',
-            bottom: '-48px',
+            top: '-52px',
+            bottom: '-52px',
             transform: 'translateX(-50%)',
           }}
           aria-hidden="true"

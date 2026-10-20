@@ -30,7 +30,7 @@ export default function CountryFilter({
       forceClose={forceClose}
       className={className}
     >
-      <div className="bg-gray-950/95 backdrop-blur-xl border border-white/10 rounded-2xl p-2 shadow-2xl shadow-black/40 w-52 max-h-64 overflow-y-auto scrollbar-hide">
+      <div className="bg-[#000F20]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-2 shadow-2xl shadow-black/40 w-52 max-h-64 overflow-y-auto scrollbar-hide">
         <button
           onClick={() => onChange(null)}
           className={`block w-full text-left px-3 py-2 text-sm rounded-xl transition-colors ${
@@ -39,7 +39,7 @@ export default function CountryFilter({
               : 'text-gray-300 hover:bg-white/5'
           }`}
         >
-          Todos
+          All
         </button>
         {countries.map((countryName) => (
           <button

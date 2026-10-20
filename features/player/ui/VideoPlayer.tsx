@@ -24,23 +24,13 @@ export interface VideoPlayerProps {
   sources: PlayableSource[];
 }
 
-/**
- * Fases de la advertencia de adblock:
- *
- * - 'checking':  detección breve del bloqueador del usuario (~100 ms).
- * - 'show':      sin bloqueador → aviso minimalista.
- * - 'dismissed': tiene bloqueador o eligió continuar → renderizar iframe.
- */
 type AdBlockWarningPhase = 'checking' | 'show' | 'dismissed';
 
 export default function VideoPlayer({ sources }: VideoPlayerProps) {
-  // ─── Estado de advertencia ───
   const [warningPhase, setWarningPhase] = useState<AdBlockWarningPhase>(() =>
     shouldShowWarning() ? 'checking' : 'dismissed'
   );
 
-  // Si el usuario ya tiene un bloqueador (extensión o navegador con
-  // bloqueo nativo), se ahorra la advertencia por completo.
   useEffect(() => {
     if (warningPhase !== 'checking') return;
     let cancelled = false;
@@ -49,8 +39,6 @@ export default function VideoPlayer({ sources }: VideoPlayerProps) {
       .then((hasBlocker) => {
         if (cancelled) return;
         if (hasBlocker) {
-          // Marcar como descartada: próximas navegaciones SPA
-          // ni siquiera repiten la detección.
           markAsWarnedInSession();
           setWarningPhase('dismissed');
         } else {
@@ -80,7 +68,10 @@ export default function VideoPlayer({ sources }: VideoPlayerProps) {
     handleIframeLoad,
     handleRetry,
     handleSelectSource,
-  } = useServerFailover({ sources });
+  } = useServerFailover({
+    sources,
+    enabled: iframeAllowed,
+  });
 
   const handleInstall = () => {
     const recommendation = getAdblockRecommendation(detectBrowser());
@@ -94,7 +85,7 @@ export default function VideoPlayer({ sources }: VideoPlayerProps) {
 
   if (!sources || sources.length === 0) {
     return (
-      <div className="aspect-video bg-white/[0.02] border border-white/5 rounded-2xl flex items-center justify-center text-gray-500">
+      <div className="aspect-video bg-[#00040A] border border-white/5 rounded-2xl flex items-center justify-center text-gray-500">
         No servers available for this movie.
       </div>
     );
@@ -109,7 +100,7 @@ export default function VideoPlayer({ sources }: VideoPlayerProps) {
         onSelectSource={handleSelectSource}
       />
 
-      {autoSwitched && loadStatus === 'loading' && (
+      {iframeAllowed && autoSwitched && loadStatus === 'loading' && (
         <div className="mb-3 flex items-center gap-2 text-xs text-amber-400/80 bg-amber-500/5 border border-amber-500/10 rounded-lg px-3 py-2">
           <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse flex-shrink-0" />
           The previous server did not respond. Automatically switching to{' '}
@@ -117,22 +108,20 @@ export default function VideoPlayer({ sources }: VideoPlayerProps) {
         </div>
       )}
 
-      <div className="relative aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl shadow-black/30 border border-white/5">
-        {/* ─── Detección de bloqueador (breve, ~100 ms) ─── */}
+      <div className="relative aspect-video bg-[#00040A] rounded-2xl overflow-hidden shadow-2xl shadow-black/50 border border-white/5">
         {warningPhase === 'checking' && (
-          <div className="absolute inset-0 z-10 bg-gray-950 flex items-center justify-center">
+          <div className="absolute inset-0 z-10 bg-[#00040A] flex items-center justify-center">
             <div className="w-8 h-8 border-2 border-red-600/60 border-t-transparent rounded-full animate-spin" />
           </div>
         )}
 
-        {/* ─── Advertencia minimalista (sin bloqueador detectado) ─── */}
         {showWarning && (
-          <div className="absolute inset-0 z-10 bg-gray-950 flex flex-col items-center justify-center gap-3 sm:gap-5 px-4 py-3 sm:p-8 text-center">
+          <div className="absolute inset-0 z-10 bg-[#00040A] flex flex-col items-center justify-center gap-3 sm:gap-5 px-4 py-3 sm:p-8 text-center">
             <div className="hidden min-[380px]:flex w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-red-600/10 border border-red-600/25 items-center justify-center flex-shrink-0">
               <IconShield className="w-5 h-5 sm:w-6 sm:h-6 text-red-500" />
             </div>
 
-            <p className="text-xs sm:text-sm text-gray-400 leading-relaxed max-w-sm flex-shrink-0">
+            <p className="text-xs sm:text-sm text-gray-300 leading-relaxed max-w-sm flex-shrink-0">
               To avoid invasive ads, we recommend installing an ad
               blocker.
             </p>
@@ -154,7 +143,6 @@ export default function VideoPlayer({ sources }: VideoPlayerProps) {
           </div>
         )}
 
-        {/* ─── Contenido del player (solo con advertencia descartada) ─── */}
         {iframeAllowed && loadStatus === 'loading' && (
           <PlayerLoadingOverlay
             serverName={activeSource?.name}

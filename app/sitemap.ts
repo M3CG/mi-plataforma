@@ -1,7 +1,7 @@
 // app/sitemap.ts
 import type { MetadataRoute } from 'next';
-
-import { getMoviesWithFilters } from '@/lib/queries/movies';
+import { discoverMovies } from '@/lib/api/tmdb/discover';
+import { normalizeTmdbResultsToMovies } from '@/lib/api/tmdb/catalogNormalizer';
 import { absoluteRoutes } from '@/lib/routes';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -21,14 +21,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   const movieRoutes: MetadataRoute.Sitemap = [];
+  const searchParams = new URLSearchParams();
 
-  let page = 1;
-  let hasMore = true;
-
-  while (hasMore && page <= 50) {
+  for (let page = 1; page <= 10; page += 1) {
     try {
-      const result = await getMoviesWithFilters({}, page, 100);
-      const movies = result.data;
+      const result = await discoverMovies(searchParams, page, 'catalog', 24);
+      const movies = normalizeTmdbResultsToMovies(result.results);
 
       movies.forEach((movie) => {
         movieRoutes.push({
@@ -39,8 +37,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         });
       });
 
-      hasMore = result.hasMore;
-      page++;
+      if (!result.hasMore) break;
     } catch {
       break;
     }

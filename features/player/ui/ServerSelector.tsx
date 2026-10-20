@@ -46,7 +46,7 @@ export default function ServerSelector({
 
             {isFailed && !isActive && (
               <span className="text-[9px] uppercase tracking-wide opacity-60">
-                caído
+                down
               </span>
             )}
           </button>

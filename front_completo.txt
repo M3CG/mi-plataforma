@@ -2,10 +2,10 @@
 VUELCO COMPLETO EN UN ARCHIVO
 ==============================================================================
 
-Raíz: /home/mario/Projects/Cinelito/mi-plataforma
-Fecha: 2026-10-15 10:01
+Raíz: /home/mario/Projects/Cinestream/mi-plataforma
+Fecha: 2026-10-18 02:46
 Alcance: solo frontend (mi-plataforma)
-Archivos incluidos: 260 · Chars: 495,483 (~123,870 tokens aprox.)
+Archivos incluidos: 262 · Chars: 510,358 (~127,589 tokens aprox.)
 
 ------------------------------------------------------------------------------
 ESTRUCTURA DE ARCHIVOS INCLUIDOS
@@ -59,6 +59,7 @@ mi-plataforma/
 │   │   ├── loading.tsx
 │   │   └── page.tsx
 │   ├── providers/
+│   │   ├── PageTransitionGate.tsx
 │   │   └── ScrollToTop.tsx
 │   ├── search/
 │   │   ├── loading.tsx
@@ -164,6 +165,8 @@ mi-plataforma/
 │   │   ├── lib/
 │   │   │   └── filterUrlSerializer.ts
 │   │   ├── model/
+│   │   │   ├── __tests__/
+│   │   │   │   └── decideScrollCollapse.test.ts
 │   │   │   ├── useMovieFilters.ts
 │   │   │   ├── useScrollCollapse.ts
 │   │   │   └── useStickySentinel.ts
@@ -396,7 +399,7 @@ CONTENIDO DE LOS ARCHIVOS
 ------------------------------------------------------------------------------
 
 ==============================================================================
-ARCHIVO [1/260]: .env.example  (20 líneas)
+ARCHIVO [1/262]: .env.example  (20 líneas)
 ==============================================================================
 # ─── Strapi ───
 NEXT_PUBLIC_API_URL=http://localhost:1337
@@ -422,7 +425,7 @@ STRAPI_API_TOKEN=
 --- FIN DEL ARCHIVO: .env.example ---
 
 ==============================================================================
-ARCHIVO [2/260]: .gitignore  (41 líneas)
+ARCHIVO [2/262]: .gitignore  (41 líneas)
 ==============================================================================
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
@@ -469,7 +472,7 @@ next-env.d.ts
 --- FIN DEL ARCHIVO: .gitignore ---
 
 ==============================================================================
-ARCHIVO [3/260]: app/actor/[slug]/loading.tsx  (46 líneas)
+ARCHIVO [3/262]: app/actor/[slug]/loading.tsx  (46 líneas)
 ==============================================================================
 // app/actor/[slug]/loading.tsx
 
@@ -521,7 +524,7 @@ export default function ActorDetailLoading() {
 --- FIN DEL ARCHIVO: app/actor/[slug]/loading.tsx ---
 
 ==============================================================================
-ARCHIVO [4/260]: app/actor/[slug]/page.tsx  (37 líneas)
+ARCHIVO [4/262]: app/actor/[slug]/page.tsx  (37 líneas)
 ==============================================================================
 // app/actor/[slug]/page.tsx
 
@@ -564,7 +567,7 @@ export default async function ActorRoute({
 --- FIN DEL ARCHIVO: app/actor/[slug]/page.tsx ---
 
 ==============================================================================
-ARCHIVO [5/260]: app/admin/import/actor/[tmdbId]/page.tsx  (28 líneas)
+ARCHIVO [5/262]: app/admin/import/actor/[tmdbId]/page.tsx  (28 líneas)
 ==============================================================================
 // app/admin/import/actor/[tmdbId]/page.tsx
 import { notFound } from 'next/navigation';
@@ -598,7 +601,7 @@ export default async function ActorImportRoute({
 --- FIN DEL ARCHIVO: app/admin/import/actor/[tmdbId]/page.tsx ---
 
 ==============================================================================
-ARCHIVO [6/260]: app/admin/import/movie/[tmdbId]/page.tsx  (28 líneas)
+ARCHIVO [6/262]: app/admin/import/movie/[tmdbId]/page.tsx  (28 líneas)
 ==============================================================================
 // app/admin/import/movie/[tmdbId]/page.tsx
 import { notFound } from 'next/navigation';
@@ -632,7 +635,7 @@ export default async function MovieImportRoute({
 --- FIN DEL ARCHIVO: app/admin/import/movie/[tmdbId]/page.tsx ---
 
 ==============================================================================
-ARCHIVO [7/260]: app/admin/import/page.tsx  (37 líneas)
+ARCHIVO [7/262]: app/admin/import/page.tsx  (37 líneas)
 ==============================================================================
 // app/admin/import/page.tsx
 import { Suspense } from 'react';
@@ -675,7 +678,7 @@ export default async function AdminImportRoute() {
 --- FIN DEL ARCHIVO: app/admin/import/page.tsx ---
 
 ==============================================================================
-ARCHIVO [8/260]: app/api/admin/actors/route.ts  (59 líneas)
+ARCHIVO [8/262]: app/api/admin/actors/route.ts  (59 líneas)
 ==============================================================================
 // app/api/admin/actors/route.ts
 import { NextRequest, NextResponse } from 'next/server';
@@ -740,7 +743,7 @@ export async function POST(request: NextRequest) {
 --- FIN DEL ARCHIVO: app/api/admin/actors/route.ts ---
 
 ==============================================================================
-ARCHIVO [9/260]: app/api/admin/movies/route.ts  (62 líneas)
+ARCHIVO [9/262]: app/api/admin/movies/route.ts  (62 líneas)
 ==============================================================================
 // app/api/admin/movies/route.ts
 import { NextRequest, NextResponse } from 'next/server';
@@ -808,7 +811,7 @@ export async function POST(request: NextRequest) {
 --- FIN DEL ARCHIVO: app/api/admin/movies/route.ts ---
 
 ==============================================================================
-ARCHIVO [10/260]: app/api/admin/tmdb/discover/route.ts  (47 líneas)
+ARCHIVO [10/262]: app/api/admin/tmdb/discover/route.ts  (47 líneas)
 ==============================================================================
 // app/api/admin/tmdb/discover/route.ts
 import { NextRequest, NextResponse } from 'next/server';
@@ -861,7 +864,7 @@ export async function GET(request: NextRequest) {
 --- FIN DEL ARCHIVO: app/api/admin/tmdb/discover/route.ts ---
 
 ==============================================================================
-ARCHIVO [11/260]: app/api/admin/tmdb/movie/route.ts  (62 líneas)
+ARCHIVO [11/262]: app/api/admin/tmdb/movie/route.ts  (62 líneas)
 ==============================================================================
 // app/api/admin/tmdb/movie/route.ts
 import { NextRequest, NextResponse } from 'next/server';
@@ -929,7 +932,7 @@ export async function GET(request: NextRequest) {
 --- FIN DEL ARCHIVO: app/api/admin/tmdb/movie/route.ts ---
 
 ==============================================================================
-ARCHIVO [12/260]: app/api/admin/tmdb/person/filmography/route.ts  (86 líneas)
+ARCHIVO [12/262]: app/api/admin/tmdb/person/filmography/route.ts  (86 líneas)
 ==============================================================================
 // app/api/admin/tmdb/person/filmography/route.ts
 import { NextRequest, NextResponse } from 'next/server';
@@ -1021,7 +1024,7 @@ export async function GET(request: NextRequest) {
 --- FIN DEL ARCHIVO: app/api/admin/tmdb/person/filmography/route.ts ---
 
 ==============================================================================
-ARCHIVO [13/260]: app/api/admin/tmdb/person/route.ts  (48 líneas)
+ARCHIVO [13/262]: app/api/admin/tmdb/person/route.ts  (48 líneas)
 ==============================================================================
 // app/api/admin/tmdb/person/route.ts
 import { NextRequest, NextResponse } from 'next/server';
@@ -1075,7 +1078,7 @@ export async function GET(request: NextRequest) {
 --- FIN DEL ARCHIVO: app/api/admin/tmdb/person/route.ts ---
 
 ==============================================================================
-ARCHIVO [14/260]: app/api/admin/tmdb/search/route.ts  (61 líneas)
+ARCHIVO [14/262]: app/api/admin/tmdb/search/route.ts  (61 líneas)
 ==============================================================================
 // app/api/admin/tmdb/search/route.ts
 import { NextRequest, NextResponse } from 'next/server';
@@ -1142,7 +1145,7 @@ export async function GET(request: NextRequest) {
 --- FIN DEL ARCHIVO: app/api/admin/tmdb/search/route.ts ---
 
 ==============================================================================
-ARCHIVO [15/260]: app/api/movies/autocomplete/route.ts  (51 líneas)
+ARCHIVO [15/262]: app/api/movies/autocomplete/route.ts  (51 líneas)
 ==============================================================================
 // app/api/movies/autocomplete/route.ts
 import { NextRequest, NextResponse } from 'next/server';
@@ -1199,7 +1202,7 @@ export async function GET(request: NextRequest) {
 --- FIN DEL ARCHIVO: app/api/movies/autocomplete/route.ts ---
 
 ==============================================================================
-ARCHIVO [16/260]: app/api/movies/route.ts  (80 líneas)
+ARCHIVO [16/262]: app/api/movies/route.ts  (80 líneas)
 ==============================================================================
 // app/api/movies/route.ts
 import { NextRequest, NextResponse } from 'next/server';
@@ -1285,7 +1288,7 @@ export async function GET(request: NextRequest) {
 --- FIN DEL ARCHIVO: app/api/movies/route.ts ---
 
 ==============================================================================
-ARCHIVO [17/260]: app/api/movies/view/route.ts  (169 líneas)
+ARCHIVO [17/262]: app/api/movies/view/route.ts  (169 líneas)
 ==============================================================================
 // app/api/movies/view/route.ts
 import { after } from 'next/server';
@@ -1460,7 +1463,7 @@ export async function POST(request: NextRequest) {
 --- FIN DEL ARCHIVO: app/api/movies/view/route.ts ---
 
 ==============================================================================
-ARCHIVO [18/260]: app/api/revalidate/route.ts  (78 líneas)
+ARCHIVO [18/262]: app/api/revalidate/route.ts  (78 líneas)
 ==============================================================================
 // app/api/revalidate/route.ts
 import { NextRequest, NextResponse } from 'next/server';
@@ -1544,7 +1547,7 @@ export async function POST(request: NextRequest) {
 --- FIN DEL ARCHIVO: app/api/revalidate/route.ts ---
 
 ==============================================================================
-ARCHIVO [19/260]: app/error.tsx  (41 líneas)
+ARCHIVO [19/262]: app/error.tsx  (41 líneas)
 ==============================================================================
 // app/error.tsx
 'use client';
@@ -1591,7 +1594,7 @@ export default function Error({
 --- FIN DEL ARCHIVO: app/error.tsx ---
 
 ==============================================================================
-ARCHIVO [20/260]: app/globals.css  (49 líneas)
+ARCHIVO [20/262]: app/globals.css  (49 líneas)
 ==============================================================================
 /* app/globals.css */
 
@@ -1646,15 +1649,14 @@ h1, h2, h3, h4, h5, h6 {
 --- FIN DEL ARCHIVO: app/globals.css ---
 
 ==============================================================================
-ARCHIVO [21/260]: app/layout.tsx  (63 líneas)
+ARCHIVO [21/262]: app/layout.tsx  (62 líneas)
 ==============================================================================
-
-
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from '@/widgets/Header/Header';
 import ScrollToTop from '@/app/providers/ScrollToTop';
+import PageTransitionGate from '@/app/providers/PageTransitionGate';
 import { WebVitalsReporter } from './vitals';
 import { SITE_URL } from '@/lib/config/site';
 import { API_URL } from '@/lib/api/http/config';
@@ -1686,7 +1688,6 @@ export default function RootLayout({
     <html lang="en">
       {/*
         Se eliminó suppressHydrationWarning del body.
-
         En este proyecto no hay una causa legítima para silenciar
         warnings de hidratación:
 
@@ -1705,7 +1706,8 @@ export default function RootLayout({
         <link rel="preconnect" href="https://image.tmdb.org" crossOrigin="anonymous" />
         <link rel="preconnect" href={strapiOrigin} />
         <ScrollToTop />
-                <Header />
+        <PageTransitionGate />
+        <Header />
         <main className="pt-16 min-h-screen">{children}</main>
       </body>
     </html>
@@ -1715,7 +1717,7 @@ export default function RootLayout({
 --- FIN DEL ARCHIVO: app/layout.tsx ---
 
 ==============================================================================
-ARCHIVO [22/260]: app/loading.tsx  (10 líneas)
+ARCHIVO [22/262]: app/loading.tsx  (10 líneas)
 ==============================================================================
 export default function Loading() {
   return (
@@ -1731,7 +1733,7 @@ export default function Loading() {
 --- FIN DEL ARCHIVO: app/loading.tsx ---
 
 ==============================================================================
-ARCHIVO [23/260]: app/movie/[slug]/loading.tsx  (77 líneas)
+ARCHIVO [23/262]: app/movie/[slug]/loading.tsx  (77 líneas)
 ==============================================================================
 // app/movie/[slug]/loading.tsx
 
@@ -1814,7 +1816,7 @@ export default function MovieDetailLoading() {
 --- FIN DEL ARCHIVO: app/movie/[slug]/loading.tsx ---
 
 ==============================================================================
-ARCHIVO [24/260]: app/movie/[slug]/page.tsx  (49 líneas)
+ARCHIVO [24/262]: app/movie/[slug]/page.tsx  (49 líneas)
 ==============================================================================
 import { notFound } from 'next/navigation';
 import {
@@ -1869,7 +1871,7 @@ export default async function MovieDetailRoute({
 --- FIN DEL ARCHIVO: app/movie/[slug]/page.tsx ---
 
 ==============================================================================
-ARCHIVO [25/260]: app/movies/loading.tsx  (22 líneas)
+ARCHIVO [25/262]: app/movies/loading.tsx  (22 líneas)
 ==============================================================================
 // app/movies/loading.tsx
 
@@ -1897,7 +1899,7 @@ export default function MoviesLoading() {
 --- FIN DEL ARCHIVO: app/movies/loading.tsx ---
 
 ==============================================================================
-ARCHIVO [26/260]: app/movies/page.tsx  (74 líneas)
+ARCHIVO [26/262]: app/movies/page.tsx  (74 líneas)
 ==============================================================================
 import type { MovieFiltersQuery } from '@/entities/movie';
 import {
@@ -1977,7 +1979,7 @@ export default async function MoviesRoute({
 --- FIN DEL ARCHIVO: app/movies/page.tsx ---
 
 ==============================================================================
-ARCHIVO [27/260]: app/not-found.tsx  (31 líneas)
+ARCHIVO [27/262]: app/not-found.tsx  (31 líneas)
 ==============================================================================
 // app/not-found.tsx
 import Link from 'next/link';
@@ -2014,7 +2016,7 @@ export default function NotFound() {
 --- FIN DEL ARCHIVO: app/not-found.tsx ---
 
 ==============================================================================
-ARCHIVO [28/260]: app/page.tsx  (6 líneas)
+ARCHIVO [28/262]: app/page.tsx  (6 líneas)
 ==============================================================================
 import { HomePage, getHomeHeroData } from '@/features/home';
 
@@ -2026,7 +2028,163 @@ export default async function Home() {
 --- FIN DEL ARCHIVO: app/page.tsx ---
 
 ==============================================================================
-ARCHIVO [29/260]: app/providers/ScrollToTop.tsx  (19 líneas)
+ARCHIVO [29/262]: app/providers/PageTransitionGate.tsx  (150 líneas)
+==============================================================================
+// app/providers/PageTransitionGate.tsx
+'use client';
+
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
+
+/**
+ * Duración mínima percibida de cada navegación entre páginas (ms).
+ *
+ * El sitio responde tan rápido que muchas transiciones son
+ * instantáneas (prefetch + router cache). Eso genera dos problemas:
+ *
+ * 1. El usuario no percibe que cambió de página.
+ * 2. Los tiempos son inconsistentes: 0 ms, 200 ms, 400 ms...
+ *    El usuario no lo detecta conscientemente, pero se siente.
+ *
+ * Este componente garantiza un mínimo uniforme por navegación:
+ * si la transición terminó antes del mínimo, muestra un overlay de
+ * carga por el tiempo restante. Si tardó más (fetch real lento),
+ * no agrega nada: el skeleton de la ruta ya cubrió ese tiempo.
+ *
+ * Resultado: toda navegación dura max(tiempoReal, MIN_PAGE_DURATION_MS).
+ */
+const MIN_PAGE_DURATION_MS = 900;
+const FADE_OUT_MS = 150;
+
+type GatePhase = 'idle' | 'visible' | 'fading';
+
+export default function PageTransitionGate() {
+  const pathname = usePathname();
+  const [phase, setPhase] = useState<GatePhase>('idle');
+
+  // Momento en que el usuario inició la navegación.
+  const intentAtRef = useRef<number | null>(null);
+  // Última ruta procesada (evita disparar en mount / strict mode).
+  const lastPathnameRef = useRef(pathname);
+  const timersRef = useRef<number[]>([]);
+
+  // ─── Registrar el inicio de cada navegación ───
+  // Click en links internos, submit de formularios (búsqueda)
+  // y popstate (back/forward). Links externos, con modificadores
+  // o target=_blank se ignoran.
+  useEffect(() => {
+    const registerIntent = () => {
+      intentAtRef.current = performance.now();
+    };
+
+    const handleClick = (event: MouseEvent) => {
+      if (event.defaultPrevented || event.button !== 0) return;
+      if (
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
+      const target = event.target as Element | null;
+      const anchor = target?.closest?.('a[href]') as
+        | HTMLAnchorElement
+        | null
+        | undefined;
+      if (!anchor) return;
+      const href = anchor.getAttribute('href');
+      if (!href || !href.startsWith('/')) return;
+      if (
+        anchor.target === '_blank' ||
+        anchor.hasAttribute('download')
+      ) {
+        return;
+      }
+      registerIntent();
+    };
+
+    document.addEventListener('click', handleClick, true);
+    document.addEventListener('submit', registerIntent, true);
+    window.addEventListener('popstate', registerIntent);
+
+    return () => {
+      document.removeEventListener('click', handleClick, true);
+      document.removeEventListener('submit', registerIntent, true);
+      window.removeEventListener('popstate', registerIntent);
+    };
+  }, []);
+
+  // ─── Completar el mínimo cuando cambia la ruta ───
+  //
+  // useLayoutEffect (no useEffect): el overlay debe pintarse en el
+  // mismo frame que la página nueva; con useEffect el contenido
+  // nuevo flashea un instante antes de taparse.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useLayoutEffect(() => {
+    // Sin cambio real de ruta (mount, re-render, strict mode).
+    if (lastPathnameRef.current === pathname) return;
+    lastPathnameRef.current = pathname;
+
+    const startedAt = intentAtRef.current;
+    intentAtRef.current = null;
+
+    // Sin evento registrado (navegación programática sin click):
+    // el mínimo se cuenta desde que la página nueva quedó montada.
+    const elapsed =
+      startedAt === null ? 0 : performance.now() - startedAt;
+    const remaining = MIN_PAGE_DURATION_MS - elapsed;
+
+    // La transición ya tardó más que el mínimo: el skeleton real
+    // cubrió el tiempo, no agregar carga artificial.
+    if (remaining <= 0) return;
+
+    timersRef.current.forEach((timer) => window.clearTimeout(timer));
+    timersRef.current = [];
+
+    setPhase('visible');
+
+    const hideTimer = window.setTimeout(() => {
+      setPhase('fading');
+      const doneTimer = window.setTimeout(() => {
+        setPhase('idle');
+      }, FADE_OUT_MS);
+      timersRef.current.push(doneTimer);
+    }, remaining);
+    timersRef.current.push(hideTimer);
+  }, [pathname]);
+
+  // ─── Limpieza de timers al desmontar ───
+  useEffect(() => {
+    return () => {
+      timersRef.current.forEach((timer) =>
+        window.clearTimeout(timer)
+      );
+    };
+  }, []);
+
+  if (phase === 'idle') return null;
+
+  return (
+    <div
+      role="status"
+      aria-label="Loading page"
+      className={`fixed inset-0 z-[80] bg-gray-900 flex flex-col items-center justify-center gap-4 ${
+        phase === 'visible'
+          ? 'opacity-100'
+          : 'opacity-0 pointer-events-none transition-opacity duration-150 ease-out'
+      }`}
+    >
+      <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
+      <p className="text-gray-400 text-sm">Loading...</p>
+    </div>
+  );
+}
+==============================================================================
+--- FIN DEL ARCHIVO: app/providers/PageTransitionGate.tsx ---
+
+==============================================================================
+ARCHIVO [30/262]: app/providers/ScrollToTop.tsx  (19 líneas)
 ==============================================================================
 'use client';
 
@@ -2051,7 +2209,7 @@ export default function ScrollToTop() {
 --- FIN DEL ARCHIVO: app/providers/ScrollToTop.tsx ---
 
 ==============================================================================
-ARCHIVO [30/260]: app/robots.ts  (17 líneas)
+ARCHIVO [31/262]: app/robots.ts  (17 líneas)
 ==============================================================================
 // app/robots.ts
 
@@ -2074,7 +2232,7 @@ export default function robots(): MetadataRoute.Robots {
 --- FIN DEL ARCHIVO: app/robots.ts ---
 
 ==============================================================================
-ARCHIVO [31/260]: app/search/loading.tsx  (13 líneas)
+ARCHIVO [32/262]: app/search/loading.tsx  (13 líneas)
 ==============================================================================
 // app/search/loading.tsx
 
@@ -2093,7 +2251,7 @@ export default function SearchLoading() {
 --- FIN DEL ARCHIVO: app/search/loading.tsx ---
 
 ==============================================================================
-ARCHIVO [32/260]: app/search/page.tsx  (32 líneas)
+ARCHIVO [33/262]: app/search/page.tsx  (32 líneas)
 ==============================================================================
 // app/search/page.tsx
 import {
@@ -2131,7 +2289,7 @@ export default async function SearchRoute({
 --- FIN DEL ARCHIVO: app/search/page.tsx ---
 
 ==============================================================================
-ARCHIVO [33/260]: app/sitemap.ts  (50 líneas)
+ARCHIVO [34/262]: app/sitemap.ts  (50 líneas)
 ==============================================================================
 // app/sitemap.ts
 import type { MetadataRoute } from 'next';
@@ -2187,7 +2345,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 --- FIN DEL ARCHIVO: app/sitemap.ts ---
 
 ==============================================================================
-ARCHIVO [34/260]: app/vitals.ts  (88 líneas)
+ARCHIVO [35/262]: app/vitals.ts  (88 líneas)
 ==============================================================================
 'use client';
 
@@ -2281,7 +2439,7 @@ export function WebVitalsReporter() {
 --- FIN DEL ARCHIVO: app/vitals.ts ---
 
 ==============================================================================
-ARCHIVO [35/260]: ARCHITECTURE.md  (486 líneas)
+ARCHIVO [36/262]: ARCHITECTURE.md  (486 líneas)
 ==============================================================================
 # Arquitectura del proyecto
 
@@ -2773,7 +2931,7 @@ La siguiente etapa está documentada en:
 --- FIN DEL ARCHIVO: ARCHITECTURE.md ---
 
 ==============================================================================
-ARCHIVO [36/260]: docs/REFACTORING_ROADMAP.md  (200 líneas)
+ARCHIVO [37/262]: docs/REFACTORING_ROADMAP.md  (200 líneas)
 ==============================================================================
 # Roadmap de refactorización fina
 
@@ -2979,7 +3137,7 @@ Orden sugerido:
 --- FIN DEL ARCHIVO: docs/REFACTORING_ROADMAP.md ---
 
 ==============================================================================
-ARCHIVO [37/260]: entities/category/index.ts  (3 líneas)
+ARCHIVO [38/262]: entities/category/index.ts  (3 líneas)
 ==============================================================================
 // entities/category/index.ts
 
@@ -2988,7 +3146,7 @@ export type { Category } from './types';
 --- FIN DEL ARCHIVO: entities/category/index.ts ---
 
 ==============================================================================
-ARCHIVO [38/260]: entities/category/types.ts  (7 líneas)
+ARCHIVO [39/262]: entities/category/types.ts  (7 líneas)
 ==============================================================================
 // entities/category/types.ts
 
@@ -3001,7 +3159,7 @@ export interface Category {
 --- FIN DEL ARCHIVO: entities/category/types.ts ---
 
 ==============================================================================
-ARCHIVO [39/260]: entities/movie/__tests__/genreMatch.test.ts  (61 líneas)
+ARCHIVO [40/262]: entities/movie/__tests__/genreMatch.test.ts  (61 líneas)
 ==============================================================================
 import { describe, it, expect } from 'vitest';
 import {
@@ -3068,7 +3226,7 @@ describe('getMovieGenreMatchCount', () => {
 --- FIN DEL ARCHIVO: entities/movie/__tests__/genreMatch.test.ts ---
 
 ==============================================================================
-ARCHIVO [40/260]: entities/movie/config/sort.ts  (31 líneas)
+ARCHIVO [41/262]: entities/movie/config/sort.ts  (31 líneas)
 ==============================================================================
 // entities/movie/config/sort.ts
 import type { MovieSort } from '../types/filters';
@@ -3105,7 +3263,7 @@ export function isMovieSort(value: unknown): value is MovieSort {
 --- FIN DEL ARCHIVO: entities/movie/config/sort.ts ---
 
 ==============================================================================
-ARCHIVO [41/260]: entities/movie/index.ts  (34 líneas)
+ARCHIVO [42/262]: entities/movie/index.ts  (34 líneas)
 ==============================================================================
 export type { Movie, Server } from './types/movie';
 
@@ -3145,7 +3303,7 @@ export { formatRuntime } from './lib/format';
 --- FIN DEL ARCHIVO: entities/movie/index.ts ---
 
 ==============================================================================
-ARCHIVO [42/260]: entities/movie/lib/format.ts  (13 líneas)
+ARCHIVO [43/262]: entities/movie/lib/format.ts  (13 líneas)
 ==============================================================================
 // entities/movie/lib/format.ts
 /**
@@ -3164,7 +3322,7 @@ export function formatRuntime(minutes?: number | null): string | null {
 --- FIN DEL ARCHIVO: entities/movie/lib/format.ts ---
 
 ==============================================================================
-ARCHIVO [43/260]: entities/movie/lib/genreMatch.ts  (44 líneas)
+ARCHIVO [44/262]: entities/movie/lib/genreMatch.ts  (44 líneas)
 ==============================================================================
 import type { Movie } from '../types/movie';
 
@@ -3214,7 +3372,7 @@ export function getMovieGenreMatchCount(
 --- FIN DEL ARCHIVO: entities/movie/lib/genreMatch.ts ---
 
 ==============================================================================
-ARCHIVO [44/260]: entities/movie/lib/movieKey.ts  (26 líneas)
+ARCHIVO [45/262]: entities/movie/lib/movieKey.ts  (26 líneas)
 ==============================================================================
 import type { Movie } from '../types/movie';
 
@@ -3246,7 +3404,7 @@ export function dedupeMovies(
 --- FIN DEL ARCHIVO: entities/movie/lib/movieKey.ts ---
 
 ==============================================================================
-ARCHIVO [45/260]: entities/movie/lib/runtime.ts  (16 líneas)
+ARCHIVO [46/262]: entities/movie/lib/runtime.ts  (16 líneas)
 ==============================================================================
 // entities/movie/lib/runtime.ts
 /**
@@ -3268,7 +3426,7 @@ export function clampMovieRuntime(runtime: number): number {
 --- FIN DEL ARCHIVO: entities/movie/lib/runtime.ts ---
 
 ==============================================================================
-ARCHIVO [46/260]: entities/movie/lib/year.ts  (16 líneas)
+ARCHIVO [47/262]: entities/movie/lib/year.ts  (16 líneas)
 ==============================================================================
 // entities/movie/lib/year.ts
 
@@ -3290,7 +3448,7 @@ export function clampMovieYear(year: number): number {
 --- FIN DEL ARCHIVO: entities/movie/lib/year.ts ---
 
 ==============================================================================
-ARCHIVO [47/260]: entities/movie/types/filters.ts  (34 líneas)
+ARCHIVO [48/262]: entities/movie/types/filters.ts  (34 líneas)
 ==============================================================================
 // entities/movie/types/filters.ts
 /**
@@ -3330,7 +3488,7 @@ export type MovieFiltersQuery = Record<
 --- FIN DEL ARCHIVO: entities/movie/types/filters.ts ---
 
 ==============================================================================
-ARCHIVO [48/260]: entities/movie/types/movie.ts  (40 líneas)
+ARCHIVO [49/262]: entities/movie/types/movie.ts  (40 líneas)
 ==============================================================================
 // entities/movie/types/movie.ts
 import type { Category } from '@/entities/category/types';
@@ -3376,7 +3534,7 @@ export interface Movie {
 --- FIN DEL ARCHIVO: entities/movie/types/movie.ts ---
 
 ==============================================================================
-ARCHIVO [49/260]: entities/person/index.ts  (3 líneas)
+ARCHIVO [50/262]: entities/person/index.ts  (3 líneas)
 ==============================================================================
 // entities/person/index.ts
 
@@ -3385,7 +3543,7 @@ export type { Person, Actor, Director } from './types';
 --- FIN DEL ARCHIVO: entities/person/index.ts ---
 
 ==============================================================================
-ARCHIVO [50/260]: entities/person/types.ts  (18 líneas)
+ARCHIVO [51/262]: entities/person/types.ts  (18 líneas)
 ==============================================================================
 // entities/person/types.ts
 
@@ -3409,7 +3567,7 @@ export type Director = Person;
 --- FIN DEL ARCHIVO: entities/person/types.ts ---
 
 ==============================================================================
-ARCHIVO [51/260]: eslint.config.mjs  (292 líneas)
+ARCHIVO [52/262]: eslint.config.mjs  (292 líneas)
 ==============================================================================
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
@@ -3707,7 +3865,7 @@ export default eslintConfig;
 --- FIN DEL ARCHIVO: eslint.config.mjs ---
 
 ==============================================================================
-ARCHIVO [52/260]: features/actor-detail/index.ts  (5 líneas)
+ARCHIVO [53/262]: features/actor-detail/index.ts  (5 líneas)
 ==============================================================================
 // features/actor-detail/index.ts
 
@@ -3718,7 +3876,7 @@ export { buildActorMetadata } from './lib/actorMetadata';
 --- FIN DEL ARCHIVO: features/actor-detail/index.ts ---
 
 ==============================================================================
-ARCHIVO [53/260]: features/actor-detail/lib/actorMetadata.ts  (33 líneas)
+ARCHIVO [54/262]: features/actor-detail/lib/actorMetadata.ts  (33 líneas)
 ==============================================================================
 // features/actor-detail/lib/actorMetadata.ts
 import type { Metadata } from 'next';
@@ -3757,7 +3915,7 @@ export function buildActorMetadata(
 --- FIN DEL ARCHIVO: features/actor-detail/lib/actorMetadata.ts ---
 
 ==============================================================================
-ARCHIVO [54/260]: features/actor-detail/lib/createActorDetailViewModel.ts  (17 líneas)
+ARCHIVO [55/262]: features/actor-detail/lib/createActorDetailViewModel.ts  (17 líneas)
 ==============================================================================
 // features/actor-detail/lib/createActorDetailViewModel.ts
 
@@ -3780,7 +3938,7 @@ export function createActorDetailViewModel(
 --- FIN DEL ARCHIVO: features/actor-detail/lib/createActorDetailViewModel.ts ---
 
 ==============================================================================
-ARCHIVO [55/260]: features/actor-detail/services/getActorPageData.ts  (33 líneas)
+ARCHIVO [56/262]: features/actor-detail/services/getActorPageData.ts  (33 líneas)
 ==============================================================================
 // features/actor-detail/services/getActorPageData.ts
 import { cache } from 'react';
@@ -3819,7 +3977,7 @@ export const getActorPageData = cache(
 --- FIN DEL ARCHIVO: features/actor-detail/services/getActorPageData.ts ---
 
 ==============================================================================
-ARCHIVO [56/260]: features/actor-detail/types.ts  (11 líneas)
+ARCHIVO [57/262]: features/actor-detail/types.ts  (11 líneas)
 ==============================================================================
 // features/actor-detail/types.ts
 
@@ -3836,7 +3994,7 @@ export interface ActorDetailViewModel {
 --- FIN DEL ARCHIVO: features/actor-detail/types.ts ---
 
 ==============================================================================
-ARCHIVO [57/260]: features/actor-detail/ui/ActorEmptyState.tsx  (27 líneas)
+ARCHIVO [58/262]: features/actor-detail/ui/ActorEmptyState.tsx  (27 líneas)
 ==============================================================================
 // features/actor-detail/ui/ActorEmptyState.tsx
 
@@ -3869,7 +4027,7 @@ export default function ActorEmptyState({
 --- FIN DEL ARCHIVO: features/actor-detail/ui/ActorEmptyState.tsx ---
 
 ==============================================================================
-ARCHIVO [58/260]: features/actor-detail/ui/ActorFilmography.tsx  (36 líneas)
+ARCHIVO [59/262]: features/actor-detail/ui/ActorFilmography.tsx  (36 líneas)
 ==============================================================================
 import type { Movie } from '@/entities/movie';
 import { getMovieKey } from '@/entities/movie';
@@ -3911,7 +4069,7 @@ export default function ActorFilmography({
 --- FIN DEL ARCHIVO: features/actor-detail/ui/ActorFilmography.tsx ---
 
 ==============================================================================
-ARCHIVO [59/260]: features/actor-detail/ui/ActorHero.tsx  (66 líneas)
+ARCHIVO [60/262]: features/actor-detail/ui/ActorHero.tsx  (66 líneas)
 ==============================================================================
 import Image from 'next/image';
 import BackButton from '@/shared/ui/BackButton';
@@ -3983,7 +4141,7 @@ export default function ActorHero({ viewModel }: ActorHeroProps) {
 --- FIN DEL ARCHIVO: features/actor-detail/ui/ActorHero.tsx ---
 
 ==============================================================================
-ARCHIVO [60/260]: features/actor-detail/ui/ActorPage.tsx  (25 líneas)
+ARCHIVO [61/262]: features/actor-detail/ui/ActorPage.tsx  (25 líneas)
 ==============================================================================
 // features/actor-detail/ui/ActorPage.tsx
 
@@ -4014,7 +4172,7 @@ export default function ActorPage({ viewModel }: ActorPageProps) {
 --- FIN DEL ARCHIVO: features/actor-detail/ui/ActorPage.tsx ---
 
 ==============================================================================
-ARCHIVO [61/260]: features/admin-import/index.ts  (4 líneas)
+ARCHIVO [62/262]: features/admin-import/index.ts  (4 líneas)
 ==============================================================================
 // features/admin-import/index.ts
 export { default as AdminImportPage } from './ui/AdminImportPage';
@@ -4024,7 +4182,7 @@ export { default as ActorImportDetail } from './ui/ActorImportDetail';
 --- FIN DEL ARCHIVO: features/admin-import/index.ts ---
 
 ==============================================================================
-ARCHIVO [62/260]: features/admin-import/model/useImport.ts  (95 líneas)
+ARCHIVO [63/262]: features/admin-import/model/useImport.ts  (95 líneas)
 ==============================================================================
 // features/admin-import/model/useImport.ts
 'use client';
@@ -4125,7 +4283,7 @@ export function useImportActor() {
 --- FIN DEL ARCHIVO: features/admin-import/model/useImport.ts ---
 
 ==============================================================================
-ARCHIVO [63/260]: features/admin-import/model/useMoviePreview.ts  (45 líneas)
+ARCHIVO [64/262]: features/admin-import/model/useMoviePreview.ts  (45 líneas)
 ==============================================================================
 // features/admin-import/model/useMoviePreview.ts
 'use client';
@@ -4176,7 +4334,7 @@ export function useMoviePreview() {
 --- FIN DEL ARCHIVO: features/admin-import/model/useMoviePreview.ts ---
 
 ==============================================================================
-ARCHIVO [64/260]: features/admin-import/model/usePersonFilmography.ts  (31 líneas)
+ARCHIVO [65/262]: features/admin-import/model/usePersonFilmography.ts  (31 líneas)
 ==============================================================================
 // features/admin-import/model/usePersonFilmography.ts
 'use client';
@@ -4213,7 +4371,7 @@ export function usePersonFilmography() {
 --- FIN DEL ARCHIVO: features/admin-import/model/usePersonFilmography.ts ---
 
 ==============================================================================
-ARCHIVO [65/260]: features/admin-import/model/usePersonPreview.ts  (33 líneas)
+ARCHIVO [66/262]: features/admin-import/model/usePersonPreview.ts  (33 líneas)
 ==============================================================================
 // features/admin-import/model/usePersonPreview.ts
 'use client';
@@ -4252,7 +4410,7 @@ export function usePersonPreview() {
 --- FIN DEL ARCHIVO: features/admin-import/model/usePersonPreview.ts ---
 
 ==============================================================================
-ARCHIVO [66/260]: features/admin-import/model/useTmdbDiscover.ts  (96 líneas)
+ARCHIVO [67/262]: features/admin-import/model/useTmdbDiscover.ts  (96 líneas)
 ==============================================================================
 // features/admin-import/model/useTmdbDiscover.ts
 'use client';
@@ -4354,7 +4512,7 @@ export function useTmdbDiscover() {
 --- FIN DEL ARCHIVO: features/admin-import/model/useTmdbDiscover.ts ---
 
 ==============================================================================
-ARCHIVO [67/260]: features/admin-import/model/useTmdbSearch.ts  (54 líneas)
+ARCHIVO [68/262]: features/admin-import/model/useTmdbSearch.ts  (54 líneas)
 ==============================================================================
 // features/admin-import/model/useTmdbSearch.ts
 'use client';
@@ -4414,7 +4572,7 @@ export function useTmdbSearch() {
 --- FIN DEL ARCHIVO: features/admin-import/model/useTmdbSearch.ts ---
 
 ==============================================================================
-ARCHIVO [68/260]: features/admin-import/types.ts  (91 líneas)
+ARCHIVO [69/262]: features/admin-import/types.ts  (91 líneas)
 ==============================================================================
 // features/admin-import/types.ts
 export type ImportStatus = 'idle' | 'saving' | 'success' | 'error';
@@ -4511,7 +4669,7 @@ export interface FilmographyMovie {
 --- FIN DEL ARCHIVO: features/admin-import/types.ts ---
 
 ==============================================================================
-ARCHIVO [69/260]: features/admin-import/ui/ActorImportDetail.tsx  (302 líneas)
+ARCHIVO [70/262]: features/admin-import/ui/ActorImportDetail.tsx  (302 líneas)
 ==============================================================================
 // features/admin-import/ui/ActorImportDetail.tsx
 'use client';
@@ -4819,7 +4977,7 @@ export default function ActorImportDetail({
 --- FIN DEL ARCHIVO: features/admin-import/ui/ActorImportDetail.tsx ---
 
 ==============================================================================
-ARCHIVO [70/260]: features/admin-import/ui/ActorPreviewPanel.tsx  (109 líneas)
+ARCHIVO [71/262]: features/admin-import/ui/ActorPreviewPanel.tsx  (109 líneas)
 ==============================================================================
 // features/admin-import/ui/ActorPreviewPanel.tsx
 'use client';
@@ -4934,7 +5092,7 @@ export default function ActorPreviewPanel({
 --- FIN DEL ARCHIVO: features/admin-import/ui/ActorPreviewPanel.tsx ---
 
 ==============================================================================
-ARCHIVO [71/260]: features/admin-import/ui/AdminImportPage.tsx  (229 líneas)
+ARCHIVO [72/262]: features/admin-import/ui/AdminImportPage.tsx  (229 líneas)
 ==============================================================================
 // features/admin-import/ui/AdminImportPage.tsx
 'use client';
@@ -5169,7 +5327,7 @@ export default function AdminImportPage({
 --- FIN DEL ARCHIVO: features/admin-import/ui/AdminImportPage.tsx ---
 
 ==============================================================================
-ARCHIVO [72/260]: features/admin-import/ui/MovieImportDetail.tsx  (311 líneas)
+ARCHIVO [73/262]: features/admin-import/ui/MovieImportDetail.tsx  (311 líneas)
 ==============================================================================
 // features/admin-import/ui/MovieImportDetail.tsx
 'use client';
@@ -5486,7 +5644,7 @@ export default function MovieImportDetail({ tmdbId }: MovieImportDetailProps) {
 --- FIN DEL ARCHIVO: features/admin-import/ui/MovieImportDetail.tsx ---
 
 ==============================================================================
-ARCHIVO [73/260]: features/admin-import/ui/MoviePreviewPanel.tsx  (204 líneas)
+ARCHIVO [74/262]: features/admin-import/ui/MoviePreviewPanel.tsx  (204 líneas)
 ==============================================================================
 // features/admin-import/ui/MoviePreviewPanel.tsx
 'use client';
@@ -5696,7 +5854,7 @@ export default function MoviePreviewPanel({
 --- FIN DEL ARCHIVO: features/admin-import/ui/MoviePreviewPanel.tsx ---
 
 ==============================================================================
-ARCHIVO [74/260]: features/admin-import/ui/PosterSelector.tsx  (65 líneas)
+ARCHIVO [75/262]: features/admin-import/ui/PosterSelector.tsx  (65 líneas)
 ==============================================================================
 // features/admin-import/ui/PosterSelector.tsx
 'use client';
@@ -5767,7 +5925,7 @@ export default function PosterSelector({
 --- FIN DEL ARCHIVO: features/admin-import/ui/PosterSelector.tsx ---
 
 ==============================================================================
-ARCHIVO [75/260]: features/admin-import/ui/SearchResults.tsx  (122 líneas)
+ARCHIVO [76/262]: features/admin-import/ui/SearchResults.tsx  (122 líneas)
 ==============================================================================
 // features/admin-import/ui/SearchResults.tsx
 'use client';
@@ -5895,7 +6053,7 @@ export default function SearchResults({
 --- FIN DEL ARCHIVO: features/admin-import/ui/SearchResults.tsx ---
 
 ==============================================================================
-ARCHIVO [76/260]: features/admin-import/ui/SlugSelector.tsx  (61 líneas)
+ARCHIVO [77/262]: features/admin-import/ui/SlugSelector.tsx  (61 líneas)
 ==============================================================================
 // features/admin-import/ui/SlugSelector.tsx
 'use client';
@@ -5962,7 +6120,7 @@ export default function SlugSelector({
 --- FIN DEL ARCHIVO: features/admin-import/ui/SlugSelector.tsx ---
 
 ==============================================================================
-ARCHIVO [77/260]: features/ads/config/ads.ts  (20 líneas)
+ARCHIVO [78/262]: features/ads/config/ads.ts  (20 líneas)
 ==============================================================================
 // features/ads/config/ads.ts
 
@@ -5988,7 +6146,7 @@ export const MOVIES_PER_AD = 24;
 --- FIN DEL ARCHIVO: features/ads/config/ads.ts ---
 
 ==============================================================================
-ARCHIVO [78/260]: features/ads/index.ts  (4 líneas)
+ARCHIVO [79/262]: features/ads/index.ts  (4 líneas)
 ==============================================================================
 export { default as AdBanner } from './ui/AdBanner';
 export { default as MovieGridAdSlot } from './ui/MovieGridAdSlot';
@@ -5998,7 +6156,7 @@ export { MOVIES_PER_AD, ADS_ENABLED } from './config/ads';
 --- FIN DEL ARCHIVO: features/ads/index.ts ---
 
 ==============================================================================
-ARCHIVO [79/260]: features/ads/lib/adPlacement.ts  (23 líneas)
+ARCHIVO [80/262]: features/ads/lib/adPlacement.ts  (23 líneas)
 ==============================================================================
 // features/ads/lib/adPlacement.ts
 import { MOVIES_PER_AD, ADS_ENABLED } from '../config/ads';
@@ -6027,7 +6185,7 @@ export function shouldShowAdAtIndex(index: number): boolean {
 --- FIN DEL ARCHIVO: features/ads/lib/adPlacement.ts ---
 
 ==============================================================================
-ARCHIVO [80/260]: features/ads/ui/AdBanner.tsx  (49 líneas)
+ARCHIVO [81/262]: features/ads/ui/AdBanner.tsx  (49 líneas)
 ==============================================================================
 // features/ads/ui/AdBanner.tsx
 import { IconAd } from '@/shared/ui/icons';
@@ -6082,7 +6240,7 @@ export default function AdBanner({
 --- FIN DEL ARCHIVO: features/ads/ui/AdBanner.tsx ---
 
 ==============================================================================
-ARCHIVO [81/260]: features/ads/ui/MovieGridAdSlot.tsx  (19 líneas)
+ARCHIVO [82/262]: features/ads/ui/MovieGridAdSlot.tsx  (19 líneas)
 ==============================================================================
 // features/ads/ui/MovieGridAdSlot.tsx
 import AdBanner from './AdBanner';
@@ -6107,7 +6265,7 @@ export default function MovieGridAdSlot({ index }: MovieGridAdSlotProps) {
 --- FIN DEL ARCHIVO: features/ads/ui/MovieGridAdSlot.tsx ---
 
 ==============================================================================
-ARCHIVO [82/260]: features/catalog/config/grid.ts  (9 líneas)
+ARCHIVO [83/262]: features/catalog/config/grid.ts  (9 líneas)
 ==============================================================================
 // features/catalog/config/grid.ts
 
@@ -6122,7 +6280,7 @@ export const INFINITE_SCROLL_THRESHOLD = 0.1;
 --- FIN DEL ARCHIVO: features/catalog/config/grid.ts ---
 
 ==============================================================================
-ARCHIVO [83/260]: features/catalog/index.ts  (4 líneas)
+ARCHIVO [84/262]: features/catalog/index.ts  (4 líneas)
 ==============================================================================
 export { default as MovieGrid } from './ui/MovieGrid';
 export type { MovieGridProps } from './ui/MovieGrid';
@@ -6132,7 +6290,7 @@ export { default as MovieGridSkeleton } from './ui/MovieGridSkeleton';
 --- FIN DEL ARCHIVO: features/catalog/index.ts ---
 
 ==============================================================================
-ARCHIVO [84/260]: features/catalog/infrastructure/moviesClient.ts  (63 líneas)
+ARCHIVO [85/262]: features/catalog/infrastructure/moviesClient.ts  (63 líneas)
 ==============================================================================
 import type { Movie, MovieFilters } from '@/entities/movie';
 import type { PaginatedResult } from '@/lib/api/pagination/types';
@@ -6201,7 +6359,7 @@ export async function fetchMoviesFromApi(
 --- FIN DEL ARCHIVO: features/catalog/infrastructure/moviesClient.ts ---
 
 ==============================================================================
-ARCHIVO [85/260]: features/catalog/lib/gridScrollPersistence.ts  (21 líneas)
+ARCHIVO [86/262]: features/catalog/lib/gridScrollPersistence.ts  (21 líneas)
 ==============================================================================
 import { GRID_SCROLL_STORAGE_KEY } from '../config/grid';
 import { deferScrollRestore } from '@/lib/scroll/defer';
@@ -6228,7 +6386,7 @@ export function saveGridScrollPosition(returnPath: string): void {
 --- FIN DEL ARCHIVO: features/catalog/lib/gridScrollPersistence.ts ---
 
 ==============================================================================
-ARCHIVO [86/260]: features/catalog/lib/gridStateStorage.ts  (144 líneas)
+ARCHIVO [87/262]: features/catalog/lib/gridStateStorage.ts  (144 líneas)
 ==============================================================================
 import type { Movie } from '@/entities/movie';
 import {
@@ -6378,7 +6536,7 @@ export function writeGridState(
 --- FIN DEL ARCHIVO: features/catalog/lib/gridStateStorage.ts ---
 
 ==============================================================================
-ARCHIVO [87/260]: features/catalog/model/useGridScrollRestore.ts  (44 líneas)
+ARCHIVO [88/262]: features/catalog/model/useGridScrollRestore.ts  (44 líneas)
 ==============================================================================
 'use client';
 
@@ -6428,7 +6586,7 @@ export function useGridScrollRestore(
 --- FIN DEL ARCHIVO: features/catalog/model/useGridScrollRestore.ts ---
 
 ==============================================================================
-ARCHIVO [88/260]: features/catalog/model/useGridStatePersistence.ts  (36 líneas)
+ARCHIVO [89/262]: features/catalog/model/useGridStatePersistence.ts  (36 líneas)
 ==============================================================================
 // features/catalog/model/useGridStatePersistence.ts
 'use client';
@@ -6470,7 +6628,7 @@ export function useGridStatePersistence({
 --- FIN DEL ARCHIVO: features/catalog/model/useGridStatePersistence.ts ---
 
 ==============================================================================
-ARCHIVO [89/260]: features/catalog/model/useInfiniteMovies.ts  (63 líneas)
+ARCHIVO [90/262]: features/catalog/model/useInfiniteMovies.ts  (63 líneas)
 ==============================================================================
 // features/catalog/model/useInfiniteMovies.ts
 'use client';
@@ -6539,7 +6697,7 @@ export function useInfiniteMovies({
 --- FIN DEL ARCHIVO: features/catalog/model/useInfiniteMovies.ts ---
 
 ==============================================================================
-ARCHIVO [90/260]: features/catalog/model/useInfiniteScroll.ts  (49 líneas)
+ARCHIVO [91/262]: features/catalog/model/useInfiniteScroll.ts  (49 líneas)
 ==============================================================================
 // features/catalog/model/useInfiniteScroll.ts
 'use client';
@@ -6594,7 +6752,7 @@ export function useInfiniteScroll({
 --- FIN DEL ARCHIVO: features/catalog/model/useInfiniteScroll.ts ---
 
 ==============================================================================
-ARCHIVO [91/260]: features/catalog/model/useMoviePagination.ts  (122 líneas)
+ARCHIVO [92/262]: features/catalog/model/useMoviePagination.ts  (122 líneas)
 ==============================================================================
 // features/catalog/model/useMoviePagination.ts
 'use client';
@@ -6722,7 +6880,7 @@ export function useMoviePagination({
 --- FIN DEL ARCHIVO: features/catalog/model/useMoviePagination.ts ---
 
 ==============================================================================
-ARCHIVO [92/260]: features/catalog/ui/CatalogMovieCard.tsx  (42 líneas)
+ARCHIVO [93/262]: features/catalog/ui/CatalogMovieCard.tsx  (42 líneas)
 ==============================================================================
 'use client';
 
@@ -6770,7 +6928,7 @@ export default function CatalogMovieCard({
 --- FIN DEL ARCHIVO: features/catalog/ui/CatalogMovieCard.tsx ---
 
 ==============================================================================
-ARCHIVO [93/260]: features/catalog/ui/MovieGrid.tsx  (73 líneas)
+ARCHIVO [94/262]: features/catalog/ui/MovieGrid.tsx  (73 líneas)
 ==============================================================================
 'use client';
 
@@ -6849,7 +7007,7 @@ export default function MovieGrid({
 --- FIN DEL ARCHIVO: features/catalog/ui/MovieGrid.tsx ---
 
 ==============================================================================
-ARCHIVO [94/260]: features/catalog/ui/MovieGridSkeleton.tsx  (18 líneas)
+ARCHIVO [95/262]: features/catalog/ui/MovieGridSkeleton.tsx  (18 líneas)
 ==============================================================================
 import { MovieCardSkeleton } from '@/widgets/movie-card';
 import PosterGrid from '@/shared/ui/PosterGrid';
@@ -6873,7 +7031,7 @@ export default function MovieGridSkeleton({
 --- FIN DEL ARCHIVO: features/catalog/ui/MovieGridSkeleton.tsx ---
 
 ==============================================================================
-ARCHIVO [95/260]: features/filters/config/options.ts  (31 líneas)
+ARCHIVO [96/262]: features/filters/config/options.ts  (31 líneas)
 ==============================================================================
 // features/filters/config/options.ts
 
@@ -6910,7 +7068,7 @@ export type SortOptionValue = MovieSort;
 --- FIN DEL ARCHIVO: features/filters/config/options.ts ---
 
 ==============================================================================
-ARCHIVO [96/260]: features/filters/config/sortOptions.ts  (20 líneas)
+ARCHIVO [97/262]: features/filters/config/sortOptions.ts  (20 líneas)
 ==============================================================================
 import type { MovieSort } from '@/entities/movie';
 
@@ -6936,7 +7094,7 @@ export const MOVIE_SORT_OPTIONS: readonly MovieSortOption[] = [
 --- FIN DEL ARCHIVO: features/filters/config/sortOptions.ts ---
 
 ==============================================================================
-ARCHIVO [97/260]: features/filters/index.ts  (3 líneas)
+ARCHIVO [98/262]: features/filters/index.ts  (3 líneas)
 ==============================================================================
 // features/filters/index.ts
 
@@ -6945,7 +7103,7 @@ export { default as FilterMenu } from './ui/FilterMenu';
 --- FIN DEL ARCHIVO: features/filters/index.ts ---
 
 ==============================================================================
-ARCHIVO [98/260]: features/filters/lib/filterUrlSerializer.ts  (15 líneas)
+ARCHIVO [99/262]: features/filters/lib/filterUrlSerializer.ts  (15 líneas)
 ==============================================================================
 // features/filters/lib/filterUrlSerializer.ts
 
@@ -6966,7 +7124,123 @@ export function buildFiltersUrl(
 --- FIN DEL ARCHIVO: features/filters/lib/filterUrlSerializer.ts ---
 
 ==============================================================================
-ARCHIVO [99/260]: features/filters/model/useMovieFilters.ts  (260 líneas)
+ARCHIVO [100/262]: features/filters/model/__tests__/decideScrollCollapse.test.ts  (110 líneas)
+==============================================================================
+import { describe, it, expect } from 'vitest';
+import { decideScrollCollapse } from '../useScrollCollapse';
+
+const THRESHOLDS = {
+  hideAfter: 200,
+  hideDelta: 100,
+  showDelta: 80,
+  teleportThreshold: 250,
+};
+
+function simulate(
+  ys: number[],
+  start: { startY: number; peakY: number; lastY: number }
+) {
+  let { startY, peakY, lastY } = start;
+  let toggle: 'hide' | 'show' | null = null;
+  for (const y of ys) {
+    const decision = decideScrollCollapse(
+      { y, frameDelta: y - lastY, startY, peakY },
+      THRESHOLDS
+    );
+    startY = decision.startY;
+    peakY = decision.peakY;
+    lastY = y;
+    if (decision.toggle) toggle = decision.toggle;
+  }
+  return { startY, peakY, toggle };
+}
+
+describe('decideScrollCollapse', () => {
+  it('mantiene visible y reinicia referencias cerca del tope', () => {
+    const decision = decideScrollCollapse(
+      { y: 180, frameDelta: -30, startY: 240, peakY: 260 },
+      THRESHOLDS
+    );
+    expect(decision.toggle).toBe('show');
+    expect(decision.startY).toBe(180);
+    expect(decision.peakY).toBe(180);
+  });
+
+  it('oculta tras un arrastre sostenido hacia abajo', () => {
+    const { toggle } = simulate(
+      [310, 330, 350, 370, 390, 400],
+      { startY: 300, peakY: 300, lastY: 300 }
+    );
+    expect(toggle).toBe('hide');
+  });
+
+  it('no oculta si el arrastre hacia abajo es menor al umbral', () => {
+    const { toggle } = simulate([350, 370, 390], {
+      startY: 300,
+      peakY: 300,
+      lastY: 300,
+    });
+    expect(toggle).toBeNull();
+  });
+
+  it('ignora el jitter de pocos píxeles típico del scroll táctil', () => {
+    const { toggle } = simulate(
+      [403, 398, 404, 399, 405, 400, 406, 401],
+      { startY: 400, peakY: 400, lastY: 400 }
+    );
+    expect(toggle).toBeNull();
+  });
+
+  it('acumula el gesto aunque haya micro-reversiones', () => {
+    const { toggle } = simulate(
+      [512, 520, 517, 530, 528, 545, 560, 575, 590, 601],
+      { startY: 500, peakY: 500, lastY: 500 }
+    );
+    expect(toggle).toBe('hide');
+  });
+
+  it('muestra tras un arrastre sostenido hacia arriba desde el pico', () => {
+    const { toggle } = simulate(
+      [795, 780, 760, 740, 725, 715],
+      { startY: 800, peakY: 800, lastY: 800 }
+    );
+    expect(toggle).toBe('show');
+  });
+
+  it('no muestra si el rebote hacia arriba es menor al umbral', () => {
+    const { toggle } = simulate([790, 770, 750, 730], {
+      startY: 800,
+      peakY: 800,
+      lastY: 800,
+    });
+    expect(toggle).toBeNull();
+  });
+
+  it('re-baselinea sin alternar ante un salto programático', () => {
+    const decision = decideScrollCollapse(
+      { y: 1500, frameDelta: 1200, startY: 300, peakY: 300 },
+      THRESHOLDS
+    );
+    expect(decision.toggle).toBeNull();
+    expect(decision.startY).toBe(1500);
+    expect(decision.peakY).toBe(1500);
+  });
+
+  it('reinicia las referencias en el punto de alternancia', () => {
+    const decision = decideScrollCollapse(
+      { y: 400, frameDelta: 10, startY: 300, peakY: 390 },
+      THRESHOLDS
+    );
+    expect(decision.toggle).toBe('hide');
+    expect(decision.startY).toBe(400);
+    expect(decision.peakY).toBe(400);
+  });
+});
+==============================================================================
+--- FIN DEL ARCHIVO: features/filters/model/__tests__/decideScrollCollapse.test.ts ---
+
+==============================================================================
+ARCHIVO [101/262]: features/filters/model/useMovieFilters.ts  (260 líneas)
 ==============================================================================
 'use client';
 
@@ -7232,7 +7506,7 @@ export function useMovieFilters(): UseMovieFiltersResult {
 --- FIN DEL ARCHIVO: features/filters/model/useMovieFilters.ts ---
 
 ==============================================================================
-ARCHIVO [100/260]: features/filters/model/useScrollCollapse.ts  (47 líneas)
+ARCHIVO [102/262]: features/filters/model/useScrollCollapse.ts  (133 líneas)
 ==============================================================================
 // features/filters/model/useScrollCollapse.ts
 'use client';
@@ -7240,40 +7514,126 @@ ARCHIVO [100/260]: features/filters/model/useScrollCollapse.ts  (47 líneas)
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface UseScrollCollapseOptions {
+  /** Scroll mínimo desde el top para que el colapso pueda activarse. */
   hideAfter?: number;
-  showDelta?: number;
+  /** Px que hay que arrastrar hacia abajo para ocultar los controles. */
+  collapseThreshold?: number;
+  /** Px que hay que arrastrar hacia arriba para volver a mostrarlos. */
+  expandThreshold?: number;
+  /** Ms de "cuarentena" tras cada cambio de estado para asentar el layout. */
+  settleMs?: number;
 }
 
-export function useScrollCollapse(options?: UseScrollCollapseOptions): boolean {
+/**
+ * Colapsa/expande la barra de filtros según la dirección del scroll.
+ *
+ * ─── El bug que corrige (parpadeo en móviles Chromium / Brave) ───
+ *
+ * La versión anterior alternaba `isCollapsed` comparando el scrollY de
+ * dos frames consecutivos con un umbral de 5px. En Chromium eso entraba
+ * en un bucle de realimentación:
+ *
+ *   colapsar → la barra reduce su altura ~200px → el scroll-anchoring
+ *   de Chromium mueve window.scrollY → el hook lo lee como "subió" →
+ *   expande → la altura vuelve a cambiar → otro salto de scrollY →
+ *   colapsa de nuevo… y la barra parpadea sola con el usuario quieto.
+ *
+ * En Firefox no ocurre: Gecko no aplica scroll-anchoring de la misma
+ * forma y throttlea distinto los eventos de scroll.
+ *
+ * ─── Las tres correcciones ───
+ *
+ * 1. HISTÉRESIS: ya no basta 1px entre frames. Hay que arrastrar un
+ *    mínimo claro hacia abajo para ocultar y hacia arriba para mostrar,
+ *    medido desde un "ancla", no entre frames consecutivos. El
+ *    micro-jitter no llega al umbral.
+ *
+ * 2. CUARENTENA POST-CAMBIO: tras cada colapso/expansión se ignoran los
+ *    eventos de scroll durante `settleMs` (cubre la transición de 300ms).
+ *    En esa ventana solo se mueve el ancla, sin evaluar el estado. Así el
+ *    reflow del propio colapso no se retroalimenta.
+ *
+ * 3. ANCLA DIRECCIONAL: mientras está colapsado, el ancla persigue el
+ *    punto más bajo alcanzado; mientras está expandido, el más alto. Así
+ *    "arrastrar X px hacia arriba" se mide desde donde empezó el gesto,
+ *    no desde un punto arbitrario.
+ */
+export function useScrollCollapse(
+  options?: UseScrollCollapseOptions
+): boolean {
   const hideAfter = options?.hideAfter ?? 150;
-  const showDelta = options?.showDelta ?? 5;
+  const collapseThreshold = options?.collapseThreshold ?? 32;
+  const expandThreshold = options?.expandThreshold ?? 32;
+  const settleMs = options?.settleMs ?? 400;
 
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const lastScrollY = useRef(0);
-  const ticking = useRef(false);
+
+  // Refs para el estado "real": el setState es asíncrono y el handler
+  // de scroll necesita leer el valor vigente dentro del rAF.
+  const collapsedRef = useRef(false);
+  const anchorYRef = useRef(0);
+  const lastChangeAtRef = useRef(-Infinity);
+  const tickingRef = useRef(false);
 
   const handleScroll = useCallback(() => {
-    if (ticking.current) return;
-
-    ticking.current = true;
+    if (tickingRef.current) return;
+    tickingRef.current = true;
 
     window.requestAnimationFrame(() => {
-      const currentScrollY = window.scrollY;
+      tickingRef.current = false;
 
-      if (currentScrollY > lastScrollY.current && currentScrollY > hideAfter) {
-        setIsCollapsed(true);
-      } else if (currentScrollY < lastScrollY.current - showDelta) {
-        setIsCollapsed(false);
+      const currentY = window.scrollY;
+      const now = performance.now();
+
+      // ─── 1. Cuarentena: absorber el reflow del propio colapso ───
+      if (now - lastChangeAtRef.current < settleMs) {
+        anchorYRef.current = collapsedRef.current
+          ? Math.max(anchorYRef.current, currentY)
+          : Math.min(anchorYRef.current, currentY);
+        return;
       }
 
-      lastScrollY.current = currentScrollY;
-      ticking.current = false;
+      // ─── 2. Red de seguridad: cerca del top, siempre expandido ───
+      if (collapsedRef.current && currentY <= hideAfter) {
+        collapsedRef.current = false;
+        lastChangeAtRef.current = now;
+        anchorYRef.current = currentY;
+        setIsCollapsed(false);
+        return;
+      }
+
+      if (!collapsedRef.current) {
+        // Expandido: el ancla persigue el punto más alto alcanzado.
+        anchorYRef.current = Math.min(anchorYRef.current, currentY);
+
+        // ─── 3. Ocultar: gesto claro hacia abajo ───
+        if (
+          currentY - anchorYRef.current >= collapseThreshold &&
+          currentY > hideAfter
+        ) {
+          collapsedRef.current = true;
+          lastChangeAtRef.current = now;
+          anchorYRef.current = currentY;
+          setIsCollapsed(true);
+        }
+      } else {
+        // Colapsado: el ancla persigue el punto más bajo alcanzado.
+        anchorYRef.current = Math.max(anchorYRef.current, currentY);
+
+        // ─── 3. Mostrar: gesto claro hacia arriba ───
+        if (anchorYRef.current - currentY >= expandThreshold) {
+          collapsedRef.current = false;
+          lastChangeAtRef.current = now;
+          anchorYRef.current = currentY;
+          setIsCollapsed(false);
+        }
+      }
     });
-  }, [hideAfter, showDelta]);
+  }, [hideAfter, collapseThreshold, expandThreshold, settleMs]);
 
   useEffect(() => {
+    anchorYRef.current = window.scrollY;
     window.addEventListener('scroll', handleScroll, { passive: true });
-
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
@@ -7285,7 +7645,7 @@ export function useScrollCollapse(options?: UseScrollCollapseOptions): boolean {
 --- FIN DEL ARCHIVO: features/filters/model/useScrollCollapse.ts ---
 
 ==============================================================================
-ARCHIVO [101/260]: features/filters/model/useStickySentinel.ts  (29 líneas)
+ARCHIVO [103/262]: features/filters/model/useStickySentinel.ts  (29 líneas)
 ==============================================================================
 // features/filters/model/useStickySentinel.ts
 'use client';
@@ -7320,7 +7680,7 @@ export function useStickySentinel<T extends HTMLElement = HTMLDivElement>() {
 --- FIN DEL ARCHIVO: features/filters/model/useStickySentinel.ts ---
 
 ==============================================================================
-ARCHIVO [102/260]: features/filters/ui/ActiveFiltersBar.tsx  (155 líneas)
+ARCHIVO [104/262]: features/filters/ui/ActiveFiltersBar.tsx  (155 líneas)
 ==============================================================================
 // features/filters/ui/ActiveFiltersBar.tsx
 'use client';
@@ -7481,7 +7841,7 @@ export default function ActiveFiltersBar({
 --- FIN DEL ARCHIVO: features/filters/ui/ActiveFiltersBar.tsx ---
 
 ==============================================================================
-ARCHIVO [103/260]: features/filters/ui/CountryFilter.tsx  (60 líneas)
+ARCHIVO [105/262]: features/filters/ui/CountryFilter.tsx  (60 líneas)
 ==============================================================================
 // features/filters/ui/CountryFilter.tsx
 'use client';
@@ -7547,7 +7907,7 @@ export default function CountryFilter({
 --- FIN DEL ARCHIVO: features/filters/ui/CountryFilter.tsx ---
 
 ==============================================================================
-ARCHIVO [104/260]: features/filters/ui/DropdownMenu.tsx  (161 líneas)
+ARCHIVO [106/262]: features/filters/ui/DropdownMenu.tsx  (161 líneas)
 ==============================================================================
 // features/filters/ui/DropdownMenu.tsx
 'use client';
@@ -7714,7 +8074,7 @@ export default function DropdownMenu({
 --- FIN DEL ARCHIVO: features/filters/ui/DropdownMenu.tsx ---
 
 ==============================================================================
-ARCHIVO [105/260]: features/filters/ui/DualRangeSlider.tsx  (139 líneas)
+ARCHIVO [107/262]: features/filters/ui/DualRangeSlider.tsx  (139 líneas)
 ==============================================================================
 'use client';
 
@@ -7859,10 +8219,11 @@ export default function DualRangeSlider({
 --- FIN DEL ARCHIVO: features/filters/ui/DualRangeSlider.tsx ---
 
 ==============================================================================
-ARCHIVO [106/260]: features/filters/ui/FilterMenu.tsx  (158 líneas)
+ARCHIVO [108/262]: features/filters/ui/FilterMenu.tsx  (168 líneas)
 ==============================================================================
 // features/filters/ui/FilterMenu.tsx
 'use client';
+
 import type { Category } from '@/entities/category';
 import { useMovieFilters } from '../model/useMovieFilters';
 import { useScrollCollapse } from '../model/useScrollCollapse';
@@ -7911,6 +8272,10 @@ export default function FilterMenu({
   } = useMovieFilters();
 
   const { ref: sentinelRef, isStuck } = useStickySentinel<HTMLDivElement>();
+
+  // Histéresis de scroll: en celulares hace falta un arrastre
+  // sostenido para alternar la barra. Los rebotes de pocos píxeles
+  // del overscroll táctil ya no la hacen parpadear.
   const isCollapsed = useScrollCollapse();
 
   return (
@@ -7920,30 +8285,35 @@ export default function FilterMenu({
 
       <div className="sticky top-16 z-30 -mx-4 md:-mx-8 px-4 md:px-8 pb-4">
         <div
-          className={`bg-gray-950/80 backdrop-blur-xl border border-white/5 shadow-2xl shadow-black/20 transition-all duration-300 ${
-            isStuck
+          className={`bg-gray-950/80 backdrop-blur-xl border border-white/5 shadow-2xl shadow-black/20 transition-all duration-300 ${isStuck
               ? 'rounded-b-2xl rounded-t-none border-t-0'
               : 'rounded-2xl'
-          }`}
+            }`}
         >
           {/* ═══ SECCIÓN COLAPSABLE: CONTROLES DE FILTRO ═══ */}
           <div
-            className="relative z-10 transition-all duration-300 ease-in-out"
+            className="relative z-10 duration-300 ease-in-out"
             style={{
-              maxHeight: isCollapsed ? '0px' : '400px',
+              // 260px cubre el layout mobile más alto (4 filas ≈ 200px)
+              // con margen. Con 400px la animación tenía un tramo
+              // muerto largo que se percibía como lag.
+              maxHeight: isCollapsed ? '0px' : '260px',
               opacity: isCollapsed ? 0 : 1,
-              transform: isCollapsed ? 'translateY(-8px)' : 'translateY(0)',
+              transform: isCollapsed
+                ? 'translateY(-8px)'
+                : 'translateY(0)',
               pointerEvents: isCollapsed ? 'none' : 'auto',
+              transitionProperty: 'max-height, opacity, transform',
             }}
           >
             {/*
-              Layout responsive:
-              - Mobile (< lg): Grid de 3 columnas
-                · Fila 1: Género | Puntuación | País
-                · Fila 2: Año (col-span-3)
-                · Fila 3: Duración (col-span-3)
-                · Fila 4: Ordenar (col-span-3)
-              - Desktop (lg+): Flex wrap clásico
+            Layout responsive:
+            - Mobile (< lg): Grid de 3 columnas
+              · Fila 1: Género | Puntuación | País
+              · Fila 2: Año (col-span-3)
+              · Fila 3: Duración (col-span-3)
+              · Fila 4: Ordenar (col-span-3)
+            - Desktop (lg+): Flex wrap clásico
             */}
             <div className="grid grid-cols-3 gap-2 px-4 pt-4 pb-3 lg:flex lg:flex-wrap lg:items-center">
               {/* ─── Fila 1: Género, Puntuación, País ─── */}
@@ -8023,7 +8393,7 @@ export default function FilterMenu({
 --- FIN DEL ARCHIVO: features/filters/ui/FilterMenu.tsx ---
 
 ==============================================================================
-ARCHIVO [107/260]: features/filters/ui/GenreFilter.tsx  (62 líneas)
+ARCHIVO [109/262]: features/filters/ui/GenreFilter.tsx  (62 líneas)
 ==============================================================================
 // features/filters/ui/GenreFilter.tsx
 'use client';
@@ -8091,7 +8461,7 @@ export default function GenreFilter({
 --- FIN DEL ARCHIVO: features/filters/ui/GenreFilter.tsx ---
 
 ==============================================================================
-ARCHIVO [108/260]: features/filters/ui/range.module.css  (72 líneas)
+ARCHIVO [110/262]: features/filters/ui/range.module.css  (72 líneas)
 ==============================================================================
 /* features/filters/ui/year-range.module.css */
 
@@ -8169,7 +8539,7 @@ ARCHIVO [108/260]: features/filters/ui/range.module.css  (72 líneas)
 --- FIN DEL ARCHIVO: features/filters/ui/range.module.css ---
 
 ==============================================================================
-ARCHIVO [109/260]: features/filters/ui/RatingFilter.tsx  (54 líneas)
+ARCHIVO [111/262]: features/filters/ui/RatingFilter.tsx  (54 líneas)
 ==============================================================================
 // features/filters/ui/RatingFilter.tsx
 'use client';
@@ -8229,7 +8599,7 @@ export default function RatingFilter({
 --- FIN DEL ARCHIVO: features/filters/ui/RatingFilter.tsx ---
 
 ==============================================================================
-ARCHIVO [110/260]: features/filters/ui/RuntimeRangeFilter.tsx  (32 líneas)
+ARCHIVO [112/262]: features/filters/ui/RuntimeRangeFilter.tsx  (32 líneas)
 ==============================================================================
 import { IconClock } from '@/shared/ui/icons';
 import { RUNTIME_MIN, RUNTIME_MAX } from '../config/options';
@@ -8267,7 +8637,7 @@ export default function RuntimeRangeFilter({
 --- FIN DEL ARCHIVO: features/filters/ui/RuntimeRangeFilter.tsx ---
 
 ==============================================================================
-ARCHIVO [111/260]: features/filters/ui/SortFilter.tsx  (54 líneas)
+ARCHIVO [113/262]: features/filters/ui/SortFilter.tsx  (54 líneas)
 ==============================================================================
 // features/filters/ui/SortFilter.tsx
 'use client';
@@ -8327,7 +8697,7 @@ export default function SortFilter({
 --- FIN DEL ARCHIVO: features/filters/ui/SortFilter.tsx ---
 
 ==============================================================================
-ARCHIVO [112/260]: features/filters/ui/YearRangeFilter.tsx  (32 líneas)
+ARCHIVO [114/262]: features/filters/ui/YearRangeFilter.tsx  (32 líneas)
 ==============================================================================
 import { IconCalendar } from '@/shared/ui/icons';
 import { YEAR_MIN, YEAR_MAX } from '../config/options';
@@ -8365,7 +8735,7 @@ export default function YearRangeFilter({
 --- FIN DEL ARCHIVO: features/filters/ui/YearRangeFilter.tsx ---
 
 ==============================================================================
-ARCHIVO [113/260]: features/home/index.ts  (5 líneas)
+ARCHIVO [115/262]: features/home/index.ts  (5 líneas)
 ==============================================================================
 export { default as HomePage } from './ui/HomePage';
 export {
@@ -8376,7 +8746,7 @@ export {
 --- FIN DEL ARCHIVO: features/home/index.ts ---
 
 ==============================================================================
-ARCHIVO [114/260]: features/home/services/getHomePageData.ts  (61 líneas)
+ARCHIVO [116/262]: features/home/services/getHomePageData.ts  (61 líneas)
 ==============================================================================
 // features/home/services/getHomePageData.ts
 import type { HomeHeroData, HomeRankingsData } from '../types';
@@ -8443,7 +8813,7 @@ export async function getHomeRankingsData(): Promise<HomeRankingsData> {
 --- FIN DEL ARCHIVO: features/home/services/getHomePageData.ts ---
 
 ==============================================================================
-ARCHIVO [115/260]: features/home/types.ts  (18 líneas)
+ARCHIVO [117/262]: features/home/types.ts  (18 líneas)
 ==============================================================================
 import type { Movie } from '@/entities/movie';
 
@@ -8467,7 +8837,7 @@ export interface HomePageData extends HomeHeroData, HomeRankingsData {}
 --- FIN DEL ARCHIVO: features/home/types.ts ---
 
 ==============================================================================
-ARCHIVO [116/260]: features/home/ui/CatalogCta.tsx  (22 líneas)
+ARCHIVO [118/262]: features/home/ui/CatalogCta.tsx  (22 líneas)
 ==============================================================================
 import Link from 'next/link';
 import { routes } from '@/lib/routes';
@@ -8495,7 +8865,7 @@ export default function CatalogCta() {
 --- FIN DEL ARCHIVO: features/home/ui/CatalogCta.tsx ---
 
 ==============================================================================
-ARCHIVO [117/260]: features/home/ui/HeroRotator.tsx  (100 líneas)
+ARCHIVO [119/262]: features/home/ui/HeroRotator.tsx  (100 líneas)
 ==============================================================================
 'use client';
 
@@ -8601,7 +8971,7 @@ export default function HeroRotator({
 --- FIN DEL ARCHIVO: features/home/ui/HeroRotator.tsx ---
 
 ==============================================================================
-ARCHIVO [118/260]: features/home/ui/HeroWithTicker.tsx  (83 líneas)
+ARCHIVO [120/262]: features/home/ui/HeroWithTicker.tsx  (83 líneas)
 ==============================================================================
 'use client';
 
@@ -8690,7 +9060,7 @@ export default function HeroWithTicker({ movies }: HeroWithTickerProps) {
 --- FIN DEL ARCHIVO: features/home/ui/HeroWithTicker.tsx ---
 
 ==============================================================================
-ARCHIVO [119/260]: features/home/ui/HomePage.tsx  (48 líneas)
+ARCHIVO [121/262]: features/home/ui/HomePage.tsx  (48 líneas)
 ==============================================================================
 import { Suspense } from 'react';
 import HeroWithTicker from './HeroWithTicker';
@@ -8744,7 +9114,7 @@ export default function HomePage({ data }: HomePageProps) {
 --- FIN DEL ARCHIVO: features/home/ui/HomePage.tsx ---
 
 ==============================================================================
-ARCHIVO [120/260]: features/home/ui/HomeStripsSkeleton.tsx  (28 líneas)
+ARCHIVO [122/262]: features/home/ui/HomeStripsSkeleton.tsx  (28 líneas)
 ==============================================================================
 function StripSkeleton() {
   return (
@@ -8778,7 +9148,7 @@ export default function HomeStripsSkeleton() {
 --- FIN DEL ARCHIVO: features/home/ui/HomeStripsSkeleton.tsx ---
 
 ==============================================================================
-ARCHIVO [121/260]: features/home/ui/HomeTicker.tsx  (182 líneas)
+ARCHIVO [123/262]: features/home/ui/HomeTicker.tsx  (182 líneas)
 ==============================================================================
 'use client';
 
@@ -8966,7 +9336,7 @@ export default function HomeTicker({ movies, railRef }: HomeTickerProps) {
 --- FIN DEL ARCHIVO: features/home/ui/HomeTicker.tsx ---
 
 ==============================================================================
-ARCHIVO [122/260]: features/home/ui/MovieStrip.tsx  (157 líneas)
+ARCHIVO [124/262]: features/home/ui/MovieStrip.tsx  (157 líneas)
 ==============================================================================
 'use client';
 
@@ -9129,7 +9499,7 @@ export default function MovieStrip({
 --- FIN DEL ARCHIVO: features/home/ui/MovieStrip.tsx ---
 
 ==============================================================================
-ARCHIVO [123/260]: features/home/ui/ScrollIndicator.tsx  (49 líneas)
+ARCHIVO [125/262]: features/home/ui/ScrollIndicator.tsx  (49 líneas)
 ==============================================================================
 'use client';
 
@@ -9184,7 +9554,7 @@ export default function ScrollIndicator() {
 --- FIN DEL ARCHIVO: features/home/ui/ScrollIndicator.tsx ---
 
 ==============================================================================
-ARCHIVO [124/260]: features/home/ui/SectionHeader.tsx  (53 líneas)
+ARCHIVO [126/262]: features/home/ui/SectionHeader.tsx  (53 líneas)
 ==============================================================================
 import Link from 'next/link';
 import { IconBack } from '@/shared/ui/icons';
@@ -9243,7 +9613,7 @@ export default function SectionHeader({
 --- FIN DEL ARCHIVO: features/home/ui/SectionHeader.tsx ---
 
 ==============================================================================
-ARCHIVO [125/260]: features/movie-detail/config/movieDetail.ts  (3 líneas)
+ARCHIVO [127/262]: features/movie-detail/config/movieDetail.ts  (3 líneas)
 ==============================================================================
 // features/movie-detail/config/movieDetail.ts
 
@@ -9252,7 +9622,7 @@ export const WATCH_SECTION_ID = 'watch';
 --- FIN DEL ARCHIVO: features/movie-detail/config/movieDetail.ts ---
 
 ==============================================================================
-ARCHIVO [126/260]: features/movie-detail/index.ts  (5 líneas)
+ARCHIVO [128/262]: features/movie-detail/index.ts  (5 líneas)
 ==============================================================================
 export { default as MovieDetailPage } from './ui/MovieDetailPage';
 export { default as ViewTracker } from './ui/ViewTracker';
@@ -9263,7 +9633,7 @@ export { WATCH_SECTION_ID } from './config/movieDetail';
 --- FIN DEL ARCHIVO: features/movie-detail/index.ts ---
 
 ==============================================================================
-ARCHIVO [127/260]: features/movie-detail/lib/createMovieDetailViewModel.ts  (58 líneas)
+ARCHIVO [129/262]: features/movie-detail/lib/createMovieDetailViewModel.ts  (58 líneas)
 ==============================================================================
 // features/movie-detail/lib/createMovieDetailViewModel.ts
 
@@ -9327,7 +9697,7 @@ export function createMovieDetailViewModel(
 --- FIN DEL ARCHIVO: features/movie-detail/lib/createMovieDetailViewModel.ts ---
 
 ==============================================================================
-ARCHIVO [128/260]: features/movie-detail/lib/movieJsonLd.ts  (58 líneas)
+ARCHIVO [130/262]: features/movie-detail/lib/movieJsonLd.ts  (58 líneas)
 ==============================================================================
 // features/movie-detail/lib/movieJsonLd.ts
 
@@ -9391,7 +9761,7 @@ export function buildMovieJsonLdString(
 --- FIN DEL ARCHIVO: features/movie-detail/lib/movieJsonLd.ts ---
 
 ==============================================================================
-ARCHIVO [129/260]: features/movie-detail/lib/movieMetadata.ts  (38 líneas)
+ARCHIVO [131/262]: features/movie-detail/lib/movieMetadata.ts  (38 líneas)
 ==============================================================================
 // features/movie-detail/lib/movieMetadata.ts
 import type { Metadata } from 'next';
@@ -9435,7 +9805,7 @@ export function buildMovieMetadata(
 --- FIN DEL ARCHIVO: features/movie-detail/lib/movieMetadata.ts ---
 
 ==============================================================================
-ARCHIVO [130/260]: features/movie-detail/model/useModal.ts  (45 líneas)
+ARCHIVO [132/262]: features/movie-detail/model/useModal.ts  (45 líneas)
 ==============================================================================
 // features/movie-detail/model/useModal.ts
 'use client';
@@ -9486,7 +9856,7 @@ export function useModal(initialOpen = false) {
 --- FIN DEL ARCHIVO: features/movie-detail/model/useModal.ts ---
 
 ==============================================================================
-ARCHIVO [131/260]: features/movie-detail/services/getMovieDetailPage.ts  (114 líneas)
+ARCHIVO [133/262]: features/movie-detail/services/getMovieDetailPage.ts  (114 líneas)
 ==============================================================================
 // features/movie-detail/services/getMovieDetailPage.ts
 import { isValidSlug } from '@/lib/utils/slugify';
@@ -9606,7 +9976,7 @@ export async function getMovieDetailPage(
 --- FIN DEL ARCHIVO: features/movie-detail/services/getMovieDetailPage.ts ---
 
 ==============================================================================
-ARCHIVO [132/260]: features/movie-detail/ui/MovieCastSection.tsx  (57 líneas)
+ARCHIVO [134/262]: features/movie-detail/ui/MovieCastSection.tsx  (57 líneas)
 ==============================================================================
 // features/movie-detail/ui/MovieCastSection.tsx
 
@@ -9669,7 +10039,7 @@ export default function MovieCastSection({
 --- FIN DEL ARCHIVO: features/movie-detail/ui/MovieCastSection.tsx ---
 
 ==============================================================================
-ARCHIVO [133/260]: features/movie-detail/ui/MovieDetailPage.tsx  (36 líneas)
+ARCHIVO [135/262]: features/movie-detail/ui/MovieDetailPage.tsx  (36 líneas)
 ==============================================================================
 import type { ReactNode } from 'react';
 import type { MovieDetailViewModel } from '../lib/createMovieDetailViewModel';
@@ -9711,7 +10081,7 @@ export default function MovieDetailPage({
 --- FIN DEL ARCHIVO: features/movie-detail/ui/MovieDetailPage.tsx ---
 
 ==============================================================================
-ARCHIVO [134/260]: features/movie-detail/ui/MovieHero.tsx  (138 líneas)
+ARCHIVO [136/262]: features/movie-detail/ui/MovieHero.tsx  (138 líneas)
 ==============================================================================
 // features/movie-detail/ui/MovieHero.tsx
 
@@ -9855,7 +10225,7 @@ export default function MovieHero({ viewModel }: MovieHeroProps) {
 --- FIN DEL ARCHIVO: features/movie-detail/ui/MovieHero.tsx ---
 
 ==============================================================================
-ARCHIVO [135/260]: features/movie-detail/ui/MovieInfoSection.tsx  (54 líneas)
+ARCHIVO [137/262]: features/movie-detail/ui/MovieInfoSection.tsx  (54 líneas)
 ==============================================================================
 // features/movie-detail/ui/MovieInfoSection.tsx
 
@@ -9915,7 +10285,7 @@ export default function MovieInfoSection({
 --- FIN DEL ARCHIVO: features/movie-detail/ui/MovieInfoSection.tsx ---
 
 ==============================================================================
-ARCHIVO [136/260]: features/movie-detail/ui/TrailerButton.tsx  (48 líneas)
+ARCHIVO [138/262]: features/movie-detail/ui/TrailerButton.tsx  (48 líneas)
 ==============================================================================
 // features/movie-detail/ui/TrailerButton.tsx
 'use client';
@@ -9969,7 +10339,7 @@ export default function TrailerButton({
 --- FIN DEL ARCHIVO: features/movie-detail/ui/TrailerButton.tsx ---
 
 ==============================================================================
-ARCHIVO [137/260]: features/movie-detail/ui/TrailerModal.tsx  (68 líneas)
+ARCHIVO [139/262]: features/movie-detail/ui/TrailerModal.tsx  (68 líneas)
 ==============================================================================
 // features/movie-detail/ui/TrailerModal.tsx
 'use client';
@@ -10043,7 +10413,7 @@ export default function TrailerModal({
 --- FIN DEL ARCHIVO: features/movie-detail/ui/TrailerModal.tsx ---
 
 ==============================================================================
-ARCHIVO [138/260]: features/movie-detail/ui/ViewTracker.tsx  (32 líneas)
+ARCHIVO [140/262]: features/movie-detail/ui/ViewTracker.tsx  (32 líneas)
 ==============================================================================
 'use client';
 
@@ -10081,7 +10451,7 @@ export default function ViewTracker({ slug, tmdbId }: ViewTrackerProps) {
 --- FIN DEL ARCHIVO: features/movie-detail/ui/ViewTracker.tsx ---
 
 ==============================================================================
-ARCHIVO [139/260]: features/movie-detail/ui/WatchButton.tsx  (39 líneas)
+ARCHIVO [141/262]: features/movie-detail/ui/WatchButton.tsx  (39 líneas)
 ==============================================================================
 // features/movie-detail/ui/WatchButton.tsx
 'use client';
@@ -10126,7 +10496,7 @@ export default function WatchButton() {
 --- FIN DEL ARCHIVO: features/movie-detail/ui/WatchButton.tsx ---
 
 ==============================================================================
-ARCHIVO [140/260]: features/movies-page/index.ts  (7 líneas)
+ARCHIVO [142/262]: features/movies-page/index.ts  (7 líneas)
 ==============================================================================
 export { default as MoviesPage } from './ui/MoviesPage';
 export { default as FilterMenuSkeleton } from './ui/FilterMenuSkeleton';
@@ -10139,7 +10509,7 @@ export { buildMoviesPageMetadata } from './lib/moviesPageMetadata';
 --- FIN DEL ARCHIVO: features/movies-page/index.ts ---
 
 ==============================================================================
-ARCHIVO [141/260]: features/movies-page/lib/moviesPageMetadata.ts  (21 líneas)
+ARCHIVO [143/262]: features/movies-page/lib/moviesPageMetadata.ts  (21 líneas)
 ==============================================================================
 // features/movies-page/lib/moviesPageMetadata.ts
 import type { Metadata } from 'next';
@@ -10166,7 +10536,7 @@ export function buildMoviesPageMetadata(): Metadata {
 --- FIN DEL ARCHIVO: features/movies-page/lib/moviesPageMetadata.ts ---
 
 ==============================================================================
-ARCHIVO [142/260]: features/movies-page/services/getFilteredMovies.ts  (30 líneas)
+ARCHIVO [144/262]: features/movies-page/services/getFilteredMovies.ts  (30 líneas)
 ==============================================================================
 // features/movies-page/services/getFilteredMovies.ts
 import { cache } from 'react';
@@ -10202,7 +10572,7 @@ export const getFilteredMovies = cache(
 --- FIN DEL ARCHIVO: features/movies-page/services/getFilteredMovies.ts ---
 
 ==============================================================================
-ARCHIVO [143/260]: features/movies-page/services/getFilterOptions.ts  (27 líneas)
+ARCHIVO [145/262]: features/movies-page/services/getFilterOptions.ts  (27 líneas)
 ==============================================================================
 // features/movies-page/services/getFilterOptions.ts
 import { cache } from 'react';
@@ -10235,7 +10605,7 @@ export const getFilterOptions = cache(
 --- FIN DEL ARCHIVO: features/movies-page/services/getFilterOptions.ts ---
 
 ==============================================================================
-ARCHIVO [144/260]: features/movies-page/services/getMoviesPageData.ts  (26 líneas)
+ARCHIVO [146/262]: features/movies-page/services/getMoviesPageData.ts  (26 líneas)
 ==============================================================================
 // features/movies-page/services/getMoviesPageData.ts
 import { getMoviesWithFilters } from '@/lib/queries/movies';
@@ -10267,7 +10637,7 @@ export async function getMoviesPageData(
 --- FIN DEL ARCHIVO: features/movies-page/services/getMoviesPageData.ts ---
 
 ==============================================================================
-ARCHIVO [145/260]: features/movies-page/types.ts  (14 líneas)
+ARCHIVO [147/262]: features/movies-page/types.ts  (14 líneas)
 ==============================================================================
 // features/movies-page/types.ts
 
@@ -10287,7 +10657,7 @@ export interface MoviesPageData {
 --- FIN DEL ARCHIVO: features/movies-page/types.ts ---
 
 ==============================================================================
-ARCHIVO [146/260]: features/movies-page/ui/CatalogSkeleton.tsx  (27 líneas)
+ARCHIVO [148/262]: features/movies-page/ui/CatalogSkeleton.tsx  (27 líneas)
 ==============================================================================
 import { MovieGridSkeleton } from '@/features/catalog';
 
@@ -10320,7 +10690,7 @@ export default function CatalogSkeleton() {
 --- FIN DEL ARCHIVO: features/movies-page/ui/CatalogSkeleton.tsx ---
 
 ==============================================================================
-ARCHIVO [147/260]: features/movies-page/ui/FilterMenuSkeleton.tsx  (16 líneas)
+ARCHIVO [149/262]: features/movies-page/ui/FilterMenuSkeleton.tsx  (16 líneas)
 ==============================================================================
 // features/movies-page/ui/FilterMenuSkeleton.tsx
 
@@ -10342,7 +10712,7 @@ export default function FilterMenuSkeleton() {
 --- FIN DEL ARCHIVO: features/movies-page/ui/FilterMenuSkeleton.tsx ---
 
 ==============================================================================
-ARCHIVO [148/260]: features/movies-page/ui/MoviesEmptyState.tsx  (37 líneas)
+ARCHIVO [150/262]: features/movies-page/ui/MoviesEmptyState.tsx  (37 líneas)
 ==============================================================================
 // features/movies-page/ui/MoviesEmptyState.tsx
 
@@ -10385,7 +10755,7 @@ export default function MoviesEmptyState() {
 --- FIN DEL ARCHIVO: features/movies-page/ui/MoviesEmptyState.tsx ---
 
 ==============================================================================
-ARCHIVO [149/260]: features/movies-page/ui/MoviesPage.tsx  (34 líneas)
+ARCHIVO [151/262]: features/movies-page/ui/MoviesPage.tsx  (34 líneas)
 ==============================================================================
 import { Suspense, type ReactNode } from 'react';
 import type { MoviesPageData } from '../types';
@@ -10425,7 +10795,7 @@ export default function MoviesPage({
 --- FIN DEL ARCHIVO: features/movies-page/ui/MoviesPage.tsx ---
 
 ==============================================================================
-ARCHIVO [150/260]: features/movies-page/ui/MoviesResults.tsx  (20 líneas)
+ARCHIVO [152/262]: features/movies-page/ui/MoviesResults.tsx  (20 líneas)
 ==============================================================================
 // features/movies-page/ui/MoviesResults.tsx
 import type { ReactNode } from 'react';
@@ -10451,7 +10821,7 @@ export default function MoviesResults({
 --- FIN DEL ARCHIVO: features/movies-page/ui/MoviesResults.tsx ---
 
 ==============================================================================
-ARCHIVO [151/260]: features/navigation/config/nav-links.ts  (22 líneas)
+ARCHIVO [153/262]: features/navigation/config/nav-links.ts  (22 líneas)
 ==============================================================================
 // features/navigation/config/nav-links.ts
 
@@ -10479,7 +10849,7 @@ export const NAV_LINKS: NavLink[] = [
 --- FIN DEL ARCHIVO: features/navigation/config/nav-links.ts ---
 
 ==============================================================================
-ARCHIVO [152/260]: features/navigation/index.ts  (3 líneas)
+ARCHIVO [154/262]: features/navigation/index.ts  (3 líneas)
 ==============================================================================
 // features/navigation/index.ts
 
@@ -10488,7 +10858,7 @@ export { default as HeaderNavigation } from './ui/HeaderNavigation';
 --- FIN DEL ARCHIVO: features/navigation/index.ts ---
 
 ==============================================================================
-ARCHIVO [153/260]: features/navigation/ui/HeaderNavigation.tsx  (87 líneas)
+ARCHIVO [155/262]: features/navigation/ui/HeaderNavigation.tsx  (87 líneas)
 ==============================================================================
 // features/navigation/ui/HeaderNavigation.tsx
 'use client';
@@ -10581,7 +10951,7 @@ export default function HeaderNavigation() {
 --- FIN DEL ARCHIVO: features/navigation/ui/HeaderNavigation.tsx ---
 
 ==============================================================================
-ARCHIVO [154/260]: features/player/config/player.ts  (3 líneas)
+ARCHIVO [156/262]: features/player/config/player.ts  (3 líneas)
 ==============================================================================
 // features/player/config/player.ts
 
@@ -10590,7 +10960,7 @@ export const LOAD_TIMEOUT_MS = 15_000;
 --- FIN DEL ARCHIVO: features/player/config/player.ts ---
 
 ==============================================================================
-ARCHIVO [155/260]: features/player/config/providers.ts  (57 líneas)
+ARCHIVO [157/262]: features/player/config/providers.ts  (57 líneas)
 ==============================================================================
 // features/player/config/providers.ts
 
@@ -10653,7 +11023,7 @@ export const EMBED_PROVIDERS: EmbedProvider[] = [
 --- FIN DEL ARCHIVO: features/player/config/providers.ts ---
 
 ==============================================================================
-ARCHIVO [156/260]: features/player/config/sandbox-policy.ts  (44 líneas)
+ARCHIVO [158/262]: features/player/config/sandbox-policy.ts  (44 líneas)
 ==============================================================================
 // features/player/config/sandbox-policy.ts
 
@@ -10703,7 +11073,7 @@ export function resolveSandboxAttribute(
 --- FIN DEL ARCHIVO: features/player/config/sandbox-policy.ts ---
 
 ==============================================================================
-ARCHIVO [157/260]: features/player/index.ts  (5 líneas)
+ARCHIVO [159/262]: features/player/index.ts  (5 líneas)
 ==============================================================================
 // features/player/index.ts
 
@@ -10714,7 +11084,7 @@ export { default as LazyVideoPlayer } from './ui/LazyVideoPlayer';
 --- FIN DEL ARCHIVO: features/player/index.ts ---
 
 ==============================================================================
-ARCHIVO [158/260]: features/player/lib/__tests__/findNextAvailableSource.test.ts  (47 líneas)
+ARCHIVO [160/262]: features/player/lib/__tests__/findNextAvailableSource.test.ts  (47 líneas)
 ==============================================================================
 import { describe, it, expect } from 'vitest';
 import { findNextAvailableSource } from '../findNextAvailableSource';
@@ -10767,7 +11137,7 @@ describe('findNextAvailableSource', () => {
 --- FIN DEL ARCHIVO: features/player/lib/__tests__/findNextAvailableSource.test.ts ---
 
 ==============================================================================
-ARCHIVO [159/260]: features/player/lib/createMovieSources.ts  (32 líneas)
+ARCHIVO [161/262]: features/player/lib/createMovieSources.ts  (32 líneas)
 ==============================================================================
 // features/player/lib/createMovieSources.ts
 
@@ -10805,7 +11175,7 @@ export function createMovieSources({
 --- FIN DEL ARCHIVO: features/player/lib/createMovieSources.ts ---
 
 ==============================================================================
-ARCHIVO [160/260]: features/player/lib/findNextAvailableSource.ts  (22 líneas)
+ARCHIVO [162/262]: features/player/lib/findNextAvailableSource.ts  (22 líneas)
 ==============================================================================
 // features/player/lib/findNextAvailableSource.ts
 
@@ -10833,7 +11203,7 @@ export function findNextAvailableSource(
 --- FIN DEL ARCHIVO: features/player/lib/findNextAvailableSource.ts ---
 
 ==============================================================================
-ARCHIVO [161/260]: features/player/model/useServerFailover.ts  (183 líneas)
+ARCHIVO [163/262]: features/player/model/useServerFailover.ts  (183 líneas)
 ==============================================================================
 'use client';
 
@@ -11022,7 +11392,7 @@ export function useServerFailover({
 --- FIN DEL ARCHIVO: features/player/model/useServerFailover.ts ---
 
 ==============================================================================
-ARCHIVO [162/260]: features/player/types.ts  (20 líneas)
+ARCHIVO [164/262]: features/player/types.ts  (20 líneas)
 ==============================================================================
 // features/player/types.ts
 
@@ -11048,7 +11418,7 @@ export interface PlayableSource {
 --- FIN DEL ARCHIVO: features/player/types.ts ---
 
 ==============================================================================
-ARCHIVO [163/260]: features/player/ui/LazyVideoPlayer.tsx  (57 líneas)
+ARCHIVO [165/262]: features/player/ui/LazyVideoPlayer.tsx  (57 líneas)
 ==============================================================================
 'use client';
 
@@ -11111,7 +11481,7 @@ export default function LazyVideoPlayer({
 --- FIN DEL ARCHIVO: features/player/ui/LazyVideoPlayer.tsx ---
 
 ==============================================================================
-ARCHIVO [164/260]: features/player/ui/PlayerErrorBoundary.tsx  (77 líneas)
+ARCHIVO [166/262]: features/player/ui/PlayerErrorBoundary.tsx  (77 líneas)
 ==============================================================================
 'use client';
 
@@ -11194,7 +11564,7 @@ export default class PlayerErrorBoundary extends Component<Props, State> {
 --- FIN DEL ARCHIVO: features/player/ui/PlayerErrorBoundary.tsx ---
 
 ==============================================================================
-ARCHIVO [165/260]: features/player/ui/PlayerErrorOverlay.tsx  (44 líneas)
+ARCHIVO [167/262]: features/player/ui/PlayerErrorOverlay.tsx  (44 líneas)
 ==============================================================================
 // features/player/ui/PlayerErrorOverlay.tsx
 'use client';
@@ -11244,7 +11614,7 @@ export default function PlayerErrorOverlay({
 --- FIN DEL ARCHIVO: features/player/ui/PlayerErrorOverlay.tsx ---
 
 ==============================================================================
-ARCHIVO [166/260]: features/player/ui/PlayerFrame.tsx  (30 líneas)
+ARCHIVO [168/262]: features/player/ui/PlayerFrame.tsx  (30 líneas)
 ==============================================================================
 // features/player/ui/PlayerFrame.tsx
 'use client';
@@ -11280,7 +11650,7 @@ export default function PlayerFrame({ source, onLoad }: PlayerFrameProps) {
 --- FIN DEL ARCHIVO: features/player/ui/PlayerFrame.tsx ---
 
 ==============================================================================
-ARCHIVO [167/260]: features/player/ui/PlayerLoadingOverlay.tsx  (30 líneas)
+ARCHIVO [169/262]: features/player/ui/PlayerLoadingOverlay.tsx  (30 líneas)
 ==============================================================================
 // features/player/ui/PlayerLoadingOverlay.tsx
 
@@ -11316,7 +11686,7 @@ export default function PlayerLoadingOverlay({
 --- FIN DEL ARCHIVO: features/player/ui/PlayerLoadingOverlay.tsx ---
 
 ==============================================================================
-ARCHIVO [168/260]: features/player/ui/ServerSelector.tsx  (57 líneas)
+ARCHIVO [170/262]: features/player/ui/ServerSelector.tsx  (57 líneas)
 ==============================================================================
 // features/player/ui/ServerSelector.tsx
 'use client';
@@ -11379,19 +11749,25 @@ export default function ServerSelector({
 --- FIN DEL ARCHIVO: features/player/ui/ServerSelector.tsx ---
 
 ==============================================================================
-ARCHIVO [169/260]: features/player/ui/VideoPlayer.tsx  (190 líneas)
+ARCHIVO [171/262]: features/player/ui/VideoPlayer.tsx  (190 líneas)
 ==============================================================================
 // features/player/ui/VideoPlayer.tsx
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { PlayableSource } from '../types';
 import { LOAD_TIMEOUT_MS } from '../config/player';
-
 import { useServerFailover } from '../model/useServerFailover';
-import { shouldShowWarning, markAsWarnedInSession } from '@/shared/lib/adblock-storage';
-import { detectBrowser, getAdblockRecommendation } from '@/shared/lib/adblock-detector';
-
+import {
+  shouldShowWarning,
+  markAsWarnedInSession,
+} from '@/shared/lib/adblock-storage';
+import {
+  detectAdBlock,
+  detectBrowser,
+  getAdblockRecommendation,
+} from '@/shared/lib/adblock-detector';
+import { IconShield } from '@/shared/ui/icons';
 import ServerSelector from './ServerSelector';
 import PlayerLoadingOverlay from './PlayerLoadingOverlay';
 import PlayerErrorOverlay from './PlayerErrorOverlay';
@@ -11401,11 +11777,50 @@ export interface VideoPlayerProps {
   sources: PlayableSource[];
 }
 
+/**
+ * Fases de la advertencia de adblock:
+ *
+ * - 'checking':  detección breve del bloqueador del usuario (~100 ms).
+ * - 'show':      sin bloqueador → aviso minimalista.
+ * - 'dismissed': tiene bloqueador o eligió continuar → renderizar iframe.
+ */
+type AdBlockWarningPhase = 'checking' | 'show' | 'dismissed';
+
 export default function VideoPlayer({ sources }: VideoPlayerProps) {
   // ─── Estado de advertencia ───
-  const [showWarning, setShowWarning] = useState(() => shouldShowWarning());
-  const browser = detectBrowser();
-  const recommendation = getAdblockRecommendation(browser);
+  const [warningPhase, setWarningPhase] = useState<AdBlockWarningPhase>(() =>
+    shouldShowWarning() ? 'checking' : 'dismissed'
+  );
+
+  // Si el usuario ya tiene un bloqueador (extensión o navegador con
+  // bloqueo nativo), se ahorra la advertencia por completo.
+  useEffect(() => {
+    if (warningPhase !== 'checking') return;
+    let cancelled = false;
+
+    detectAdBlock()
+      .then((hasBlocker) => {
+        if (cancelled) return;
+        if (hasBlocker) {
+          // Marcar como descartada: próximas navegaciones SPA
+          // ni siquiera repiten la detección.
+          markAsWarnedInSession();
+          setWarningPhase('dismissed');
+        } else {
+          setWarningPhase('show');
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setWarningPhase('show');
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [warningPhase]);
+
+  const showWarning = warningPhase === 'show';
+  const iframeAllowed = warningPhase === 'dismissed';
 
   const {
     activeSource,
@@ -11415,22 +11830,19 @@ export default function VideoPlayer({ sources }: VideoPlayerProps) {
     autoSwitched,
     retryCounter,
     allFailed,
-
     handleIframeLoad,
     handleRetry,
     handleSelectSource,
   } = useServerFailover({ sources });
 
-  // El iframe solo se permite si el usuario cerró la advertencia
-  const iframeAllowed = !showWarning;
-
   const handleInstall = () => {
+    const recommendation = getAdblockRecommendation(detectBrowser());
     window.open(recommendation.url, '_blank', 'noopener,noreferrer');
   };
 
   const handleContinue = () => {
     markAsWarnedInSession();
-    setShowWarning(false);
+    setWarningPhase('dismissed');
   };
 
   if (!sources || sources.length === 0) {
@@ -11459,87 +11871,43 @@ export default function VideoPlayer({ sources }: VideoPlayerProps) {
       )}
 
       <div className="relative aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl shadow-black/30 border border-white/5">
-        {/* ─── Advertencia inline (en el espacio del player) ─── */}
-        {showWarning && (
-          <div className="absolute inset-0 z-10 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 flex flex-col items-center justify-center p-4 sm:p-8 text-center overflow-y-auto">
-            {/* Icono */}
-            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-amber-500/20 rounded-full flex items-center justify-center mb-3 flex-shrink-0">
-              <svg
-                className="w-6 h-6 sm:w-7 sm:h-7 text-amber-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                />
-              </svg>
-            </div>
-
-            {/* Título */}
-            <h3 className="text-white font-bold text-base sm:text-lg mb-2 flex-shrink-0">
-              Recomendación antes de reproducir
-            </h3>
-
-            {/* Descripción */}
-            <p className="text-gray-300 text-xs sm:text-sm mb-3 leading-relaxed max-w-md flex-shrink-0">
-              Los servidores muestran publicidad invasiva. Te recomendamos
-              instalar un bloqueador de anuncios para una mejor experiencia.
-            </p>
-
-            {/* Recomendación */}
-            <div className="bg-white/5 border border-white/10 rounded-xl p-3 mb-3 w-full max-w-sm flex-shrink-0">
-              <p className="text-xs font-semibold text-white mb-2">
-                Extensión recomendada:
-              </p>
-              <div className="flex items-center gap-2">
-                <div className="flex-1 text-left">
-                  <p className="text-white font-medium text-sm">{recommendation.name}</p>
-                  <p className="text-gray-400 text-xs">{recommendation.description}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Botones */}
-            <div className="flex flex-col sm:flex-row gap-2 w-full max-w-sm flex-shrink-0">
-              <button
-                onClick={handleInstall}
-                className="
-                  flex-1 bg-blue-600 hover:bg-blue-700
-                  text-white font-semibold
-                  px-4 py-2.5 rounded-lg
-                  transition-colors
-                  text-sm
-                "
-              >
-                Instalar bloqueador
-              </button>
-              <button
-                onClick={handleContinue}
-                className="
-                  flex-1 bg-gray-800 hover:bg-gray-700
-                  text-gray-300 font-medium
-                  px-4 py-2.5 rounded-lg
-                  transition-colors
-                  border border-white/10
-                  text-sm
-                "
-              >
-                Continuar sin bloqueador
-              </button>
-            </div>
-
-            {/* Nota */}
-            <p className="text-gray-500 text-[10px] mt-3 flex-shrink-0">
-              Esta advertencia aparecerá nuevamente al recargar la página.
-            </p>
+        {/* ─── Detección de bloqueador (breve, ~100 ms) ─── */}
+        {warningPhase === 'checking' && (
+          <div className="absolute inset-0 z-10 bg-gray-950 flex items-center justify-center">
+            <div className="w-8 h-8 border-2 border-red-600/60 border-t-transparent rounded-full animate-spin" />
           </div>
         )}
 
-        {/* ─── Contenido del player (solo si la advertencia fue cerrada) ─── */}
+        {/* ─── Advertencia minimalista (sin bloqueador detectado) ─── */}
+        {showWarning && (
+          <div className="absolute inset-0 z-10 bg-gray-950 flex flex-col items-center justify-center gap-3 sm:gap-5 px-4 py-3 sm:p-8 text-center">
+            <div className="hidden min-[380px]:flex w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-red-600/10 border border-red-600/25 items-center justify-center flex-shrink-0">
+              <IconShield className="w-5 h-5 sm:w-6 sm:h-6 text-red-500" />
+            </div>
+
+            <p className="text-xs sm:text-sm text-gray-400 leading-relaxed max-w-sm flex-shrink-0">
+              To avoid invasive ads, we recommend installing an ad
+              blocker.
+            </p>
+
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 flex-shrink-0">
+              <button
+                onClick={handleInstall}
+                className="bg-red-600 hover:bg-red-500 text-white text-xs sm:text-sm font-semibold px-4 sm:px-6 py-2 sm:py-2.5 rounded-full transition-colors"
+              >
+                Install Ad Blocker
+              </button>
+              <button
+                onClick={handleContinue}
+                className="bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 hover:text-white text-xs sm:text-sm font-medium px-4 sm:px-6 py-2 sm:py-2.5 rounded-full transition-colors"
+              >
+                Continue without it
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ─── Contenido del player (solo con advertencia descartada) ─── */}
         {iframeAllowed && loadStatus === 'loading' && (
           <PlayerLoadingOverlay
             serverName={activeSource?.name}
@@ -11554,19 +11922,21 @@ export default function VideoPlayer({ sources }: VideoPlayerProps) {
           />
         )}
 
-        {iframeAllowed && activeSource && loadStatus !== 'timeout' && !allFailed && (
-          <PlayerFrame
-            key={`${activeSource.url}-${retryCounter}`}
-            source={activeSource}
-            onLoad={handleIframeLoad}
-          />
-        )}
+        {iframeAllowed &&
+          activeSource &&
+          loadStatus !== 'timeout' &&
+          !allFailed && (
+            <PlayerFrame
+              key={`${activeSource.url}-${retryCounter}`}
+              source={activeSource}
+              onLoad={handleIframeLoad}
+            />
+          )}
       </div>
 
       <p className="mt-2 text-[10px] text-gray-600 text-center">
         Content plays in a sandboxed environment for security. If a
-        server shows pop-up ads, close them directly in the
-        player.
+        server shows pop-up ads, close them directly in the player.
       </p>
     </div>
   );
@@ -11575,7 +11945,7 @@ export default function VideoPlayer({ sources }: VideoPlayerProps) {
 --- FIN DEL ARCHIVO: features/player/ui/VideoPlayer.tsx ---
 
 ==============================================================================
-ARCHIVO [170/260]: features/search/application/searchMovies.ts  (45 líneas)
+ARCHIVO [172/262]: features/search/application/searchMovies.ts  (45 líneas)
 ==============================================================================
 // features/search/application/searchMovies.ts
 import type { Movie } from '@/entities/movie';
@@ -11626,7 +11996,7 @@ export async function searchMovies(
 --- FIN DEL ARCHIVO: features/search/application/searchMovies.ts ---
 
 ==============================================================================
-ARCHIVO [171/260]: features/search/index.ts  (6 líneas)
+ARCHIVO [173/262]: features/search/index.ts  (6 líneas)
 ==============================================================================
 // features/search/index.ts
 
@@ -11638,7 +12008,7 @@ export { buildSearchMetadata } from './lib/searchPageMetadata';
 --- FIN DEL ARCHIVO: features/search/index.ts ---
 
 ==============================================================================
-ARCHIVO [172/260]: features/search/lib/normalizeSearchQuery.ts  (11 líneas)
+ARCHIVO [174/262]: features/search/lib/normalizeSearchQuery.ts  (11 líneas)
 ==============================================================================
 // features/search/lib/normalizeSearchQuery.ts
 
@@ -11655,7 +12025,7 @@ export function normalizeSearchQuery(
 --- FIN DEL ARCHIVO: features/search/lib/normalizeSearchQuery.ts ---
 
 ==============================================================================
-ARCHIVO [173/260]: features/search/lib/searchPageMetadata.ts  (37 líneas)
+ARCHIVO [175/262]: features/search/lib/searchPageMetadata.ts  (37 líneas)
 ==============================================================================
 // features/search/lib/searchPageMetadata.ts
 import type { Metadata } from 'next';
@@ -11698,7 +12068,7 @@ export function buildSearchMetadata(
 --- FIN DEL ARCHIVO: features/search/lib/searchPageMetadata.ts ---
 
 ==============================================================================
-ARCHIVO [174/260]: features/search/model/useAutocomplete.ts  (150 líneas)
+ARCHIVO [176/262]: features/search/model/useAutocomplete.ts  (150 líneas)
 ==============================================================================
 'use client';
 
@@ -11854,7 +12224,7 @@ export function useAutocomplete(query: string): UseAutocompleteResult {
 --- FIN DEL ARCHIVO: features/search/model/useAutocomplete.ts ---
 
 ==============================================================================
-ARCHIVO [175/260]: features/search/services/getSearchPageData.ts  (31 líneas)
+ARCHIVO [177/262]: features/search/services/getSearchPageData.ts  (31 líneas)
 ==============================================================================
 import type { SearchPageData } from '../types';
 import { normalizeSearchQuery } from '../lib/normalizeSearchQuery';
@@ -11891,7 +12261,7 @@ export async function getSearchPageData(
 --- FIN DEL ARCHIVO: features/search/services/getSearchPageData.ts ---
 
 ==============================================================================
-ARCHIVO [176/260]: features/search/types.ts  (10 líneas)
+ARCHIVO [178/262]: features/search/types.ts  (10 líneas)
 ==============================================================================
 import type { Movie } from '@/entities/movie';
 
@@ -11907,7 +12277,7 @@ export interface SearchPageData {
 --- FIN DEL ARCHIVO: features/search/types.ts ---
 
 ==============================================================================
-ARCHIVO [177/260]: features/search/ui/AutocompleteSuggestions.tsx  (113 líneas)
+ARCHIVO [179/262]: features/search/ui/AutocompleteSuggestions.tsx  (113 líneas)
 ==============================================================================
 'use client';
 
@@ -12026,7 +12396,7 @@ export default function AutocompleteSuggestions({
 --- FIN DEL ARCHIVO: features/search/ui/AutocompleteSuggestions.tsx ---
 
 ==============================================================================
-ARCHIVO [178/260]: features/search/ui/SearchBar.tsx  (167 líneas)
+ARCHIVO [180/262]: features/search/ui/SearchBar.tsx  (167 líneas)
 ==============================================================================
 'use client';
 
@@ -12199,7 +12569,7 @@ export default function SearchBar() {
 --- FIN DEL ARCHIVO: features/search/ui/SearchBar.tsx ---
 
 ==============================================================================
-ARCHIVO [179/260]: features/search/ui/SearchEmptyState.tsx  (32 líneas)
+ARCHIVO [181/262]: features/search/ui/SearchEmptyState.tsx  (32 líneas)
 ==============================================================================
 // features/search/ui/SearchEmptyState.tsx
 
@@ -12237,7 +12607,7 @@ export default function SearchEmptyState() {
 --- FIN DEL ARCHIVO: features/search/ui/SearchEmptyState.tsx ---
 
 ==============================================================================
-ARCHIVO [180/260]: features/search/ui/SearchHeader.tsx  (22 líneas)
+ARCHIVO [182/262]: features/search/ui/SearchHeader.tsx  (22 líneas)
 ==============================================================================
 interface SearchHeaderProps {
   query: string;
@@ -12265,7 +12635,7 @@ export default function SearchHeader({
 --- FIN DEL ARCHIVO: features/search/ui/SearchHeader.tsx ---
 
 ==============================================================================
-ARCHIVO [181/260]: features/search/ui/SearchNoQueryState.tsx  (11 líneas)
+ARCHIVO [183/262]: features/search/ui/SearchNoQueryState.tsx  (11 líneas)
 ==============================================================================
 // features/search/ui/SearchNoQueryState.tsx
 
@@ -12282,7 +12652,7 @@ export default function SearchNoQueryState() {
 --- FIN DEL ARCHIVO: features/search/ui/SearchNoQueryState.tsx ---
 
 ==============================================================================
-ARCHIVO [182/260]: features/search/ui/SearchPage.tsx  (44 líneas)
+ARCHIVO [184/262]: features/search/ui/SearchPage.tsx  (44 líneas)
 ==============================================================================
 // features/search/ui/SearchPage.tsx
 import type { ReactNode } from 'react';
@@ -12332,7 +12702,7 @@ export default function SearchPage({
 --- FIN DEL ARCHIVO: features/search/ui/SearchPage.tsx ---
 
 ==============================================================================
-ARCHIVO [183/260]: features/search/ui/SearchResults.tsx  (21 líneas)
+ARCHIVO [185/262]: features/search/ui/SearchResults.tsx  (21 líneas)
 ==============================================================================
 import type { Movie } from '@/entities/movie';
 import { getMovieKey } from '@/entities/movie';
@@ -12359,7 +12729,7 @@ export default function SearchResults({ results }: SearchResultsProps) {
 --- FIN DEL ARCHIVO: features/search/ui/SearchResults.tsx ---
 
 ==============================================================================
-ARCHIVO [184/260]: lib/api/http/client.ts  (76 líneas)
+ARCHIVO [186/262]: lib/api/http/client.ts  (76 líneas)
 ==============================================================================
 // lib/api/http/client.ts
 import { FETCH_TIMEOUT_MS } from './config';
@@ -12441,7 +12811,7 @@ export async function fetchApi<TJson = unknown>(
 --- FIN DEL ARCHIVO: lib/api/http/client.ts ---
 
 ==============================================================================
-ARCHIVO [185/260]: lib/api/http/config.ts  (27 líneas)
+ARCHIVO [187/262]: lib/api/http/config.ts  (27 líneas)
 ==============================================================================
 // lib/api/http/config.ts
 export const API_URL =
@@ -12474,7 +12844,7 @@ if (
 --- FIN DEL ARCHIVO: lib/api/http/config.ts ---
 
 ==============================================================================
-ARCHIVO [186/260]: lib/api/http/index.ts  (5 líneas)
+ARCHIVO [188/262]: lib/api/http/index.ts  (5 líneas)
 ==============================================================================
 // lib/api/http/index.ts
 export { fetchApi } from './client';
@@ -12485,7 +12855,7 @@ export type { NextFetchRequestConfig } from './types';
 --- FIN DEL ARCHIVO: lib/api/http/index.ts ---
 
 ==============================================================================
-ARCHIVO [187/260]: lib/api/http/types.ts  (7 líneas)
+ARCHIVO [189/262]: lib/api/http/types.ts  (7 líneas)
 ==============================================================================
 // lib/api/http/types.ts
 export type NextFetchRequestConfig = RequestInit & {
@@ -12498,7 +12868,7 @@ export type NextFetchRequestConfig = RequestInit & {
 --- FIN DEL ARCHIVO: lib/api/http/types.ts ---
 
 ==============================================================================
-ARCHIVO [188/260]: lib/api/http/url.ts  (33 líneas)
+ARCHIVO [190/262]: lib/api/http/url.ts  (33 líneas)
 ==============================================================================
 // lib/api/http/url.ts
 import { API_URL } from './config';
@@ -12537,7 +12907,7 @@ export function buildApiUrl(
 --- FIN DEL ARCHIVO: lib/api/http/url.ts ---
 
 ==============================================================================
-ARCHIVO [189/260]: lib/api/pagination/config.ts  (3 líneas)
+ARCHIVO [191/262]: lib/api/pagination/config.ts  (3 líneas)
 ==============================================================================
 export const DEFAULT_PAGE_SIZE = 24;
 export const HOME_PAGE_SIZE = 20;
@@ -12546,7 +12916,7 @@ export const SEARCH_PAGE_SIZE = 24;
 --- FIN DEL ARCHIVO: lib/api/pagination/config.ts ---
 
 ==============================================================================
-ARCHIVO [190/260]: lib/api/pagination/types.ts  (7 líneas)
+ARCHIVO [192/262]: lib/api/pagination/types.ts  (7 líneas)
 ==============================================================================
 // lib/api/pagination/types.ts
 export type PaginatedResult<T> = {
@@ -12559,7 +12929,7 @@ export type PaginatedResult<T> = {
 --- FIN DEL ARCHIVO: lib/api/pagination/types.ts ---
 
 ==============================================================================
-ARCHIVO [191/260]: lib/api/repositories/actors.ts  (103 líneas)
+ARCHIVO [193/262]: lib/api/repositories/actors.ts  (103 líneas)
 ==============================================================================
 // lib/api/repositories/actors.ts
 import type { Actor } from '@/entities/person';
@@ -12668,7 +13038,7 @@ export async function fetchMoviesByActor(
 --- FIN DEL ARCHIVO: lib/api/repositories/actors.ts ---
 
 ==============================================================================
-ARCHIVO [192/260]: lib/api/repositories/adminImport.ts  (517 líneas)
+ARCHIVO [194/262]: lib/api/repositories/adminImport.ts  (517 líneas)
 ==============================================================================
 // lib/api/repositories/adminImport.ts
 import { API_URL, STRAPI_API_TOKEN } from '../http/config';
@@ -13191,7 +13561,7 @@ export async function incrementMovieView(slug: string): Promise<boolean> {
 --- FIN DEL ARCHIVO: lib/api/repositories/adminImport.ts ---
 
 ==============================================================================
-ARCHIVO [193/260]: lib/api/repositories/categories.ts  (30 líneas)
+ARCHIVO [195/262]: lib/api/repositories/categories.ts  (30 líneas)
 ==============================================================================
 // lib/api/resources/categories.ts
 import type { Category } from '@/entities/category';
@@ -13227,7 +13597,7 @@ export async function fetchCategories(): Promise<Category[]> {
 --- FIN DEL ARCHIVO: lib/api/repositories/categories.ts ---
 
 ==============================================================================
-ARCHIVO [194/260]: lib/api/repositories/countries.ts  (42 líneas)
+ARCHIVO [196/262]: lib/api/repositories/countries.ts  (42 líneas)
 ==============================================================================
 // lib/api/resources/countries.ts
 import { fetchApi } from '../http/client';
@@ -13275,7 +13645,7 @@ export async function fetchCountries(): Promise<string[]> {
 --- FIN DEL ARCHIVO: lib/api/repositories/countries.ts ---
 
 ==============================================================================
-ARCHIVO [195/260]: lib/api/repositories/movies.ts  (239 líneas)
+ARCHIVO [197/262]: lib/api/repositories/movies.ts  (239 líneas)
 ==============================================================================
 // lib/api/repositories/movies.ts
 import {
@@ -13520,7 +13890,7 @@ export async function fetchMovieBySlug(
 --- FIN DEL ARCHIVO: lib/api/repositories/movies.ts ---
 
 ==============================================================================
-ARCHIVO [196/260]: lib/api/repositories/movieSearch.ts  (37 líneas)
+ARCHIVO [198/262]: lib/api/repositories/movieSearch.ts  (37 líneas)
 ==============================================================================
 import type { Movie } from '@/entities/movie';
 import type { StrapiListResponse } from '@/lib/api/strapi/types';
@@ -13563,7 +13933,7 @@ export const movieSearchRepository: MovieSearchRepository = {
 --- FIN DEL ARCHIVO: lib/api/repositories/movieSearch.ts ---
 
 ==============================================================================
-ARCHIVO [197/260]: lib/api/strapi/__tests__/movieParams.test.ts  (60 líneas)
+ARCHIVO [199/262]: lib/api/strapi/__tests__/movieParams.test.ts  (60 líneas)
 ==============================================================================
 import { describe, it, expect } from 'vitest';
 import { buildMovieListParams } from '../movieParams';
@@ -13629,7 +13999,7 @@ describe('buildMovieListParams', () => {
 --- FIN DEL ARCHIVO: lib/api/strapi/__tests__/movieParams.test.ts ---
 
 ==============================================================================
-ARCHIVO [198/260]: lib/api/strapi/__tests__/normalizers.test.ts  (104 líneas)
+ARCHIVO [200/262]: lib/api/strapi/__tests__/normalizers.test.ts  (104 líneas)
 ==============================================================================
 import { describe, it, expect } from 'vitest';
 import { normalizeMovie, normalizeCategory, normalizeServer } from '../normalizers';
@@ -13739,7 +14109,7 @@ describe('normalizeServer', () => {
 --- FIN DEL ARCHIVO: lib/api/strapi/__tests__/normalizers.test.ts ---
 
 ==============================================================================
-ARCHIVO [199/260]: lib/api/strapi/genreRankedParams.ts  (31 líneas)
+ARCHIVO [201/262]: lib/api/strapi/genreRankedParams.ts  (31 líneas)
 ==============================================================================
 // lib/api/strapi/genreRankedParams.ts
 /**
@@ -13776,7 +14146,7 @@ export const GENRE_RANKED_PAGINATION_KEYS = {
 --- FIN DEL ARCHIVO: lib/api/strapi/genreRankedParams.ts ---
 
 ==============================================================================
-ARCHIVO [200/260]: lib/api/strapi/movieParams.ts  (113 líneas)
+ARCHIVO [202/262]: lib/api/strapi/movieParams.ts  (113 líneas)
 ==============================================================================
 // lib/api/strapi/movieParams.ts
 import {
@@ -13895,7 +14265,7 @@ export function buildMovieListParams(
 --- FIN DEL ARCHIVO: lib/api/strapi/movieParams.ts ---
 
 ==============================================================================
-ARCHIVO [201/260]: lib/api/strapi/normalizers.ts  (272 líneas)
+ARCHIVO [203/262]: lib/api/strapi/normalizers.ts  (272 líneas)
 ==============================================================================
 // lib/api/strapi/normalizers.ts
 import type { Movie, Server } from '@/entities/movie';
@@ -14173,7 +14543,7 @@ export function normalizePerson(raw: unknown): Actor | Director | null {
 --- FIN DEL ARCHIVO: lib/api/strapi/normalizers.ts ---
 
 ==============================================================================
-ARCHIVO [202/260]: lib/api/strapi/pagination.ts  (27 líneas)
+ARCHIVO [204/262]: lib/api/strapi/pagination.ts  (27 líneas)
 ==============================================================================
 // lib/api/strapi/pagination.ts
 import type { StrapiListResponse } from './types';
@@ -14206,7 +14576,7 @@ export function getHasMore(
 --- FIN DEL ARCHIVO: lib/api/strapi/pagination.ts ---
 
 ==============================================================================
-ARCHIVO [203/260]: lib/api/strapi/populate.ts  (34 líneas)
+ARCHIVO [205/262]: lib/api/strapi/populate.ts  (34 líneas)
 ==============================================================================
 // lib/api/strapi/populate.ts
 
@@ -14246,7 +14616,7 @@ export function buildPopulateParams(
 --- FIN DEL ARCHIVO: lib/api/strapi/populate.ts ---
 
 ==============================================================================
-ARCHIVO [204/260]: lib/api/strapi/schemas.ts  (67 líneas)
+ARCHIVO [206/262]: lib/api/strapi/schemas.ts  (67 líneas)
 ==============================================================================
 // lib/api/strapi/schemas.ts
 import { z } from 'zod';
@@ -14319,7 +14689,7 @@ export const StrapiMovieSchema = z.object({
 --- FIN DEL ARCHIVO: lib/api/strapi/schemas.ts ---
 
 ==============================================================================
-ARCHIVO [205/260]: lib/api/strapi/types.ts  (14 líneas)
+ARCHIVO [207/262]: lib/api/strapi/types.ts  (14 líneas)
 ==============================================================================
 // lib/api/strapi/types.ts
 export type StrapiPagination = {
@@ -14339,7 +14709,7 @@ export type StrapiListResponse<T> = {
 --- FIN DEL ARCHIVO: lib/api/strapi/types.ts ---
 
 ==============================================================================
-ARCHIVO [206/260]: lib/api/tmdb/catalogNormalizer.ts  (116 líneas)
+ARCHIVO [208/262]: lib/api/tmdb/catalogNormalizer.ts  (116 líneas)
 ==============================================================================
 // lib/api/tmdb/catalogNormalizer.ts
 import type { Movie } from '@/entities/movie';
@@ -14461,7 +14831,7 @@ export function normalizeTmdbSearchToMovies(
 --- FIN DEL ARCHIVO: lib/api/tmdb/catalogNormalizer.ts ---
 
 ==============================================================================
-ARCHIVO [207/260]: lib/api/tmdb/client.ts  (85 líneas)
+ARCHIVO [209/262]: lib/api/tmdb/client.ts  (85 líneas)
 ==============================================================================
 // lib/api/tmdb/client.ts
 import {
@@ -14552,7 +14922,7 @@ export async function tmdbGetPersonMovieCredits(
 --- FIN DEL ARCHIVO: lib/api/tmdb/client.ts ---
 
 ==============================================================================
-ARCHIVO [208/260]: lib/api/tmdb/config.ts  (17 líneas)
+ARCHIVO [210/262]: lib/api/tmdb/config.ts  (17 líneas)
 ==============================================================================
 // lib/api/tmdb/config.ts
 export const TMDB_API_KEY = process.env.TMDB_API_KEY || '';
@@ -14575,7 +14945,7 @@ export function tmdbImageUrl(
 --- FIN DEL ARCHIVO: lib/api/tmdb/config.ts ---
 
 ==============================================================================
-ARCHIVO [209/260]: lib/api/tmdb/discover.ts  (282 líneas)
+ARCHIVO [211/262]: lib/api/tmdb/discover.ts  (282 líneas)
 ==============================================================================
 // lib/api/tmdb/discover.ts
 import {
@@ -14863,7 +15233,7 @@ export async function discoverMovies(
 --- FIN DEL ARCHIVO: lib/api/tmdb/discover.ts ---
 
 ==============================================================================
-ARCHIVO [210/260]: lib/api/tmdb/genres.ts  (66 líneas)
+ARCHIVO [212/262]: lib/api/tmdb/genres.ts  (66 líneas)
 ==============================================================================
 // lib/api/tmdb/genres.ts
 import type { Category } from '@/entities/category';
@@ -14935,7 +15305,7 @@ export function getTmdbCountries(): string[] {
 --- FIN DEL ARCHIVO: lib/api/tmdb/genres.ts ---
 
 ==============================================================================
-ARCHIVO [211/260]: lib/api/tmdb/index.ts  (43 líneas)
+ARCHIVO [213/262]: lib/api/tmdb/index.ts  (43 líneas)
 ==============================================================================
 // lib/api/tmdb/index.ts
 export * from './config';
@@ -14984,7 +15354,7 @@ export async function getPersonFilmography(
 --- FIN DEL ARCHIVO: lib/api/tmdb/index.ts ---
 
 ==============================================================================
-ARCHIVO [212/260]: lib/api/tmdb/normalizers.ts  (320 líneas)
+ARCHIVO [214/262]: lib/api/tmdb/normalizers.ts  (320 líneas)
 ==============================================================================
 // lib/api/tmdb/normalizers.ts
 import { tmdbImageUrl } from './config';
@@ -15310,7 +15680,7 @@ export function normalizePersonDetail(
 --- FIN DEL ARCHIVO: lib/api/tmdb/normalizers.ts ---
 
 ==============================================================================
-ARCHIVO [213/260]: lib/api/tmdb/slugCandidates.ts  (139 líneas)
+ARCHIVO [215/262]: lib/api/tmdb/slugCandidates.ts  (139 líneas)
 ==============================================================================
 // lib/api/tmdb/slugCandidates.ts
 import { slugify, isLatinizable } from '@/lib/utils/slugify';
@@ -15455,7 +15825,7 @@ export function generatePersonSlugCandidates(
 --- FIN DEL ARCHIVO: lib/api/tmdb/slugCandidates.ts ---
 
 ==============================================================================
-ARCHIVO [214/260]: lib/api/tmdb/slugResolver.ts  (34 líneas)
+ARCHIVO [216/262]: lib/api/tmdb/slugResolver.ts  (34 líneas)
 ==============================================================================
 // lib/api/tmdb/slugResolver.ts
 import { slugify } from '@/lib/utils/slugify';
@@ -15495,7 +15865,7 @@ export function isTmdbSlug(slug: string): boolean {
 --- FIN DEL ARCHIVO: lib/api/tmdb/slugResolver.ts ---
 
 ==============================================================================
-ARCHIVO [215/260]: lib/api/tmdb/trending.ts  (103 líneas)
+ARCHIVO [217/262]: lib/api/tmdb/trending.ts  (103 líneas)
 ==============================================================================
 // lib/api/tmdb/trending.ts
 import {
@@ -15604,7 +15974,7 @@ export async function fetchPopularMovies(
 --- FIN DEL ARCHIVO: lib/api/tmdb/trending.ts ---
 
 ==============================================================================
-ARCHIVO [216/260]: lib/api/tmdb/types.ts  (176 líneas)
+ARCHIVO [218/262]: lib/api/tmdb/types.ts  (176 líneas)
 ==============================================================================
 // lib/api/tmdb/types.ts
 export interface TmdbGenre {
@@ -15786,7 +16156,7 @@ export interface TmdbPersonPreview {
 --- FIN DEL ARCHIVO: lib/api/tmdb/types.ts ---
 
 ==============================================================================
-ARCHIVO [217/260]: lib/config/adminTools.ts  (13 líneas)
+ARCHIVO [219/262]: lib/config/adminTools.ts  (13 líneas)
 ==============================================================================
 // lib/config/adminTools.ts
 /**
@@ -15805,7 +16175,7 @@ export const ADMIN_TOOLS_ENABLED =
 --- FIN DEL ARCHIVO: lib/config/adminTools.ts ---
 
 ==============================================================================
-ARCHIVO [218/260]: lib/config/site.ts  (16 líneas)
+ARCHIVO [220/262]: lib/config/site.ts  (16 líneas)
 ==============================================================================
 // lib/config/site.ts
 
@@ -15827,7 +16197,7 @@ export const SITE_URL =
 --- FIN DEL ARCHIVO: lib/config/site.ts ---
 
 ==============================================================================
-ARCHIVO [219/260]: lib/queries/actors.ts  (10 líneas)
+ARCHIVO [221/262]: lib/queries/actors.ts  (10 líneas)
 ==============================================================================
 // lib/queries/actors.ts
 import { cache } from 'react';
@@ -15843,7 +16213,7 @@ export const getMoviesByActor = cache(fetchMoviesByActor);
 --- FIN DEL ARCHIVO: lib/queries/actors.ts ---
 
 ==============================================================================
-ARCHIVO [220/260]: lib/queries/categories.ts  (6 líneas)
+ARCHIVO [222/262]: lib/queries/categories.ts  (6 líneas)
 ==============================================================================
 // lib/queries/categories.ts
 import { cache } from 'react';
@@ -15855,7 +16225,7 @@ export const getCategories = cache(fetchCategories);
 --- FIN DEL ARCHIVO: lib/queries/categories.ts ---
 
 ==============================================================================
-ARCHIVO [221/260]: lib/queries/countries.ts  (6 líneas)
+ARCHIVO [223/262]: lib/queries/countries.ts  (6 líneas)
 ==============================================================================
 // lib/queries/countries.ts
 import { cache } from 'react';
@@ -15867,7 +16237,7 @@ export const getCountries = cache(fetchCountries);
 --- FIN DEL ARCHIVO: lib/queries/countries.ts ---
 
 ==============================================================================
-ARCHIVO [222/260]: lib/queries/movies.ts  (18 líneas)
+ARCHIVO [224/262]: lib/queries/movies.ts  (18 líneas)
 ==============================================================================
 // lib/queries/movies.ts
 import { cache } from 'react';
@@ -15891,7 +16261,7 @@ export const getMoviesWithFilters = cache(fetchMoviesWithFilters);
 --- FIN DEL ARCHIVO: lib/queries/movies.ts ---
 
 ==============================================================================
-ARCHIVO [223/260]: lib/queries/search.ts  (15 líneas)
+ARCHIVO [225/262]: lib/queries/search.ts  (15 líneas)
 ==============================================================================
 import { cache } from 'react';
 import {
@@ -15912,7 +16282,7 @@ export type { MovieSearchRepository };
 --- FIN DEL ARCHIVO: lib/queries/search.ts ---
 
 ==============================================================================
-ARCHIVO [224/260]: lib/routes.ts  (17 líneas)
+ARCHIVO [226/262]: lib/routes.ts  (17 líneas)
 ==============================================================================
 import { SITE_URL } from './config/site';
 
@@ -15935,7 +16305,7 @@ export const absoluteRoutes = {
 --- FIN DEL ARCHIVO: lib/routes.ts ---
 
 ==============================================================================
-ARCHIVO [225/260]: lib/scroll/defer.ts  (48 líneas)
+ARCHIVO [227/262]: lib/scroll/defer.ts  (48 líneas)
 ==============================================================================
 const SCROLL_DEFER_KEY = '__scroll_restore_pending_path';
 
@@ -15989,7 +16359,7 @@ export function consumeScrollRestoreSignal(pathname: string): boolean {
 --- FIN DEL ARCHIVO: lib/scroll/defer.ts ---
 
 ==============================================================================
-ARCHIVO [226/260]: lib/url/__tests__/movieFilters.test.ts  (75 líneas)
+ARCHIVO [228/262]: lib/url/__tests__/movieFilters.test.ts  (75 líneas)
 ==============================================================================
 import { describe, it, expect } from 'vitest';
 import { parseMovieFiltersFromSearchParams } from '../movieFilters';
@@ -16070,7 +16440,7 @@ describe('parseMovieFiltersFromSearchParams', () => {
 --- FIN DEL ARCHIVO: lib/url/__tests__/movieFilters.test.ts ---
 
 ==============================================================================
-ARCHIVO [227/260]: lib/url/movieFilterParams.ts  (36 líneas)
+ARCHIVO [229/262]: lib/url/movieFilterParams.ts  (36 líneas)
 ==============================================================================
 /**
  * Fuente canónica de los query params de filtros de películas.
@@ -16112,7 +16482,7 @@ export const MOVIE_PAGINATION_PARAM_KEYS = {
 --- FIN DEL ARCHIVO: lib/url/movieFilterParams.ts ---
 
 ==============================================================================
-ARCHIVO [228/260]: lib/url/movieFilters.ts  (277 líneas)
+ARCHIVO [230/262]: lib/url/movieFilters.ts  (277 líneas)
 ==============================================================================
 // lib/url/movieFilters.ts
 
@@ -16395,7 +16765,7 @@ export function parseMovieFiltersForUI(
 --- FIN DEL ARCHIVO: lib/url/movieFilters.ts ---
 
 ==============================================================================
-ARCHIVO [229/260]: lib/utils/__tests__/slugify.test.ts  (77 líneas)
+ARCHIVO [231/262]: lib/utils/__tests__/slugify.test.ts  (77 líneas)
 ==============================================================================
 import { describe, it, expect } from 'vitest';
 import { slugify, isLatinizable, chooseSlug, isValidSlug } from '../slugify';
@@ -16478,7 +16848,7 @@ describe('isValidSlug', () => {
 --- FIN DEL ARCHIVO: lib/utils/__tests__/slugify.test.ts ---
 
 ==============================================================================
-ARCHIVO [230/260]: lib/utils/imageLoader.ts  (38 líneas)
+ARCHIVO [232/262]: lib/utils/imageLoader.ts  (38 líneas)
 ==============================================================================
 import type { ImageLoaderProps } from 'next/image';
 
@@ -16522,7 +16892,7 @@ export default function imageLoader({
 --- FIN DEL ARCHIVO: lib/utils/imageLoader.ts ---
 
 ==============================================================================
-ARCHIVO [231/260]: lib/utils/logger.ts  (66 líneas)
+ARCHIVO [233/262]: lib/utils/logger.ts  (66 líneas)
 ==============================================================================
 // lib/utils/logger.ts
 // Sistema de logging unificado.
@@ -16594,7 +16964,7 @@ export const apiLogger = {
 --- FIN DEL ARCHIVO: lib/utils/logger.ts ---
 
 ==============================================================================
-ARCHIVO [232/260]: lib/utils/rate-limit.ts  (65 líneas)
+ARCHIVO [234/262]: lib/utils/rate-limit.ts  (65 líneas)
 ==============================================================================
 // lib/utils/rate-limit.ts
 
@@ -16665,7 +17035,7 @@ export function getClientIp(request: Request): string {
 --- FIN DEL ARCHIVO: lib/utils/rate-limit.ts ---
 
 ==============================================================================
-ARCHIVO [233/260]: lib/utils/slugify.ts  (76 líneas)
+ARCHIVO [235/262]: lib/utils/slugify.ts  (76 líneas)
 ==============================================================================
 // lib/utils/slugify.ts
 
@@ -16747,7 +17117,7 @@ export function isValidSlug(slug: string | null | undefined): slug is string {
 --- FIN DEL ARCHIVO: lib/utils/slugify.ts ---
 
 ==============================================================================
-ARCHIVO [234/260]: lib/validation/moviePayloadSchemas.ts  (59 líneas)
+ARCHIVO [236/262]: lib/validation/moviePayloadSchemas.ts  (59 líneas)
 ==============================================================================
 import { z } from 'zod';
 
@@ -16812,7 +17182,7 @@ export const PaginatedMoviesSchema = z.object({
 --- FIN DEL ARCHIVO: lib/validation/moviePayloadSchemas.ts ---
 
 ==============================================================================
-ARCHIVO [235/260]: next.config.ts  (100 líneas)
+ARCHIVO [237/262]: next.config.ts  (100 líneas)
 ==============================================================================
 import type { NextConfig } from 'next';
 
@@ -16918,7 +17288,7 @@ export default nextConfig;
 --- FIN DEL ARCHIVO: next.config.ts ---
 
 ==============================================================================
-ARCHIVO [236/260]: package.json  (33 líneas)
+ARCHIVO [238/262]: package.json  (33 líneas)
 ==============================================================================
 {
   "name": "mi-plataforma",
@@ -16957,7 +17327,7 @@ ARCHIVO [236/260]: package.json  (33 líneas)
 --- FIN DEL ARCHIVO: package.json ---
 
 ==============================================================================
-ARCHIVO [237/260]: postcss.config.mjs  (7 líneas)
+ARCHIVO [239/262]: postcss.config.mjs  (7 líneas)
 ==============================================================================
 const config = {
   plugins: {
@@ -16970,7 +17340,7 @@ export default config;
 --- FIN DEL ARCHIVO: postcss.config.mjs ---
 
 ==============================================================================
-ARCHIVO [238/260]: README.md  (38 líneas)
+ARCHIVO [240/262]: README.md  (38 líneas)
 ==============================================================================
 # Cinelito — Frontend
 
@@ -17014,7 +17384,7 @@ Las decisiones de refactorización fina viven en `docs/REFACTORING_ROADMAP.md`.
 --- FIN DEL ARCHIVO: README.md ---
 
 ==============================================================================
-ARCHIVO [239/260]: scripts/apply-so-refactor.sh  (45 líneas)
+ARCHIVO [241/262]: scripts/apply-so-refactor.sh  (45 líneas)
 ==============================================================================
 #!/usr/bin/env bash
 set -euo pipefail
@@ -17065,7 +17435,7 @@ rm -f types/person.ts
 --- FIN DEL ARCHIVO: scripts/apply-so-refactor.sh ---
 
 ==============================================================================
-ARCHIVO [240/260]: scripts/load-movies.mjs  (556 líneas)
+ARCHIVO [242/262]: scripts/load-movies.mjs  (556 líneas)
 ==============================================================================
 #!/usr/bin/env node
 // ============================================================
@@ -17627,32 +17997,47 @@ try { await main(); } catch (e) { console.error(red(`\nError fatal: ${e.message}
 --- FIN DEL ARCHIVO: scripts/load-movies.mjs ---
 
 ==============================================================================
-ARCHIVO [241/260]: shared/lib/adblock-detector.ts  (52 líneas)
+ARCHIVO [243/262]: shared/lib/adblock-detector.ts  (143 líneas)
 ==============================================================================
 // shared/lib/adblock-detector.ts
 
+export type BrowserKind =
+  | 'chrome'
+  | 'firefox'
+  | 'safari'
+  | 'edge'
+  | 'other';
+
 /**
- * Detecta el navegador del usuario para recomendar el adblocker correcto.
+ * Detecta el navegador del usuario para abrir el enlace de
+ * instalación correcto. La UI solo usa la URL, nunca muestra
+ * el nombre de la extensión.
  */
-export function detectBrowser(): 'chrome' | 'firefox' | 'safari' | 'edge' | 'other' {
+export function detectBrowser(): BrowserKind {
   if (typeof window === 'undefined') return 'other';
+
   const ua = window.navigator.userAgent;
+
   if (ua.includes('Firefox')) return 'firefox';
   if (ua.includes('Edg')) return 'edge';
   if (ua.includes('Chrome')) return 'chrome';
   if (ua.includes('Safari')) return 'safari';
+
   return 'other';
 }
 
 /**
- * Obtiene la recomendación de adblocker según el navegador.
+ * Enlace de instalación del bloqueador recomendado por navegador.
  */
-export function getAdblockRecommendation(browser: string): {
+export function getAdblockRecommendation(browser: BrowserKind): {
   name: string;
   url: string;
   description: string;
 } {
-  const recommendations: Record<string, { name: string; url: string; description: string }> = {
+  const recommendations: Record<
+    BrowserKind,
+    { name: string; url: string; description: string }
+  > = {
     chrome: {
       name: 'uBlock Origin',
       url: 'https://chrome.google.com/webstore/detail/ublock-origin/cjpalhdlnbpafiamejdnhcphjbkeiagm',
@@ -17679,13 +18064,89 @@ export function getAdblockRecommendation(browser: string): {
       description: 'Busca uBlock Origin en la tienda de extensiones de tu navegador',
     },
   };
-  return recommendations[browser] || recommendations.other;
+
+  return recommendations[browser] ?? recommendations.other;
+}
+
+/** Clases que los bloqueadores suelen ocultar o eliminar. */
+const BAIT_CLASS_NAMES =
+  'adsbox ad-banner ads adsbanner ad-placement pub_300x250 text-ad';
+
+/**
+ * Detecta si el usuario tiene un bloqueador de anuncios activo.
+ *
+ * Cubre dos casos:
+ * 1. Navegadores con bloqueo nativo (Brave Shields expone API oficial).
+ * 2. Extensiones (uBlock Origin, AdGuard, etc.) mediante un elemento
+ *    "bait" con clases típicas de anuncios: si el bloqueador lo
+ *    oculta o lo elimina del DOM, la detección es positiva.
+ *
+ * Nunca lanza: ante cualquier duda devuelve false (muestra el aviso).
+ */
+export async function detectAdBlock(): Promise<boolean> {
+  if (typeof window === 'undefined') return false;
+
+  // ─── 1) Brave: API oficial de detección ───
+  try {
+    const brave = (
+      window.navigator as Navigator & {
+        brave?: { isBrave?: () => Promise<boolean> };
+      }
+    ).brave;
+
+    if (brave?.isBrave && (await brave.isBrave())) {
+      return true;
+    }
+  } catch {
+    // Si la consulta falla, continuar con el bait element.
+  }
+
+  // ─── 2) Bait element ───
+  try {
+    const bait = document.createElement('div');
+    bait.className = BAIT_CLASS_NAMES;
+    bait.setAttribute('data-ad-unit', 'banner');
+    bait.setAttribute('aria-hidden', 'true');
+    bait.style.position = 'absolute';
+    bait.style.left = '-9999px';
+    bait.style.top = '-9999px';
+    bait.style.width = '1px';
+    bait.style.height = '1px';
+    document.body.appendChild(bait);
+
+    // Dos frames + buffer: tiempo suficiente para que los
+    // bloqueadores apliquen sus reglas cosméticas.
+    await new Promise<void>((resolve) => {
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          window.setTimeout(resolve, 60);
+        });
+      });
+    });
+
+    let wasBlocked = false;
+    if (bait.parentNode === null) {
+      // El bloqueador eliminó el elemento del DOM.
+      wasBlocked = true;
+    } else {
+      const styles = window.getComputedStyle(bait);
+      wasBlocked =
+        bait.offsetHeight === 0 ||
+        styles.display === 'none' ||
+        styles.visibility === 'hidden';
+      bait.remove();
+    }
+
+    return wasBlocked;
+  } catch {
+    return false;
+  }
 }
 ==============================================================================
 --- FIN DEL ARCHIVO: shared/lib/adblock-detector.ts ---
 
 ==============================================================================
-ARCHIVO [242/260]: shared/lib/adblock-storage.ts  (26 líneas)
+ARCHIVO [244/262]: shared/lib/adblock-storage.ts  (26 líneas)
 ==============================================================================
 // shared/lib/adblock-storage.ts
 
@@ -17717,7 +18178,7 @@ export function markAsWarnedInSession(): void {
 --- FIN DEL ARCHIVO: shared/lib/adblock-storage.ts ---
 
 ==============================================================================
-ARCHIVO [243/260]: shared/ui/BackButton.tsx  (39 líneas)
+ARCHIVO [245/262]: shared/ui/BackButton.tsx  (39 líneas)
 ==============================================================================
 'use client';
 
@@ -17762,7 +18223,7 @@ export default function BackButton({ fallbackHref }: BackButtonProps) {
 --- FIN DEL ARCHIVO: shared/ui/BackButton.tsx ---
 
 ==============================================================================
-ARCHIVO [244/260]: shared/ui/icons.tsx  (113 líneas)
+ARCHIVO [246/262]: shared/ui/icons.tsx  (119 líneas)
 ==============================================================================
 // components/icons.tsx
 import { SVGProps } from 'react';
@@ -17877,11 +18338,17 @@ export const IconClock = ({ className = "w-4 h-4" }: IconProps) => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
   </svg>
 );
+
+export const IconShield = ({ className = "w-5 h-5" }: IconProps) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+  </svg>
+);
 ==============================================================================
 --- FIN DEL ARCHIVO: shared/ui/icons.tsx ---
 
 ==============================================================================
-ARCHIVO [245/260]: shared/ui/PosterGrid.tsx  (27 líneas)
+ARCHIVO [247/262]: shared/ui/PosterGrid.tsx  (27 líneas)
 ==============================================================================
 import type { ReactNode } from 'react';
 
@@ -17914,7 +18381,7 @@ export default function PosterGrid({
 --- FIN DEL ARCHIVO: shared/ui/PosterGrid.tsx ---
 
 ==============================================================================
-ARCHIVO [246/260]: tsconfig.json  (46 líneas)
+ARCHIVO [248/262]: tsconfig.json  (46 líneas)
 ==============================================================================
 {
   "compilerOptions": {
@@ -17966,7 +18433,7 @@ ARCHIVO [246/260]: tsconfig.json  (46 líneas)
 --- FIN DEL ARCHIVO: tsconfig.json ---
 
 ==============================================================================
-ARCHIVO [247/260]: vitest.config.ts  (18 líneas)
+ARCHIVO [249/262]: vitest.config.ts  (18 líneas)
 ==============================================================================
 import { defineConfig } from 'vitest/config';
 import { fileURLToPath } from 'url';
@@ -17990,7 +18457,7 @@ export default defineConfig({
 --- FIN DEL ARCHIVO: vitest.config.ts ---
 
 ==============================================================================
-ARCHIVO [248/260]: widgets/composition/catalog-grid-with-ads/CatalogGridWithAds.tsx  (39 líneas)
+ARCHIVO [250/262]: widgets/composition/catalog-grid-with-ads/CatalogGridWithAds.tsx  (39 líneas)
 ==============================================================================
 'use client';
 
@@ -18035,14 +18502,14 @@ export default function CatalogGridWithAds({
 --- FIN DEL ARCHIVO: widgets/composition/catalog-grid-with-ads/CatalogGridWithAds.tsx ---
 
 ==============================================================================
-ARCHIVO [249/260]: widgets/composition/catalog-grid-with-ads/index.ts  (1 líneas)
+ARCHIVO [251/262]: widgets/composition/catalog-grid-with-ads/index.ts  (1 líneas)
 ==============================================================================
 export { default as CatalogGridWithAds } from './CatalogGridWithAds';
 ==============================================================================
 --- FIN DEL ARCHIVO: widgets/composition/catalog-grid-with-ads/index.ts ---
 
 ==============================================================================
-ARCHIVO [250/260]: widgets/composition/filtered-catalog/FilteredCatalog.tsx  (37 líneas)
+ARCHIVO [252/262]: widgets/composition/filtered-catalog/FilteredCatalog.tsx  (37 líneas)
 ==============================================================================
 import type { MovieFilters } from '@/entities/movie';
 import { getFilteredMovies } from '@/features/movies-page/services/getFilteredMovies';
@@ -18085,21 +18552,21 @@ export default async function FilteredCatalog({
 --- FIN DEL ARCHIVO: widgets/composition/filtered-catalog/FilteredCatalog.tsx ---
 
 ==============================================================================
-ARCHIVO [251/260]: widgets/composition/filtered-catalog/index.ts  (1 líneas)
+ARCHIVO [253/262]: widgets/composition/filtered-catalog/index.ts  (1 líneas)
 ==============================================================================
 export { default as FilteredCatalog } from './FilteredCatalog';
 ==============================================================================
 --- FIN DEL ARCHIVO: widgets/composition/filtered-catalog/index.ts ---
 
 ==============================================================================
-ARCHIVO [252/260]: widgets/composition/movie-player/index.ts  (1 líneas)
+ARCHIVO [254/262]: widgets/composition/movie-player/index.ts  (1 líneas)
 ==============================================================================
 export { default as MoviePlayerSection } from './MoviePlayerSection';
 ==============================================================================
 --- FIN DEL ARCHIVO: widgets/composition/movie-player/index.ts ---
 
 ==============================================================================
-ARCHIVO [253/260]: widgets/composition/movie-player/MoviePlayerSection.tsx  (34 líneas)
+ARCHIVO [255/262]: widgets/composition/movie-player/MoviePlayerSection.tsx  (34 líneas)
 ==============================================================================
 import type { Server } from '@/entities/movie';
 import { LazyVideoPlayer, createMovieSources, PlayerErrorBoundary } from '@/features/player';
@@ -18139,7 +18606,7 @@ export default function MoviePlayerSection({
 --- FIN DEL ARCHIVO: widgets/composition/movie-player/MoviePlayerSection.tsx ---
 
 ==============================================================================
-ARCHIVO [254/260]: widgets/Header/Header.tsx  (38 líneas)
+ARCHIVO [256/262]: widgets/Header/Header.tsx  (38 líneas)
 ==============================================================================
 // components/Header.tsx
 'use client';
@@ -18166,7 +18633,7 @@ export default function Header() {
           </div>
 
           <span className="text-lg font-bold tracking-wide text-white hidden sm:block">
-            CINE<span className="text-red-500">STREAM</span>
+            CINE<span className="text-red-500">LITO</span>
           </span>
         </Link>
 
@@ -18183,7 +18650,7 @@ export default function Header() {
 --- FIN DEL ARCHIVO: widgets/Header/Header.tsx ---
 
 ==============================================================================
-ARCHIVO [255/260]: widgets/movie-card/AppMovieCard.tsx  (30 líneas)
+ARCHIVO [257/262]: widgets/movie-card/AppMovieCard.tsx  (30 líneas)
 ==============================================================================
 'use client';
 
@@ -18219,7 +18686,7 @@ export default function AppMovieCard({
 --- FIN DEL ARCHIVO: widgets/movie-card/AppMovieCard.tsx ---
 
 ==============================================================================
-ARCHIVO [256/260]: widgets/movie-card/index.ts  (7 líneas)
+ARCHIVO [258/262]: widgets/movie-card/index.ts  (7 líneas)
 ==============================================================================
 export { default as MovieCard } from './MovieCard';
 export type { MovieCardProps } from './MovieCard';
@@ -18232,7 +18699,7 @@ export type { MovieCardViewModel } from './lib/createMovieCardViewModel';
 --- FIN DEL ARCHIVO: widgets/movie-card/index.ts ---
 
 ==============================================================================
-ARCHIVO [257/260]: widgets/movie-card/lib/createMovieCardViewModel.ts  (55 líneas)
+ARCHIVO [259/262]: widgets/movie-card/lib/createMovieCardViewModel.ts  (55 líneas)
 ==============================================================================
 import type { Category } from '@/entities/category';
 import type { Movie } from '@/entities/movie';
@@ -18293,7 +18760,7 @@ export function createMovieCardViewModel(
 --- FIN DEL ARCHIVO: widgets/movie-card/lib/createMovieCardViewModel.ts ---
 
 ==============================================================================
-ARCHIVO [258/260]: widgets/movie-card/MovieCard.tsx  (313 líneas)
+ARCHIVO [260/262]: widgets/movie-card/MovieCard.tsx  (313 líneas)
 ==============================================================================
 'use client';
 
@@ -18612,7 +19079,7 @@ export default function MovieCard({
 --- FIN DEL ARCHIVO: widgets/movie-card/MovieCard.tsx ---
 
 ==============================================================================
-ARCHIVO [259/260]: widgets/movie-card/MovieCardCategoryLink.tsx  (60 líneas)
+ARCHIVO [261/262]: widgets/movie-card/MovieCardCategoryLink.tsx  (60 líneas)
 ==============================================================================
 import Link from 'next/link';
 import type { Category } from '@/entities/category';
@@ -18678,7 +19145,7 @@ export default function MovieCardCategoryLink({
 --- FIN DEL ARCHIVO: widgets/movie-card/MovieCardCategoryLink.tsx ---
 
 ==============================================================================
-ARCHIVO [260/260]: widgets/movie-card/MovieCardSkeleton.tsx  (12 líneas)
+ARCHIVO [262/262]: widgets/movie-card/MovieCardSkeleton.tsx  (12 líneas)
 ==============================================================================
 export default function MovieCardSkeleton() {
   return (
@@ -18714,6 +19181,6 @@ Archivos excluidos (agrupados por motivo):
 Los .env reales se excluyen por seguridad; las variables están documentadas en los .env.example incluidos.
 
 ==============================================================================
-FIN DEL VOLCADO · 260 archivos
+FIN DEL VOLCADO · 262 archivos
 >>> SI AL PEGAR ESTE ARCHIVO NO VES ESTA LÍNEA AL FINAL, SE CORTÓ <<<
 ==============================================================================

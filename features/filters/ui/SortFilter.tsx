@@ -21,7 +21,7 @@ export default function SortFilter({
 }: SortFilterProps) {
   const currentLabel =
     SORT_OPTIONS.find((option) => option.value === value)?.label ||
-    'Ordenar';
+    'Sort';
 
   return (
     <DropdownMenu
@@ -34,7 +34,7 @@ export default function SortFilter({
       forceClose={forceClose}
       className={className}
     >
-      <div className="bg-gray-950/95 backdrop-blur-xl border border-white/10 rounded-2xl p-2 shadow-2xl shadow-black/40 min-w-[180px]">
+      <div className="bg-[#000F20]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-2 shadow-2xl shadow-black/40 min-w-[180px]">
         {SORT_OPTIONS.map((option) => (
           <button
             key={option.value}

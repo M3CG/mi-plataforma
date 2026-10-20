@@ -90,7 +90,13 @@ export default function ActorImportDetail({
   const router = useRouter();
   const { preview, slugCandidates, isLoading, error, load } =
     usePersonPreview();
-  const filmography = usePersonFilmography();
+  const {
+    castMovies,
+    crewMovies,
+    isLoading: filmographyLoading,
+    error: filmographyError,
+    load: loadFilmography,
+  } = usePersonFilmography();
   const { status, message, importActor } = useImportActor();
 
   const [selectedSlug, setSelectedSlug] = useState('');
@@ -98,8 +104,8 @@ export default function ActorImportDetail({
 
   useEffect(() => {
     load(tmdbId);
-    filmography.load(tmdbId);
-  }, [tmdbId, load, filmography.load]);
+    loadFilmography(tmdbId);
+  }, [tmdbId, load, loadFilmography]);
 
   useEffect(() => {
     if (preview) {
@@ -107,13 +113,12 @@ export default function ActorImportDetail({
         slugCandidates.find((c) => c.recommended) ??
         slugCandidates.find((c) => !c.taken) ??
         slugCandidates[0];
-            // eslint-disable-next-line react-hooks/set-state-in-effect
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedSlug(recommended?.slug ?? '');
       setSelectedPhoto(preview.defaultProfileUrl ?? '');
     }
   }, [preview, slugCandidates]);
 
-  // Redirigir después de éxito: volver a la página anterior
   useEffect(() => {
     if (status === 'success') {
       const timer = setTimeout(() => {
@@ -262,7 +267,7 @@ export default function ActorImportDetail({
             Click any movie to see its details and add it to the catalog.
           </p>
 
-          {filmography.isLoading && (
+          {filmographyLoading && (
             <div className="flex items-center justify-center py-12">
               <div className="w-8 h-8 border-4 border-red-600/60 border-t-transparent rounded-full animate-spin" />
               <span className="ml-3 text-gray-400">
@@ -271,24 +276,24 @@ export default function ActorImportDetail({
             </div>
           )}
 
-          {filmography.error && (
+          {filmographyError && (
             <p className="text-red-400 text-center py-8">
-              {filmography.error}
+              {filmographyError}
             </p>
           )}
 
-          {!filmography.isLoading && !filmography.error && (
+          {!filmographyLoading && !filmographyError && (
             <>
               <FilmographyGrid
                 title="As actor/actress"
-                movies={filmography.castMovies}
+                movies={castMovies}
               />
               <FilmographyGrid
                 title="As crew (direction, production, etc.)"
-                movies={filmography.crewMovies}
+                movies={crewMovies}
               />
-              {filmography.castMovies.length === 0 &&
-                filmography.crewMovies.length === 0 && (
+              {castMovies.length === 0 &&
+                crewMovies.length === 0 && (
                   <p className="text-gray-500 text-center py-8">
                     No movies found for this person.
                   </p>

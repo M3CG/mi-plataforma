@@ -39,6 +39,7 @@ export default function MovieCard({
   const isScrollingRef = useRef(false);
   const scrollEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mouseInsideRef = useRef(false);
+  const keyboardFocusedRef = useRef(false);
 
   // ─── Mostrar / ocultar overlay ───
   const showOverlayNow = useCallback(() => {
@@ -51,13 +52,16 @@ export default function MovieCard({
     showOverlayRef.current = false;
   }, []);
 
-  // ─── Timer de "mouse quieto" ───
+  // ─── Timer de "mouse quieto" o "foco de Tab mantenido" ───
   const startIdleTimer = useCallback(() => {
     if (idleTimerRef.current) {
       clearTimeout(idleTimerRef.current);
     }
     idleTimerRef.current = setTimeout(() => {
-      if (mouseInsideRef.current && !isScrollingRef.current) {
+      if (
+        (mouseInsideRef.current || keyboardFocusedRef.current) &&
+        !isScrollingRef.current
+      ) {
         showOverlayNow();
       }
     }, IDLE_DELAY_MS);
@@ -80,22 +84,35 @@ export default function MovieCard({
 
   const handleMouseLeave = useCallback(() => {
     mouseInsideRef.current = false;
-    hideOverlay();
-    cancelIdleTimer();
+    if (!keyboardFocusedRef.current) {
+      hideOverlay();
+      cancelIdleTimer();
+    }
   }, [hideOverlay, cancelIdleTimer]);
 
   const handleMouseMove = useCallback(() => {
-    // Si el overlay YA está visible, el movimiento del mouse
-    // dentro de la tarjeta NO lo oculta. El usuario puede
-    // leer la sinopsis mientras mueve el cursor libremente.
     if (showOverlayRef.current) return;
 
-    // Si el overlay no está visible, cualquier movimiento
-    // reinicia el timer de idle.
     if (mouseInsideRef.current && !isScrollingRef.current) {
       startIdleTimer();
     }
   }, [startIdleTimer]);
+
+  // ─── Handlers de teclado (Tab) ───
+  const handleFocus = useCallback(() => {
+    keyboardFocusedRef.current = true;
+    if (!isScrollingRef.current) {
+      startIdleTimer();
+    }
+  }, [startIdleTimer]);
+
+  const handleBlur = useCallback(() => {
+    keyboardFocusedRef.current = false;
+    if (!mouseInsideRef.current) {
+      hideOverlay();
+      cancelIdleTimer();
+    }
+  }, [hideOverlay, cancelIdleTimer]);
 
   // ─── Detectar scroll activo ───
   useEffect(() => {
@@ -110,7 +127,7 @@ export default function MovieCard({
 
       scrollEndTimerRef.current = setTimeout(() => {
         isScrollingRef.current = false;
-        if (mouseInsideRef.current) {
+        if (mouseInsideRef.current || keyboardFocusedRef.current) {
           startIdleTimer();
         }
       }, SCROLL_END_DELAY_MS);
@@ -145,6 +162,10 @@ export default function MovieCard({
         hover:bg-white/[0.06] hover:border-white/10
         hover:shadow-xl hover:shadow-black/20
         hover:-translate-y-1
+        focus-within:bg-white/[0.06] focus-within:border-red-500/80
+        focus-within:ring-2 focus-within:ring-red-500/60
+        focus-within:shadow-xl focus-within:shadow-black/30
+        focus-within:-translate-y-1
       "
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -153,8 +174,10 @@ export default function MovieCard({
       <Link
         href={href}
         onClick={onPrimaryLinkClick}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
         aria-label={`View details for ${viewModel.title}`}
-        className="absolute inset-0 z-10"
+        className="absolute inset-0 z-10 outline-none"
       />
 
       {/* ─── Imagen + Overlay de sinopsis ─── */}
@@ -169,6 +192,7 @@ export default function MovieCard({
               object-cover
               transition-transform duration-500
               group-hover:scale-105
+              group-focus-within:scale-105
             "
           />
         ) : (
@@ -182,30 +206,26 @@ export default function MovieCard({
           className="
             absolute inset-0
             bg-gradient-to-t from-black/60 via-transparent to-transparent
-            opacity-0 group-hover:opacity-100
+            opacity-0 group-hover:opacity-100 group-focus-within:opacity-100
             transition-opacity duration-300
           "
         />
 
-        {/* ─── Overlay de sinopsis (solo desktop, mouse quieto) ─── */}
-        {/* Sticky: una vez visible, el mouse puede moverse libremente
-            dentro de la tarjeta sin que desaparezca.
-            Solo se oculta con mouseLeave o scroll. */}
+        {/* ─── Overlay de sinopsis (mouse quieto o foco de Tab mantenido) ─── */}
         {hasSynopsis && (
           <div
             className={`
               absolute inset-0 z-20
-              bg-gray-950/90 backdrop-blur-sm
+              bg-[#000F20]/90 backdrop-blur-sm
               flex flex-col justify-end
               p-3.5
               transition-opacity duration-300
-              hidden lg:flex
               pointer-events-none
               ${showOverlay ? 'opacity-100' : 'opacity-0'}
             `}
             aria-hidden="true"
           >
-            <p className="text-s text-gray-300 leading-relaxed line-clamp-10 overflow-hidden">
+            <p className="text-base text-gray-300 leading-relaxed line-clamp-14 overflow-hidden">
               {viewModel.synopsis}
             </p>
           </div>

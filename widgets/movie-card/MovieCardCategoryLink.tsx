@@ -42,6 +42,7 @@ export default function MovieCardCategoryLink({
   return (
     <Link
       href={href}
+      tabIndex={-1}
       title={
         highlighted
           ? `Matches your filter: ${category.name}`

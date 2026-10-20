@@ -35,8 +35,8 @@ export default function MovieHero({ viewModel }: MovieHeroProps) {
           />
         )}
 
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/60 to-gray-950/30" />
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-950/80 via-gray-950/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/10 via-10% to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#000F20] from-0% via-[#000F20]/80 via-15% to-black/40" />
       </div>
 
       {/* Contenido del hero */}
@@ -46,7 +46,7 @@ export default function MovieHero({ viewModel }: MovieHeroProps) {
         <div className="flex flex-col md:flex-row gap-8 mt-8">
           {/* Póster */}
           <div className="w-40 md:w-48 flex-shrink-0 mx-auto md:mx-0">
-            <div className="relative aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl shadow-black/50 border border-white/10">
+            <div className="relative aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl shadow-black/70 border border-white/10">
               {viewModel.posterUrl ? (
                 <Image
                   src={viewModel.posterUrl}
@@ -66,9 +66,9 @@ export default function MovieHero({ viewModel }: MovieHeroProps) {
 
           {/* Información */}
           <div className="flex-1 min-w-0 flex flex-col justify-end">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.95)]">
               {viewModel.title}
-              <span className="text-gray-400 font-light text-xl md:text-2xl lg:text-3xl ml-3">
+              <span className="text-gray-200 font-light text-xl md:text-2xl lg:text-3xl ml-3 drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)]">
                 ({viewModel.year})
               </span>
             </h1>
@@ -76,7 +76,7 @@ export default function MovieHero({ viewModel }: MovieHeroProps) {
             {/* Badges */}
             <div className="flex flex-wrap items-center gap-3 mt-4">
               {viewModel.rating > 0 && (
-                <div className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-full">
+                <div className="flex items-center gap-1.5 bg-black/50 backdrop-blur-sm border border-amber-500/30 px-3 py-1.5 rounded-full">
                   <IconStar className="w-4 h-4 text-amber-400" />
                   <span className="text-sm font-bold text-amber-400">
                     {viewModel.rating.toFixed(1)}
@@ -85,19 +85,19 @@ export default function MovieHero({ viewModel }: MovieHeroProps) {
               )}
 
               {viewModel.ageRating && (
-                <span className="border border-white/20 text-gray-300 px-3 py-1.5 rounded-full text-sm font-medium">
+                <span className="bg-black/40 backdrop-blur-sm border border-white/25 text-gray-200 px-3 py-1.5 rounded-full text-sm font-medium">
                   {viewModel.ageRating}
                 </span>
               )}
 
               {viewModel.runtimeLabel && (
-                <span className="text-gray-300 text-sm">
+                <span className="text-gray-200 text-sm font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
                   {viewModel.runtimeLabel}
                 </span>
               )}
 
               {viewModel.originalLanguage && (
-                <span className="text-gray-400 text-sm uppercase">
+                <span className="text-gray-300 text-sm uppercase font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
                   {viewModel.originalLanguage}
                 </span>
               )}
@@ -112,8 +112,8 @@ export default function MovieHero({ viewModel }: MovieHeroProps) {
                     href={routes.moviesByGenre(category.slug)}
                     className="
                       text-xs font-medium
-                      bg-white/10 border border-white/10
-                      text-gray-300
+                      bg-black/45 backdrop-blur-sm border border-white/15
+                      text-gray-200
                       hover:text-white hover:bg-white/20
                       px-3 py-1.5 rounded-full
                       transition-all duration-150

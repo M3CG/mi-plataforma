@@ -4,8 +4,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { ADMIN_TOOLS_ENABLED } from '@/lib/config/adminTools';
 import { AdminImportPage } from '@/features/admin-import';
-import { getCategories } from '@/lib/queries/categories';
-import { getCountries } from '@/lib/queries/countries';
+import { getFilterOptions } from '@/features/movies-page';
 
 export const metadata: Metadata = {
   title: 'Import Content | Admin',
@@ -16,10 +15,7 @@ export default async function AdminImportRoute() {
   if (!ADMIN_TOOLS_ENABLED) {
     notFound();
   }
-  const [categories, countries] = await Promise.all([
-    getCategories(),
-    getCountries(),
-  ]);
+  const { categories, countries } = await getFilterOptions();
   return (
     <Suspense
       fallback={

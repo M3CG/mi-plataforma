@@ -9,10 +9,6 @@ interface LazyVideoPlayerProps {
   rootMargin?: string;
 }
 
-/**
- * Monta el VideoPlayer recién cuando la sección se acerca al viewport.
- * El iframe de terceros (y su failover) no compiten con el LCP del hero.
- */
 export default function LazyVideoPlayer({
   sources,
   rootMargin = '300px',

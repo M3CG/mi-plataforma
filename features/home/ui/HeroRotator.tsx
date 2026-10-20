@@ -43,8 +43,9 @@ export default function HeroRotator({
                 className="object-cover object-top"
               />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/50 to-[#0a0a0a]/20" />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a]/90 via-[#0a0a0a]/30 to-transparent" />
+            {/* Transición suave solo en el tercio inferior y detrás del texto izquierdo */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#000F20] via-[#000F20]/45 via-15% to-transparent to-45%" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#000F20]/80 via-[#000F20]/25 via-25% to-transparent to-55%" />
 
             <div className="relative z-10 flex h-full items-end">
               <div className="container mx-auto px-4 md:px-8 pb-12 md:pb-16">
@@ -83,6 +84,7 @@ export default function HeroRotator({
                   <div className="mt-5 flex items-center gap-5">
                     <Link
                       href={routes.movie(movie.slug)}
+                      tabIndex={isActive ? 0 : -1}
                       className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white text-sm font-semibold px-6 py-2.5 rounded-full transition-colors"
                     >
                       <IconPlay className="w-4 h-4" />

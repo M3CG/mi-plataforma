@@ -40,14 +40,12 @@ export default function MovieImportDetail({ tmdbId }: MovieImportDetailProps) {
         slugCandidates.find((c) => c.recommended) ??
         slugCandidates.find((c) => !c.taken) ??
         slugCandidates[0];
-            // eslint-disable-next-line react-hooks/set-state-in-effect
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedSlug(recommended?.slug ?? '');
       setSelectedPoster(preview.defaultPosterUrl ?? '');
     }
   }, [preview, slugCandidates]);
 
-  // Redirigir después de éxito: volver a la página anterior
-  // (preserva filtros, búsqueda y tab del flujo de importación)
   useEffect(() => {
     if (status === 'success') {
       const timer = setTimeout(() => {
@@ -85,7 +83,7 @@ export default function MovieImportDetail({ tmdbId }: MovieImportDetailProps) {
 
   const posterOptions = preview.posters.map((poster) => ({
     url: poster.url,
-    badge: poster.textless ? 'Sin texto' : undefined,
+    badge: poster.textless ? 'Textless' : undefined,
   }));
 
   const handleImport = () => {
@@ -107,7 +105,6 @@ export default function MovieImportDetail({ tmdbId }: MovieImportDetailProps) {
           </span>
         </div>
 
-        {/* ═══ BANNER: Ya existe en la DB ═══ */}
         {existsInDb && (
           <div className="mb-6 p-4 rounded-2xl bg-green-600/10 border border-green-500/30 flex items-center gap-4">
             <div className="w-10 h-10 rounded-full bg-green-600/20 flex items-center justify-center flex-shrink-0">
@@ -145,7 +142,7 @@ export default function MovieImportDetail({ tmdbId }: MovieImportDetailProps) {
               sizes="100vw"
               className="object-cover object-top"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/50 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#000F20] via-[#000F20]/45 via-20% to-transparent to-55%" />
           </div>
         )}
 
@@ -255,7 +252,6 @@ export default function MovieImportDetail({ tmdbId }: MovieImportDetailProps) {
             )}
           </div>
 
-          {/* ═══ Selectores + botón (solo si NO existe) ═══ */}
           {!existsInDb && (
             <>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-6 border-t border-white/5">

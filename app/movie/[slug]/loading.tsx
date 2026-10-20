@@ -5,18 +5,15 @@ export default function MovieDetailLoading() {
     <main className="min-h-screen">
       {/* Hero skeleton */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gray-900 animate-pulse" />
+        <div className="absolute inset-0 bg-[#000F20] animate-pulse" />
         <div className="relative z-10 max-w-6xl mx-auto px-4 md:px-8 pt-10 pb-12">
-          {/* Back button skeleton */}
           <div className="h-10 w-24 bg-white/5 rounded-full animate-pulse" />
 
           <div className="flex flex-col md:flex-row gap-8 mt-8">
-            {/* Poster skeleton */}
             <div className="w-40 md:w-48 flex-shrink-0 mx-auto md:mx-0">
               <div className="relative aspect-[2/3] rounded-2xl bg-white/5 animate-pulse" />
             </div>
 
-            {/* Info skeleton */}
             <div className="flex-1 space-y-4">
               <div className="h-10 w-3/4 bg-white/10 rounded-lg animate-pulse" />
               <div className="flex gap-3">
